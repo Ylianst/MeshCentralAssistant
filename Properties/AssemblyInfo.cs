@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MeshAssistant")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("MeshCentral Assistant")]
+[assembly: AssemblyDescription("Companion application for the MeshCentral agent.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Open Soruce")]
 [assembly: AssemblyProduct("MeshAssistant")]
-[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyCopyright("Apache 2.0 license")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
