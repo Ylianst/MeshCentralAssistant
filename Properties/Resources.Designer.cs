@@ -63,29 +63,9 @@ namespace MeshAssistant.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap MeshIconGray {
-            get {
-                object obj = ResourceManager.GetObject("MeshIconGray", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap MeshIconGray2 {
             get {
                 object obj = ResourceManager.GetObject("MeshIconGray2", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap MeshIconGreen {
-            get {
-                object obj = ResourceManager.GetObject("MeshIconGreen", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +83,9 @@ namespace MeshAssistant.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap MeshIconRed {
+        internal static System.Drawing.Bitmap MeshIconHelp2 {
             get {
-                object obj = ResourceManager.GetObject("MeshIconRed", resourceCulture);
+                object obj = ResourceManager.GetObject("MeshIconHelp2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

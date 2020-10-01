@@ -35,6 +35,7 @@ namespace MeshAssistant
         public int State = 0;
         public int ServerState = 0;
         public Uri ServerUri = null;
+        public bool ServiceAgent = true;
 
         public delegate void onQueryResultHandler(string value, string result);
         public event onQueryResultHandler onQueryResult;
@@ -65,10 +66,45 @@ namespace MeshAssistant
 
         public static string GetNodeId64()
         {
-            try {
+            try
+            {
                 RegistryKey localKey64 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, RegistryView.Registry64);
                 localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\MeshAgent2");
-                if (localKey64 != null) {
+                if (localKey64 != null)
+                {
+                    string nodeidb64 = localKey64.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
+                    return string.Concat(Convert.FromBase64String(nodeidb64).Select(b => b.ToString("X2")));
+                }
+            }
+            catch (Exception) { }
+            return null;
+        }
+
+        public static string GetUserNodeId32()
+        {
+            try
+            {
+                RegistryKey localKey32 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry32);
+                localKey32 = localKey32.OpenSubKey(@"SOFTWARE\Open Source\MeshAgent2");
+                if (localKey32 != null)
+                {
+                    string nodeidb64 = localKey32.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
+                    return string.Concat(Convert.FromBase64String(nodeidb64).Select(b => b.ToString("X2")));
+                }
+            }
+            catch (Exception) { }
+            return null;
+        }
+
+
+        public static string GetUserNodeId64()
+        {
+            try
+            {
+                RegistryKey localKey64 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry64);
+                localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\MeshAgent2");
+                if (localKey64 != null)
+                {
                     string nodeidb64 = localKey64.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
                     return string.Concat(Convert.FromBase64String(nodeidb64).Select(b => b.ToString("X2")));
                 }
@@ -89,7 +125,7 @@ namespace MeshAssistant
         {
             if ((pipeClient == null) || (pipeClient.IsConnected == false) || (pipeWritePending == true)) return false;
             pipeWritePending = true;
-            string data = "{\"cmd\":\"" + cmd + "\",\"value\":\"" + value + "\"}";
+            string data = "{\"cmd\":\"" + cmd + "\",\"value\":\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"}";
             byte[] buf2 = UTF8Encoding.UTF8.GetBytes(data);
             byte[] buf1 = BitConverter.GetBytes(buf2.Length + 4);
             byte[] buf = new byte[4 + buf2.Length];
@@ -101,16 +137,19 @@ namespace MeshAssistant
 
         public bool ConnectPipe()
         {
+            string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+
             if (pipeClient != null) return true;
             string nodeid = GetNodeId64();
             if (nodeid != null)
             {
-                pipeClient = new NamedPipeClientStream(".", nodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
+                pipeClient = new NamedPipeClientStream(".", nodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.None);
                 try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
                 if ((pipeClient != null) && pipeClient.IsConnected)
                 {
+                    ServiceAgent = true;
                     ChangeState(1, 0);
-                    SendCommand("register", "name");
+                    SendCommand("register", userName);
                     pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
                     return true;
                 }
@@ -124,8 +163,41 @@ namespace MeshAssistant
                 try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
                 if ((pipeClient != null) && pipeClient.IsConnected)
                 {
+                    ServiceAgent = true;
                     ChangeState(1, 0);
-                    SendCommand("register", "name");
+                    SendCommand("register", userName);
+                    pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                    return true;
+                }
+                pipeClient = null;
+            }
+
+            nodeid = GetUserNodeId64();
+            if (nodeid != null)
+            {
+                pipeClient = new NamedPipeClientStream(".", nodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
+                try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
+                if ((pipeClient != null) && pipeClient.IsConnected)
+                {
+                    ServiceAgent = false;
+                    ChangeState(1, 0);
+                    SendCommand("register", userName);
+                    pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                    return true;
+                }
+                pipeClient = null;
+            }
+
+            nodeid = GetUserNodeId32();
+            if (nodeid != null)
+            {
+                pipeClient = new NamedPipeClientStream(".", nodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
+                try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
+                if ((pipeClient != null) && pipeClient.IsConnected)
+                {
+                    ServiceAgent = false;
+                    ChangeState(1, 0);
+                    SendCommand("register", userName);
                     pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
                     return true;
                 }
@@ -139,13 +211,23 @@ namespace MeshAssistant
             if (pipeClient != null) { pipeClient.Close(); }
             ServerState = 0;
             ServerUri = null;
-    }
+        }
 
-    public bool QueryDescriptors()
+        public bool QueryDescriptors()
         {
             return SendCommand("query", "descriptors");
         }
-        
+
+        public bool RequestHelp(string details)
+        {
+            return SendCommand("requesthelp", details);
+        }
+
+        public bool CancelHelpRequest()
+        {
+            return SendCommand("cancelhelp", "");
+        }
+
         private void WritePipe(IAsyncResult r)
         {
             pipeClient.EndWrite(r);
@@ -155,7 +237,7 @@ namespace MeshAssistant
         private void ReadPipe(IAsyncResult r)
         {
             int len = pipeClient.EndRead(r);
-            if (len == 0) { pipeClient.Dispose(); pipeClient = null; ChangeState(0, 0); return; }
+            if (len == 0) { pipeClient.Dispose(); pipeClient = null; ServiceAgent = true; ChangeState(0, 0); return; }
             if (len < 4) { return; }
 
             int chunklen = BitConverter.ToInt32(pipeBuffer, 0);

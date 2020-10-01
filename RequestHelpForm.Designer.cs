@@ -39,7 +39,7 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.MeshIconGreen2;
+            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.MeshIconHelp2;
             this.pictureBox1.Location = new System.Drawing.Point(-13, 12);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(178, 136);
@@ -114,6 +114,7 @@
             this.Name = "RequestHelpForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Request Help";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RequestHelpForm_FormClosing);
             this.Load += new System.EventHandler(this.RequestHelpForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);

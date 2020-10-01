@@ -132,6 +132,7 @@
     <None Include="MeshIconRed2.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MeshIconHelp2.png" />
     <Content Include="readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

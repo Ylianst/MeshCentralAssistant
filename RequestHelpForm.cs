@@ -28,8 +28,11 @@ namespace MeshAssistant
 {
     public partial class RequestHelpForm : Form
     {
-        public RequestHelpForm()
+        public MainForm parent;
+
+        public RequestHelpForm(MainForm parent)
         {
+            this.parent = parent;
             InitializeComponent();
         }
 
@@ -37,12 +40,13 @@ namespace MeshAssistant
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
-            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         private void okButton_Click(object sender, EventArgs e)
         {
-            DialogResult = DialogResult.OK;
+            parent.RequestHelp(mainTextBox.Text);
+            Close();
         }
 
         private void mainTextBox_TextChanged(object sender, EventArgs e)
@@ -53,6 +57,11 @@ namespace MeshAssistant
         private void RequestHelpForm_Load(object sender, EventArgs e)
         {
             mainTextBox.Focus();
+        }
+
+        private void RequestHelpForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            parent.requestHelpForm = null;
         }
     }
 }

@@ -18,6 +18,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.ServiceProcess;
+using System.Security.Principal;
 
 namespace MeshAssistant
 {
@@ -26,9 +27,12 @@ namespace MeshAssistant
         public int timerSlowDown = 0;
         public bool allowShowDisplay = false;
         public bool doclose = false;
+        public bool helpRequested = false;
         public MeshAgent agent = null;
         public int queryNumber = 0;
         public SnapShotForm snapShotForm = null;
+        public RequestHelpForm requestHelpForm = null;
+        public bool isAdministrator = false;
 
         public MainForm()
         {
@@ -39,10 +43,65 @@ namespace MeshAssistant
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
             agent.ConnectPipe();
+            UpdateServiceStatus();
 
-            ServiceControllerStatus status = MeshAgent.GetServiceStatus();
-            startAgentToolStripMenuItem.Enabled = (status == ServiceControllerStatus.Stopped);
-            stopAgentToolStripMenuItem.Enabled = (status != ServiceControllerStatus.Stopped);
+            pictureBox1.Visible = false;
+            pictureBox2.Visible = false;
+            pictureBox3.Visible = true;
+
+            isAdministrator = IsAdministrator();
+            if (isAdministrator)
+            {
+                startAgentToolStripMenuItem.Visible = true;
+                stopAgentToolStripMenuItem.Visible = true;
+                toolStripMenuItem2.Visible = true;
+            }
+            else
+            {
+                startAgentToolStripMenuItem.Visible = false;
+                stopAgentToolStripMenuItem.Visible = false;
+                toolStripMenuItem2.Visible = false;
+            }
+        }
+
+        public void UpdateServiceStatus()
+        {
+            try
+            {
+                ServiceControllerStatus status = MeshAgent.GetServiceStatus();
+                startAgentToolStripMenuItem.Enabled = (status == ServiceControllerStatus.Stopped);
+                stopAgentToolStripMenuItem.Enabled = (status != ServiceControllerStatus.Stopped);
+                if (agent.State != 0) return;
+                pictureBox1.Visible = false; // Green
+                pictureBox2.Visible = true;  // Red
+                pictureBox3.Visible = false; // Yellow
+                pictureBox4.Visible = false; // Help
+                switch (status)
+                {
+                    case ServiceControllerStatus.ContinuePending: { stateLabel.Text = "Agent is continue pending"; break; }
+                    case ServiceControllerStatus.Paused: { stateLabel.Text = "Agent is paused"; break; }
+                    case ServiceControllerStatus.PausePending: { stateLabel.Text = "Agent is pause pending"; break; }
+                    case ServiceControllerStatus.Running: { stateLabel.Text = "Agent is running"; break; }
+                    case ServiceControllerStatus.StartPending: { stateLabel.Text = "Agent is start pending"; break; }
+                    case ServiceControllerStatus.Stopped: { stateLabel.Text = "Agent is stopped"; break; }
+                    case ServiceControllerStatus.StopPending: { stateLabel.Text = "Agent is stopped pending"; break; }
+                }
+            }
+            catch (Exception)
+            {
+                startAgentToolStripMenuItem.Enabled = false;
+                stopAgentToolStripMenuItem.Enabled = false;
+                stateLabel.Text = "Agent not installed";
+            }
+        }
+
+        public static bool IsAdministrator()
+        {
+            using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+            {
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
         }
 
         protected override void SetVisibleCore(bool value)
@@ -68,10 +127,11 @@ namespace MeshAssistant
             {
                 case 0:
                     {
-                        pictureBox1.Visible = false;
-                        pictureBox2.Visible = false;
-                        pictureBox3.Visible = true;
-                        stateLabel.Text = "Agent is missing";
+                        pictureBox1.Visible = false; // Green
+                        pictureBox2.Visible = true;  // Red
+                        pictureBox3.Visible = false; // Yellow
+                        pictureBox4.Visible = false; // Help
+                        UpdateServiceStatus();
                         break;
                     }
                 case 1:
@@ -80,17 +140,40 @@ namespace MeshAssistant
                             pictureBox1.Visible = true;
                             pictureBox2.Visible = false;
                             pictureBox3.Visible = false;
+                            pictureBox4.Visible = false;
                             stateLabel.Text = "Connected to server";
                         } else {
                             pictureBox1.Visible = false;
-                            pictureBox2.Visible = true;
-                            pictureBox3.Visible = false;
-                            stateLabel.Text = "Agent is running";
+                            pictureBox2.Visible = false;
+                            pictureBox3.Visible = true;
+                            pictureBox4.Visible = false;
+                            stateLabel.Text = "Agent is active";
                         }
                         break;
                     }
             }
+            helpRequested = false;
+            requestHelpButton.Text = "Request Help";
             requestHelpButton.Enabled = ((state == 1) && (serverState == 1));
+
+            if (isAdministrator && agent.ServiceAgent)
+            {
+                startAgentToolStripMenuItem.Visible = true;
+                stopAgentToolStripMenuItem.Visible = true;
+                toolStripMenuItem2.Visible = true;
+            }
+            else
+            {
+                startAgentToolStripMenuItem.Visible = false;
+                stopAgentToolStripMenuItem.Visible = false;
+                toolStripMenuItem2.Visible = false;
+            }
+
+            if ((state != 1) || (serverState != 1))
+            {
+                if (snapShotForm != null) { snapShotForm.Close(); }
+                if (requestHelpForm != null) { requestHelpForm.Close(); }
+            }
         }
 
         private void Agent_onQueryResult(string value, string result)
@@ -109,10 +192,7 @@ namespace MeshAssistant
         {
             if (timerSlowDown > 0) { timerSlowDown--; if (timerSlowDown == 0) { connectionTimer.Interval = 10000; } }
             if (agent.State == 0) { agent.ConnectPipe(); }
-
-            ServiceControllerStatus status = MeshAgent.GetServiceStatus();
-            startAgentToolStripMenuItem.Enabled = (status == ServiceControllerStatus.Stopped);
-            stopAgentToolStripMenuItem.Enabled = (status != ServiceControllerStatus.Stopped);
+            UpdateServiceStatus();
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -181,10 +261,44 @@ namespace MeshAssistant
 
         private void requestHelpButton_Click(object sender, EventArgs e)
         {
-            RequestHelpForm f = new RequestHelpForm();
-            if (f.ShowDialog(this) == DialogResult.OK)
+            if (helpRequested == true)
             {
-                string helpRequestText = f.helpRequestText;
+                if (agent.CancelHelpRequest() == true)
+                {
+                    helpRequested = false;
+                    requestHelpButton.Text = "Request Help";
+                    stateLabel.Text = "Connected to server";
+                    pictureBox1.Visible = true;
+                    pictureBox2.Visible = false;
+                    pictureBox3.Visible = false;
+                    pictureBox4.Visible = false;
+                }
+            }
+            else
+            {
+                if (requestHelpForm != null)
+                {
+                    requestHelpForm.Focus();
+                }
+                else
+                {
+                    requestHelpForm = new RequestHelpForm(this);
+                    requestHelpForm.Show(this);
+                }
+            }
+        }
+
+        public void RequestHelp(string details)
+        {
+            if (agent.RequestHelp(details) == true)
+            {
+                helpRequested = true;
+                requestHelpButton.Text = "Cancel Help Request";
+                stateLabel.Text = "Help requested";
+                pictureBox1.Visible = false;
+                pictureBox2.Visible = false;
+                pictureBox3.Visible = false;
+                pictureBox4.Visible = true;
             }
         }
     }
