@@ -3,7 +3,7 @@ MeshCentral Assistant
 
 For more information, [visit MeshCommander.com/MeshCentral2](http://www.meshcommander.com/meshcentral2).
 
-This is an early prototype of a tray icon tool for the MeshCentral Agent. It displays the state of the agent, your can start and stop the agent and request help.
+This is an early prototype of a tray icon tool for the MeshCentral Agent. It displays the state of the agent, you can start and stop the agent and request help.
 
 License
 -------
