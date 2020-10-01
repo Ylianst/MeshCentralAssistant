@@ -15,9 +15,7 @@ limitations under the License.
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace MeshAssistant
@@ -30,9 +28,20 @@ namespace MeshAssistant
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            // Named Mutexes are available computer-wide. Use a unique name.
+            using (var mutex = new Mutex(false, "MeshCentralAssistantSingletonMutex"))
+            {
+                // TimeSpan.Zero to test the mutex's signal state and
+                // return immediately without blocking
+                bool isAnotherInstanceOpen = !mutex.WaitOne(TimeSpan.Zero);
+                if (isAnotherInstanceOpen) { return; }
+
+                // main application entry point
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MainForm());
+                mutex.ReleaseMutex();
+            }
         }
     }
 }
