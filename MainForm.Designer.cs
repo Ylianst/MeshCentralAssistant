@@ -47,6 +47,8 @@
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
+            this.remoteSessionsLabel = new System.Windows.Forms.Label();
+            this.showSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
@@ -69,6 +71,9 @@
             // 
             // mainNotifyIcon
             // 
+            this.mainNotifyIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
+            this.mainNotifyIcon.BalloonTipText = "No remote sessions are active.";
+            this.mainNotifyIcon.BalloonTipTitle = "MeshCentral Assistant";
             this.mainNotifyIcon.ContextMenuStrip = this.mainContextMenuStrip;
             this.mainNotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("mainNotifyIcon.Icon")));
             this.mainNotifyIcon.Text = "MeshCentral Assistant";
@@ -81,25 +86,26 @@
             this.openToolStripMenuItem,
             this.closeToolStripMenuItem,
             this.openSiteToolStripMenuItem,
+            this.showSessionsToolStripMenuItem,
             this.toolStripMenuItem1,
             this.startAgentToolStripMenuItem,
             this.stopAgentToolStripMenuItem,
             this.toolStripMenuItem2,
             this.exitToolStripMenuItem});
             this.mainContextMenuStrip.Name = "mainContextMenuStrip";
-            this.mainContextMenuStrip.Size = new System.Drawing.Size(135, 148);
+            this.mainContextMenuStrip.Size = new System.Drawing.Size(160, 192);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
             this.openToolStripMenuItem.Text = "&Open...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
             this.closeToolStripMenuItem.Text = "&Close";
             this.closeToolStripMenuItem.Visible = false;
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
@@ -107,7 +113,7 @@
             // openSiteToolStripMenuItem
             // 
             this.openSiteToolStripMenuItem.Name = "openSiteToolStripMenuItem";
-            this.openSiteToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.openSiteToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
             this.openSiteToolStripMenuItem.Text = "O&pen Site...";
             this.openSiteToolStripMenuItem.Visible = false;
             this.openSiteToolStripMenuItem.Click += new System.EventHandler(this.openSiteToolStripMenuItem_Click);
@@ -115,31 +121,31 @@
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(131, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(156, 6);
             // 
             // startAgentToolStripMenuItem
             // 
             this.startAgentToolStripMenuItem.Name = "startAgentToolStripMenuItem";
-            this.startAgentToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.startAgentToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
             this.startAgentToolStripMenuItem.Text = "&Start Agent";
             this.startAgentToolStripMenuItem.Click += new System.EventHandler(this.startAgentToolStripMenuItem_Click);
             // 
             // stopAgentToolStripMenuItem
             // 
             this.stopAgentToolStripMenuItem.Name = "stopAgentToolStripMenuItem";
-            this.stopAgentToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.stopAgentToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
             this.stopAgentToolStripMenuItem.Text = "S&top Agent";
             this.stopAgentToolStripMenuItem.Click += new System.EventHandler(this.stopAgentToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(131, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(156, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -154,7 +160,7 @@
             this.requestHelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.requestHelpButton.Enabled = false;
-            this.requestHelpButton.Location = new System.Drawing.Point(12, 160);
+            this.requestHelpButton.Location = new System.Drawing.Point(12, 182);
             this.requestHelpButton.Name = "requestHelpButton";
             this.requestHelpButton.Size = new System.Drawing.Size(178, 31);
             this.requestHelpButton.TabIndex = 6;
@@ -204,12 +210,35 @@
             this.pictureBox4.TabStop = false;
             this.pictureBox4.Visible = false;
             // 
+            // remoteSessionsLabel
+            // 
+            this.remoteSessionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.remoteSessionsLabel.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.remoteSessionsLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.remoteSessionsLabel.ForeColor = System.Drawing.Color.White;
+            this.remoteSessionsLabel.Location = new System.Drawing.Point(12, 162);
+            this.remoteSessionsLabel.Name = "remoteSessionsLabel";
+            this.remoteSessionsLabel.Size = new System.Drawing.Size(178, 13);
+            this.remoteSessionsLabel.TabIndex = 11;
+            this.remoteSessionsLabel.Text = "No remote sessions";
+            this.remoteSessionsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.remoteSessionsLabel.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
+            // 
+            // showSessionsToolStripMenuItem
+            // 
+            this.showSessionsToolStripMenuItem.Name = "showSessionsToolStripMenuItem";
+            this.showSessionsToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.showSessionsToolStripMenuItem.Text = "Show Sessions...";
+            this.showSessionsToolStripMenuItem.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
-            this.ClientSize = new System.Drawing.Size(204, 203);
+            this.ClientSize = new System.Drawing.Size(204, 225);
+            this.Controls.Add(this.remoteSessionsLabel);
             this.Controls.Add(this.pictureBox4);
             this.Controls.Add(this.requestHelpButton);
             this.Controls.Add(this.stateLabel);
@@ -254,6 +283,8 @@
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.PictureBox pictureBox3;
         private System.Windows.Forms.PictureBox pictureBox4;
+        private System.Windows.Forms.Label remoteSessionsLabel;
+        private System.Windows.Forms.ToolStripMenuItem showSessionsToolStripMenuItem;
     }
 }
 

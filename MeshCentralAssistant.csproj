@@ -91,6 +91,12 @@
     <Compile Include="RequestHelpForm.Designer.cs">
       <DependentUpon>RequestHelpForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="SessionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SessionsForm.Designer.cs">
+      <DependentUpon>SessionsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="SnapShotForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -112,6 +118,9 @@
     </Compile>
     <EmbeddedResource Include="RequestHelpForm.resx">
       <DependentUpon>RequestHelpForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SessionsForm.resx">
+      <DependentUpon>SessionsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SnapShotForm.resx">
       <DependentUpon>SnapShotForm.cs</DependentUpon>

@@ -39,7 +39,7 @@ namespace MeshAssistant
 
         private void closeButton_Click(object sender, EventArgs e)
         {
-            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         public void displaySnapShot(string data)

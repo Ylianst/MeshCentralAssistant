@@ -18,6 +18,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.IO.Pipes;
+using System.Collections;
 using System.ServiceProcess;
 using System.Security.Principal;
 using System.Collections.Generic;
@@ -31,17 +32,29 @@ namespace MeshAssistant
         private static ServiceController agentService = new ServiceController("Mesh Agent");
         private byte[] pipeBuffer = new byte[65535];
         private bool pipeWritePending = false;
+        private ArrayList pipeWrites = new ArrayList();
         private NamedPipeClientStream pipeClient = null;
         public int State = 0;
         public int ServerState = 0;
         public Uri ServerUri = null;
         public bool ServiceAgent = true;
 
+        // Sessions
+        public Dictionary<string, object> DesktopSessions = null;
+        public Dictionary<string, object> TerminalSessions = null;
+        public Dictionary<string, object> FilesSessions = null;
+        public Dictionary<string, object> TcpSessions = null;
+        public Dictionary<string, object> UdpSessions = null;
+        public Dictionary<string, object> MessagesSessions = null;
+
         public delegate void onQueryResultHandler(string value, string result);
         public event onQueryResultHandler onQueryResult;
 
         public delegate void onStateChangedHandler(int state, int serverState);
         public event onStateChangedHandler onStateChanged;
+
+        public delegate void onSessionChangedHandler();
+        public event onSessionChangedHandler onSessionChanged;
 
         public static ServiceControllerStatus GetServiceStatus() { agentService.Refresh(); return agentService.Status; }
         public static void StartService() { try { agentService.Start(); } catch (Exception) { } }
@@ -123,16 +136,35 @@ namespace MeshAssistant
 
         public bool SendCommand(string cmd, string value)
         {
-            if ((pipeClient == null) || (pipeClient.IsConnected == false) || (pipeWritePending == true)) return false;
-            pipeWritePending = true;
+            if ((pipeClient == null) || (pipeClient.IsConnected == false)) return false;
             string data = "{\"cmd\":\"" + cmd + "\",\"value\":\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"}";
             byte[] buf2 = UTF8Encoding.UTF8.GetBytes(data);
             byte[] buf1 = BitConverter.GetBytes(buf2.Length + 4);
             byte[] buf = new byte[4 + buf2.Length];
             Array.Copy(buf1, 0, buf, 0, 4);
             Array.Copy(buf2, 0, buf, 4, buf2.Length);
-            pipeClient.BeginWrite(buf, 0, buf.Length, new AsyncCallback(WritePipe), null);
+            if (pipeWritePending == true) {
+                pipeWrites.Add(buf);
+            } else {
+                pipeWritePending = true;
+                pipeClient.BeginWrite(buf, 0, buf.Length, new AsyncCallback(WritePipe), null);
+            }
             return true;
+        }
+
+        private void WritePipe(IAsyncResult r)
+        {
+            pipeClient.EndWrite(r);
+            if (pipeWrites.Count > 0)
+            {
+                byte[] buf = (byte[])pipeWrites[0];
+                pipeWrites.RemoveAt(0);
+                pipeClient.BeginWrite(buf, 0, buf.Length, new AsyncCallback(WritePipe), null);
+            }
+            else
+            {
+                pipeWritePending = false;
+            }
         }
 
         public bool ConnectPipe()
@@ -150,6 +182,7 @@ namespace MeshAssistant
                     ServiceAgent = true;
                     ChangeState(1, 0);
                     SendCommand("register", userName);
+                    SendCommand("sessions", "");
                     pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
                     return true;
                 }
@@ -166,6 +199,7 @@ namespace MeshAssistant
                     ServiceAgent = true;
                     ChangeState(1, 0);
                     SendCommand("register", userName);
+                    SendCommand("sessions", "");
                     pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
                     return true;
                 }
@@ -182,6 +216,7 @@ namespace MeshAssistant
                     ServiceAgent = false;
                     ChangeState(1, 0);
                     SendCommand("register", userName);
+                    SendCommand("sessions", "");
                     pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
                     return true;
                 }
@@ -198,6 +233,7 @@ namespace MeshAssistant
                     ServiceAgent = false;
                     ChangeState(1, 0);
                     SendCommand("register", userName);
+                    SendCommand("sessions", "");
                     pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
                     return true;
                 }
@@ -211,6 +247,14 @@ namespace MeshAssistant
             if (pipeClient != null) { pipeClient.Close(); }
             ServerState = 0;
             ServerUri = null;
+            pipeWritePending = false;
+            pipeWrites = new ArrayList();
+            DesktopSessions = null;
+            TerminalSessions = null;
+            FilesSessions = null;
+            TcpSessions = null;
+            UdpSessions = null;
+            MessagesSessions = null;
         }
 
         public bool QueryDescriptors()
@@ -228,12 +272,6 @@ namespace MeshAssistant
             return SendCommand("cancelhelp", "");
         }
 
-        private void WritePipe(IAsyncResult r)
-        {
-            pipeClient.EndWrite(r);
-            pipeWritePending = false;
-        }
-
         private void ReadPipe(IAsyncResult r)
         {
             int len = pipeClient.EndRead(r);
@@ -246,6 +284,7 @@ namespace MeshAssistant
             // Parse the received JSON
             Dictionary<string, object> jsonAction = new Dictionary<string, object>();
             jsonAction = new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(data);
+            if (jsonAction.ContainsKey("cmd") == false) return;
             if (jsonAction != null && jsonAction["cmd"].GetType() == typeof(string))
             {
                 string action = jsonAction["cmd"].ToString();
@@ -262,6 +301,19 @@ namespace MeshAssistant
                             string value = jsonAction["value"].ToString();
                             string result = jsonAction["result"].ToString().Replace("\n", "\r\n");
                             if (onQueryResult != null) { onQueryResult(value, result); }
+                            break;
+                        }
+                    case "sessions":
+                        {
+                            if (jsonAction.ContainsKey("sessions") == false) return;
+                            Dictionary<string, object> jsonSessions = (Dictionary<string, object>)jsonAction["sessions"];
+                            if (jsonSessions.ContainsKey("desktop")) { DesktopSessions = (Dictionary<string, object>)jsonSessions["desktop"]; }
+                            if (jsonSessions.ContainsKey("terminal")) { TerminalSessions = (Dictionary<string, object>)jsonSessions["terminal"]; }
+                            if (jsonSessions.ContainsKey("files")) { FilesSessions = (Dictionary<string, object>)jsonSessions["files"]; }
+                            if (jsonSessions.ContainsKey("tcp")) { TcpSessions = (Dictionary<string, object>)jsonSessions["tcp"]; }
+                            if (jsonSessions.ContainsKey("udp")) { UdpSessions = (Dictionary<string, object>)jsonSessions["udp"]; }
+                            if (jsonSessions.ContainsKey("msg")) { MessagesSessions = (Dictionary<string, object>)jsonSessions["msg"]; }
+                            if (onSessionChanged != null) { onSessionChanged(); }
                             break;
                         }
                 }

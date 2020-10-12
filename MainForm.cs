@@ -32,6 +32,7 @@ namespace MeshAssistant
         public int queryNumber = 0;
         public SnapShotForm snapShotForm = null;
         public RequestHelpForm requestHelpForm = null;
+        public SessionsForm sessionsForm = null;
         public bool isAdministrator = false;
 
         public MainForm()
@@ -40,6 +41,7 @@ namespace MeshAssistant
             agent = new MeshAgent();
             agent.onStateChanged += Agent_onStateChanged;
             agent.onQueryResult += Agent_onQueryResult;
+            agent.onSessionChanged += Agent_onSessionChanged;
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
             agent.ConnectPipe();
@@ -62,6 +64,24 @@ namespace MeshAssistant
                 stopAgentToolStripMenuItem.Visible = false;
                 toolStripMenuItem2.Visible = false;
             }
+        }
+
+        private void Agent_onSessionChanged()
+        {
+            if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSessionChangedHandler(Agent_onSessionChanged)); return; }
+
+            // Called when sessions on the agent have changed.
+            int count = 0;
+            if (agent.DesktopSessions != null) { count += agent.DesktopSessions.Count; }
+            if (agent.TerminalSessions != null) { count += agent.TerminalSessions.Count; }
+            if (agent.FilesSessions != null) { count += agent.FilesSessions.Count; }
+            if (agent.TcpSessions != null) { count += agent.TcpSessions.Count; }
+            if (agent.UdpSessions != null) { count += agent.UdpSessions.Count; }
+            if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); }
+            if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; }
+            if (count == 0) { mainNotifyIcon.BalloonTipText = "No active remote sessions."; remoteSessionsLabel.Text = "No remote sessions"; }
+            //mainNotifyIcon.ShowBalloonTip(2000);
+            if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
         }
 
         public void UpdateServiceStatus()
@@ -299,6 +319,19 @@ namespace MeshAssistant
                 pictureBox2.Visible = false;
                 pictureBox3.Visible = false;
                 pictureBox4.Visible = true;
+            }
+        }
+
+        private void remoteSessionsLabel_Click(object sender, EventArgs e)
+        {
+            if (sessionsForm != null)
+            {
+                sessionsForm.Focus();
+            }
+            else
+            {
+                sessionsForm = new SessionsForm(this);
+                sessionsForm.Show(this);
             }
         }
     }
