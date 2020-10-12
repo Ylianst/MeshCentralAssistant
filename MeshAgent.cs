@@ -38,6 +38,7 @@ namespace MeshAssistant
         public int ServerState = 0;
         public Uri ServerUri = null;
         public bool ServiceAgent = true;
+        public bool IntelAmtSupport = false;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -55,6 +56,9 @@ namespace MeshAssistant
 
         public delegate void onSessionChangedHandler();
         public event onSessionChangedHandler onSessionChanged;
+
+        public delegate void onAmtStateHandler(Dictionary<string, object> state);
+        public event onAmtStateHandler onAmtState;
 
         public static ServiceControllerStatus GetServiceStatus() { agentService.Refresh(); return agentService.Status; }
         public static void StartService() { try { agentService.Start(); } catch (Exception) { } }
@@ -272,6 +276,11 @@ namespace MeshAssistant
             return SendCommand("cancelhelp", "");
         }
 
+        public bool RequestIntelAmtState()
+        {
+            return SendCommand("amtstate", "");
+        }
+
         private void ReadPipe(IAsyncResult r)
         {
             int len = pipeClient.EndRead(r);
@@ -293,6 +302,7 @@ namespace MeshAssistant
                     case "serverstate":
                         {
                             ServerUri = new Uri(jsonAction["url"].ToString().Replace("wss://", "https://").Replace("ws://", "http://").Replace("/agent.ashx", ""));
+                            if (jsonAction.ContainsKey("amt")) { IntelAmtSupport = (bool)jsonAction["amt"]; }
                             ChangeState(1, int.Parse(jsonAction["value"].ToString()));
                             break;
                         }
@@ -314,6 +324,13 @@ namespace MeshAssistant
                             if (jsonSessions.ContainsKey("udp")) { UdpSessions = (Dictionary<string, object>)jsonSessions["udp"]; }
                             if (jsonSessions.ContainsKey("msg")) { MessagesSessions = (Dictionary<string, object>)jsonSessions["msg"]; }
                             if (onSessionChanged != null) { onSessionChanged(); }
+                            break;
+                        }
+                    case "amtstate":
+                        {
+                            if (jsonAction.ContainsKey("value") == false) return;
+                            Dictionary<string, object> amtstate = (Dictionary<string, object>)jsonAction["value"];
+                            if (onAmtState != null) { onAmtState(amtstate); }
                             break;
                         }
                 }

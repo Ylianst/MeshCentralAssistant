@@ -33,6 +33,7 @@ namespace MeshAssistant
         public SnapShotForm snapShotForm = null;
         public RequestHelpForm requestHelpForm = null;
         public SessionsForm sessionsForm = null;
+        public MeInfoForm meInfoForm = null;
         public bool isAdministrator = false;
 
         public MainForm()
@@ -42,6 +43,7 @@ namespace MeshAssistant
             agent.onStateChanged += Agent_onStateChanged;
             agent.onQueryResult += Agent_onQueryResult;
             agent.onSessionChanged += Agent_onSessionChanged;
+            agent.onAmtState += Agent_onAmtState;
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
             agent.ConnectPipe();
@@ -64,6 +66,12 @@ namespace MeshAssistant
                 stopAgentToolStripMenuItem.Visible = false;
                 toolStripMenuItem2.Visible = false;
             }
+        }
+
+        private void Agent_onAmtState(System.Collections.Generic.Dictionary<string, object> state)
+        {
+            if (this.InvokeRequired) { this.Invoke(new MeshAgent.onAmtStateHandler(Agent_onAmtState), state); return; }
+            if (meInfoForm != null) { meInfoForm.updateInfo(state); }
         }
 
         private void Agent_onSessionChanged()
@@ -152,6 +160,11 @@ namespace MeshAssistant
                         pictureBox3.Visible = false; // Yellow
                         pictureBox4.Visible = false; // Help
                         UpdateServiceStatus();
+                        requestHelpToolStripMenuItem.Enabled = false;
+                        requestHelpToolStripMenuItem.Visible = true;
+                        cancelHelpRequestToolStripMenuItem.Visible = false;
+                        intelMEStateToolStripMenuItem.Visible = false;
+                        intelAMTStateToolStripMenuItem.Visible = false;
                         break;
                     }
                 case 1:
@@ -162,13 +175,21 @@ namespace MeshAssistant
                             pictureBox3.Visible = false;
                             pictureBox4.Visible = false;
                             stateLabel.Text = "Connected to server";
+                            requestHelpToolStripMenuItem.Enabled = true;
+                            requestHelpToolStripMenuItem.Visible = true;
+                            cancelHelpRequestToolStripMenuItem.Visible = false;
                         } else {
                             pictureBox1.Visible = false;
                             pictureBox2.Visible = false;
                             pictureBox3.Visible = true;
                             pictureBox4.Visible = false;
                             stateLabel.Text = "Agent is active";
+                            requestHelpToolStripMenuItem.Enabled = false;
+                            requestHelpToolStripMenuItem.Visible = true;
+                            cancelHelpRequestToolStripMenuItem.Visible = false;
                         }
+                        intelMEStateToolStripMenuItem.Visible = agent.IntelAmtSupport;
+                        intelAMTStateToolStripMenuItem.Visible = agent.IntelAmtSupport;
                         break;
                     }
             }
@@ -288,6 +309,8 @@ namespace MeshAssistant
                     helpRequested = false;
                     requestHelpButton.Text = "Request Help";
                     stateLabel.Text = "Connected to server";
+                    requestHelpToolStripMenuItem.Visible = true;
+                    cancelHelpRequestToolStripMenuItem.Visible = false;
                     pictureBox1.Visible = true;
                     pictureBox2.Visible = false;
                     pictureBox3.Visible = false;
@@ -315,6 +338,8 @@ namespace MeshAssistant
                 helpRequested = true;
                 requestHelpButton.Text = "Cancel Help Request";
                 stateLabel.Text = "Help requested";
+                requestHelpToolStripMenuItem.Visible = false;
+                cancelHelpRequestToolStripMenuItem.Visible = true;
                 pictureBox1.Visible = false;
                 pictureBox2.Visible = false;
                 pictureBox3.Visible = false;
@@ -332,6 +357,24 @@ namespace MeshAssistant
             {
                 sessionsForm = new SessionsForm(this);
                 sessionsForm.Show(this);
+            }
+        }
+
+        private void dialogContextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            requestHelpToolStripMenuItem.Enabled = (agent.State != 0);
+        }
+
+        private void intelAMTStateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (meInfoForm != null)
+            {
+                meInfoForm.Focus();
+            }
+            else
+            {
+                meInfoForm = new MeInfoForm(this);
+                meInfoForm.Show(this);
             }
         }
     }

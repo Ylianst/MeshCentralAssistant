@@ -36,6 +36,7 @@
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openSiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.startAgentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopAgentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,17 +44,24 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.connectionTimer = new System.Windows.Forms.Timer(this.components);
             this.requestHelpButton = new System.Windows.Forms.Button();
+            this.remoteSessionsLabel = new System.Windows.Forms.Label();
+            this.dialogContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.requestHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cancelHelpRequestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showSessionsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.intelAMTStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.pictureBox4 = new System.Windows.Forms.PictureBox();
-            this.remoteSessionsLabel = new System.Windows.Forms.Label();
-            this.showSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.intelMEStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainContextMenuStrip.SuspendLayout();
+            this.dialogContextMenuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.SuspendLayout();
             // 
             // stateLabel
@@ -87,25 +95,26 @@
             this.closeToolStripMenuItem,
             this.openSiteToolStripMenuItem,
             this.showSessionsToolStripMenuItem,
+            this.intelMEStateToolStripMenuItem,
             this.toolStripMenuItem1,
             this.startAgentToolStripMenuItem,
             this.stopAgentToolStripMenuItem,
             this.toolStripMenuItem2,
             this.exitToolStripMenuItem});
             this.mainContextMenuStrip.Name = "mainContextMenuStrip";
-            this.mainContextMenuStrip.Size = new System.Drawing.Size(160, 192);
+            this.mainContextMenuStrip.Size = new System.Drawing.Size(167, 214);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.openToolStripMenuItem.Text = "&Open...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.closeToolStripMenuItem.Text = "&Close";
             this.closeToolStripMenuItem.Visible = false;
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
@@ -113,39 +122,46 @@
             // openSiteToolStripMenuItem
             // 
             this.openSiteToolStripMenuItem.Name = "openSiteToolStripMenuItem";
-            this.openSiteToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.openSiteToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.openSiteToolStripMenuItem.Text = "O&pen Site...";
             this.openSiteToolStripMenuItem.Visible = false;
             this.openSiteToolStripMenuItem.Click += new System.EventHandler(this.openSiteToolStripMenuItem_Click);
             // 
+            // showSessionsToolStripMenuItem
+            // 
+            this.showSessionsToolStripMenuItem.Name = "showSessionsToolStripMenuItem";
+            this.showSessionsToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.showSessionsToolStripMenuItem.Text = "Show Sessions...";
+            this.showSessionsToolStripMenuItem.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
+            // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(156, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(163, 6);
             // 
             // startAgentToolStripMenuItem
             // 
             this.startAgentToolStripMenuItem.Name = "startAgentToolStripMenuItem";
-            this.startAgentToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.startAgentToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.startAgentToolStripMenuItem.Text = "&Start Agent";
             this.startAgentToolStripMenuItem.Click += new System.EventHandler(this.startAgentToolStripMenuItem_Click);
             // 
             // stopAgentToolStripMenuItem
             // 
             this.stopAgentToolStripMenuItem.Name = "stopAgentToolStripMenuItem";
-            this.stopAgentToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.stopAgentToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.stopAgentToolStripMenuItem.Text = "S&top Agent";
             this.stopAgentToolStripMenuItem.Click += new System.EventHandler(this.stopAgentToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(156, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(163, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -169,47 +185,6 @@
             this.requestHelpButton.Click += new System.EventHandler(this.requestHelpButton_Click);
             this.requestHelpButton.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.MeshIconGreen2;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 23);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(178, 136);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBox1.TabIndex = 7;
-            this.pictureBox1.TabStop = false;
-            // 
-            // pictureBox3
-            // 
-            this.pictureBox3.Image = global::MeshAssistant.Properties.Resources.MeshIconGray2;
-            this.pictureBox3.Location = new System.Drawing.Point(12, 23);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(178, 136);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBox3.TabIndex = 9;
-            this.pictureBox3.TabStop = false;
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Image = global::MeshAssistant.Properties.Resources.MeshIconRed2;
-            this.pictureBox2.Location = new System.Drawing.Point(12, 23);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(178, 136);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBox2.TabIndex = 8;
-            this.pictureBox2.TabStop = false;
-            // 
-            // pictureBox4
-            // 
-            this.pictureBox4.Image = global::MeshAssistant.Properties.Resources.MeshIconHelp2;
-            this.pictureBox4.Location = new System.Drawing.Point(12, 23);
-            this.pictureBox4.Name = "pictureBox4";
-            this.pictureBox4.Size = new System.Drawing.Size(178, 136);
-            this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBox4.TabIndex = 10;
-            this.pictureBox4.TabStop = false;
-            this.pictureBox4.Visible = false;
-            // 
             // remoteSessionsLabel
             // 
             this.remoteSessionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -225,12 +200,104 @@
             this.remoteSessionsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.remoteSessionsLabel.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
             // 
-            // showSessionsToolStripMenuItem
+            // dialogContextMenuStrip
             // 
-            this.showSessionsToolStripMenuItem.Name = "showSessionsToolStripMenuItem";
-            this.showSessionsToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
-            this.showSessionsToolStripMenuItem.Text = "Show Sessions...";
-            this.showSessionsToolStripMenuItem.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
+            this.dialogContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.requestHelpToolStripMenuItem,
+            this.cancelHelpRequestToolStripMenuItem,
+            this.toolStripMenuItem3,
+            this.showSessionsToolStripMenuItem1,
+            this.intelAMTStateToolStripMenuItem});
+            this.dialogContextMenuStrip.Name = "dialogContextMenuStrip";
+            this.dialogContextMenuStrip.Size = new System.Drawing.Size(184, 98);
+            this.dialogContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.dialogContextMenuStrip_Opening);
+            // 
+            // requestHelpToolStripMenuItem
+            // 
+            this.requestHelpToolStripMenuItem.Name = "requestHelpToolStripMenuItem";
+            this.requestHelpToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.requestHelpToolStripMenuItem.Text = "Request Help...";
+            this.requestHelpToolStripMenuItem.Click += new System.EventHandler(this.requestHelpButton_Click);
+            // 
+            // cancelHelpRequestToolStripMenuItem
+            // 
+            this.cancelHelpRequestToolStripMenuItem.Name = "cancelHelpRequestToolStripMenuItem";
+            this.cancelHelpRequestToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.cancelHelpRequestToolStripMenuItem.Text = "Cancel Help Request";
+            this.cancelHelpRequestToolStripMenuItem.Click += new System.EventHandler(this.requestHelpButton_Click);
+            // 
+            // showSessionsToolStripMenuItem1
+            // 
+            this.showSessionsToolStripMenuItem1.Name = "showSessionsToolStripMenuItem1";
+            this.showSessionsToolStripMenuItem1.Size = new System.Drawing.Size(183, 22);
+            this.showSessionsToolStripMenuItem1.Text = "Remote Sessions...";
+            this.showSessionsToolStripMenuItem1.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
+            // 
+            // intelAMTStateToolStripMenuItem
+            // 
+            this.intelAMTStateToolStripMenuItem.Name = "intelAMTStateToolStripMenuItem";
+            this.intelAMTStateToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.intelAMTStateToolStripMenuItem.Text = "Intel® ME State...";
+            this.intelAMTStateToolStripMenuItem.Visible = false;
+            this.intelAMTStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(180, 6);
+            // 
+            // pictureBox4
+            // 
+            this.pictureBox4.ContextMenuStrip = this.dialogContextMenuStrip;
+            this.pictureBox4.Image = global::MeshAssistant.Properties.Resources.MeshIconHelp2;
+            this.pictureBox4.Location = new System.Drawing.Point(12, 23);
+            this.pictureBox4.Name = "pictureBox4";
+            this.pictureBox4.Size = new System.Drawing.Size(178, 136);
+            this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox4.TabIndex = 10;
+            this.pictureBox4.TabStop = false;
+            this.pictureBox4.Visible = false;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.ContextMenuStrip = this.dialogContextMenuStrip;
+            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.MeshIconGreen2;
+            this.pictureBox1.Location = new System.Drawing.Point(12, 23);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(178, 136);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox1.TabIndex = 7;
+            this.pictureBox1.TabStop = false;
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.ContextMenuStrip = this.dialogContextMenuStrip;
+            this.pictureBox3.Image = global::MeshAssistant.Properties.Resources.MeshIconGray2;
+            this.pictureBox3.Location = new System.Drawing.Point(12, 23);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(178, 136);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox3.TabIndex = 9;
+            this.pictureBox3.TabStop = false;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.ContextMenuStrip = this.dialogContextMenuStrip;
+            this.pictureBox2.Image = global::MeshAssistant.Properties.Resources.MeshIconRed2;
+            this.pictureBox2.Location = new System.Drawing.Point(12, 23);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(178, 136);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox2.TabIndex = 8;
+            this.pictureBox2.TabStop = false;
+            // 
+            // intelMEStateToolStripMenuItem
+            // 
+            this.intelMEStateToolStripMenuItem.Name = "intelMEStateToolStripMenuItem";
+            this.intelMEStateToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.intelMEStateToolStripMenuItem.Text = "Intel® ME State...";
+            this.intelMEStateToolStripMenuItem.Visible = false;
+            this.intelMEStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -239,9 +306,9 @@
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
             this.ClientSize = new System.Drawing.Size(204, 225);
             this.Controls.Add(this.remoteSessionsLabel);
-            this.Controls.Add(this.pictureBox4);
             this.Controls.Add(this.requestHelpButton);
             this.Controls.Add(this.stateLabel);
+            this.Controls.Add(this.pictureBox4);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.pictureBox2);
@@ -256,10 +323,11 @@
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.mainContextMenuStrip.ResumeLayout(false);
+            this.dialogContextMenuStrip.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -285,6 +353,13 @@
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.Label remoteSessionsLabel;
         private System.Windows.Forms.ToolStripMenuItem showSessionsToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip dialogContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem requestHelpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cancelHelpRequestToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showSessionsToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem intelAMTStateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripMenuItem intelMEStateToolStripMenuItem;
     }
 }
 
