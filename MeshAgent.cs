@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.IO.Pipes;
@@ -22,6 +23,7 @@ using System.Collections;
 using System.ServiceProcess;
 using System.Security.Principal;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Web.Script.Serialization;
 using Microsoft.Win32;
 
@@ -39,6 +41,8 @@ namespace MeshAssistant
         public Uri ServerUri = null;
         public bool ServiceAgent = true;
         public bool IntelAmtSupport = false;
+        private string selfExecutableHashHex = null;
+        private string softwareName = null;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -60,9 +64,25 @@ namespace MeshAssistant
         public delegate void onAmtStateHandler(Dictionary<string, object> state);
         public event onAmtStateHandler onAmtState;
 
+        public delegate void onSelfUpdateHandler(string name, string hash, string url);
+        public event onSelfUpdateHandler onSelfUpdate;
+
         public static ServiceControllerStatus GetServiceStatus() { agentService.Refresh(); return agentService.Status; }
         public static void StartService() { try { agentService.Start(); } catch (Exception) { } }
         public static void StopService() { try { agentService.Stop(); } catch (Exception) { } }
+
+        public MeshAgent(string softwareName)
+        {
+            this.softwareName = softwareName;
+
+            if (softwareName != null)
+            {
+                // Hash our own executable
+                byte[] selfHash;
+                using (var sha384 = SHA384Managed.Create()) { using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location)) { selfHash = sha384.ComputeHash(stream); } }
+                selfExecutableHashHex = BitConverter.ToString(selfHash).Replace("-", string.Empty).ToLower();
+            }
+        }
 
         public static string GetNodeId32()
         {
@@ -136,6 +156,7 @@ namespace MeshAssistant
             State = state;
             if (State == 0) { ServerState = 0; } else { ServerState = serverState; }
             if (onStateChanged != null) { onStateChanged(State, ServerState); }
+            if (serverState == 1) SendSelfUpdateQuery();
         }
 
         public bool SendCommand(string cmd, string value)
@@ -150,6 +171,27 @@ namespace MeshAssistant
             if (pipeWritePending == true) {
                 pipeWrites.Add(buf);
             } else {
+                pipeWritePending = true;
+                pipeClient.BeginWrite(buf, 0, buf.Length, new AsyncCallback(WritePipe), null);
+            }
+            return true;
+        }
+
+        public bool SendSelfUpdateQuery()
+        {
+            if ((pipeClient == null) || (pipeClient.IsConnected == false) || (softwareName == null) || (selfExecutableHashHex == null)) return false;
+            string data = "{\"cmd\":\"meshToolInfo\",\"name\":\"" + softwareName + "\",\"hash\":\"" + selfExecutableHashHex + "\",\"cookie\":true}";
+            byte[] buf2 = UTF8Encoding.UTF8.GetBytes(data);
+            byte[] buf1 = BitConverter.GetBytes(buf2.Length + 4);
+            byte[] buf = new byte[4 + buf2.Length];
+            Array.Copy(buf1, 0, buf, 0, 4);
+            Array.Copy(buf2, 0, buf, 4, buf2.Length);
+            if (pipeWritePending == true)
+            {
+                pipeWrites.Add(buf);
+            }
+            else
+            {
                 pipeWritePending = true;
                 pipeClient.BeginWrite(buf, 0, buf.Length, new AsyncCallback(WritePipe), null);
             }
@@ -301,7 +343,7 @@ namespace MeshAssistant
                 {
                     case "serverstate":
                         {
-                            ServerUri = new Uri(jsonAction["url"].ToString().Replace("wss://", "https://").Replace("ws://", "http://").Replace("/agent.ashx", ""));
+                            if (jsonAction.ContainsKey("url") && (jsonAction["url"] != null)) { ServerUri = new Uri(jsonAction["url"].ToString().Replace("wss://", "https://").Replace("ws://", "http://").Replace("/agent.ashx", "")); } else { ServerUri = null; }
                             if (jsonAction.ContainsKey("amt")) { IntelAmtSupport = (bool)jsonAction["amt"]; }
                             ChangeState(1, int.Parse(jsonAction["value"].ToString()));
                             break;
@@ -331,6 +373,17 @@ namespace MeshAssistant
                             if (jsonAction.ContainsKey("value") == false) return;
                             Dictionary<string, object> amtstate = (Dictionary<string, object>)jsonAction["value"];
                             if (onAmtState != null) { onAmtState(amtstate); }
+                            break;
+                        }
+                    case "meshToolInfo":
+                        {
+                            string name = null;
+                            string hash = null;
+                            string url = null;
+                            if (jsonAction.ContainsKey("name")) { name = jsonAction["name"].ToString(); }
+                            if (jsonAction.ContainsKey("hash")) { hash = jsonAction["hash"].ToString(); }
+                            if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); }
+                            if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) { onSelfUpdate(name, hash, url); }
                             break;
                         }
                 }

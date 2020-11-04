@@ -15,15 +15,24 @@ limitations under the License.
 */
 
 using System;
+using System.IO;
+using System.Net;
 using System.Drawing;
+using System.Reflection;
+using System.Collections;
+using System.Diagnostics;
+using System.Net.Security;
 using System.Windows.Forms;
 using System.ServiceProcess;
 using System.Security.Principal;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace MeshAssistant
 {
     public partial class MainForm : Form
     {
+        public string[] args;
         public int timerSlowDown = 0;
         public bool allowShowDisplay = false;
         public bool doclose = false;
@@ -35,15 +44,50 @@ namespace MeshAssistant
         public SessionsForm sessionsForm = null;
         public MeInfoForm meInfoForm = null;
         public bool isAdministrator = false;
+        public bool forceExit = false;
 
-        public MainForm()
+        public MainForm(string[] args)
         {
+            // Perform self update operations if any.
+            this.args = args;
+            bool startVisible = false;
+            string update = null;
+            string delete = null;
+            foreach (string arg in this.args)
+            {
+                if ((arg.Length == 8) && (arg == "-visible")) { startVisible = true; }
+                if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }
+                if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-delete:") { delete = arg.Substring(8); }
+            }
+
+            if (update != null)
+            {
+                // New args
+                ArrayList args2 = new ArrayList();
+                foreach (string a in args) { if (a.StartsWith("-update:") == false) { args2.Add(a); } }
+
+                // Remove ".update.exe" and copy
+                System.Threading.Thread.Sleep(1000);
+                File.Copy(Assembly.GetEntryAssembly().Location, update, true);
+                System.Threading.Thread.Sleep(1000);
+                Process.Start(update, string.Join(" ", (string[])args2.ToArray(typeof(string))) + " -delete:" + Assembly.GetEntryAssembly().Location);
+                this.forceExit = true;
+                Application.Exit();
+                return;
+            }
+
+            if (delete != null) { try { System.Threading.Thread.Sleep(1000); File.Delete(delete); } catch (Exception) { } }
+
+            // Set TLS 1.2
+            ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
             InitializeComponent();
-            agent = new MeshAgent();
+            agent = new MeshAgent("MeshCentralAssistant");
             agent.onStateChanged += Agent_onStateChanged;
             agent.onQueryResult += Agent_onQueryResult;
             agent.onSessionChanged += Agent_onSessionChanged;
             agent.onAmtState += Agent_onAmtState;
+            agent.onSelfUpdate += Agent_onSelfUpdate;
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
             agent.ConnectPipe();
@@ -66,6 +110,14 @@ namespace MeshAssistant
                 stopAgentToolStripMenuItem.Visible = false;
                 toolStripMenuItem2.Visible = false;
             }
+
+            if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
+        }
+
+        private void Agent_onSelfUpdate(string name, string hash, string url)
+        {
+            if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSelfUpdateHandler(Agent_onSelfUpdate), name, hash, url); return; }
+            DownloadUpdate(hash, url);
         }
 
         private void Agent_onAmtState(System.Collections.Generic.Dictionary<string, object> state)
@@ -248,7 +300,7 @@ namespace MeshAssistant
 
         private void mainNotifyIcon_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == System.Windows.Forms.MouseButtons.Left) {
+            if ((e == null) || (e.Button == System.Windows.Forms.MouseButtons.Left)) {
                 this.WindowState = FormWindowState.Normal;
                 this.allowShowDisplay = true;
                 openToolStripMenuItem.Visible = this.Visible;
@@ -377,5 +429,77 @@ namespace MeshAssistant
                 meInfoForm.Show(this);
             }
         }
+
+
+        //
+        // Self update section
+        //
+
+        string seflUpdateDownloadHash = null;
+
+        private void DownloadUpdate(string hash, string url)
+        {
+            seflUpdateDownloadHash = hash;
+            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
+            Uri x = webRequest.RequestUri;
+            webRequest.Method = "GET";
+            webRequest.Timeout = 10000;
+            webRequest.BeginGetResponse(new AsyncCallback(DownloadUpdateRespone), webRequest);
+            webRequest.ServerCertificateValidationCallback += RemoteCertificateValidationCallback;
+        }
+
+        public static bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            return true;
+        }
+
+        private void DownloadUpdateRespone(IAsyncResult asyncResult)
+        {
+            long received = 0;
+            HttpWebRequest webRequest = (HttpWebRequest)asyncResult.AsyncState;
+            try
+            {
+                // Hash our own executable
+                using (HttpWebResponse webResponse = (HttpWebResponse)webRequest.EndGetResponse(asyncResult))
+                {
+                    byte[] buffer = new byte[4096];
+                    FileStream fileStream = File.OpenWrite(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe");
+                    using (Stream input = webResponse.GetResponseStream())
+                    {
+                        int size = input.Read(buffer, 0, buffer.Length);
+                        while (size > 0)
+                        {
+                            fileStream.Write(buffer, 0, size);
+                            received += size;
+                            size = input.Read(buffer, 0, buffer.Length);
+                        }
+                    }
+                    fileStream.Flush();
+                    fileStream.Close();
+
+                    // Hash the resulting file
+                    byte[] downloadHash;
+                    using (var sha384 = SHA384Managed.Create()) { using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe")) { downloadHash = sha384.ComputeHash(stream); } }
+                    string downloadHashHex = BitConverter.ToString(downloadHash).Replace("-", string.Empty).ToLower();
+                    if (downloadHashHex != seflUpdateDownloadHash)
+                    {
+                        System.Threading.Thread.Sleep(500);
+                        File.Delete(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe");
+                    }
+                    else
+                    {
+                        doclose = true;
+                        forceExit = true;
+                        System.Threading.Thread.Sleep(500);
+                        string arguments = "-update:" + System.Reflection.Assembly.GetEntryAssembly().Location + " " + string.Join(" ", args);
+                        if (this.Visible == true) { arguments += " -visible"; }
+                        Process.Start(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe", arguments);
+                        Application.Exit();
+                    }
+                }
+            }
+            catch (Exception ex) { }
+        }
+
     }
 }
