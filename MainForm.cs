@@ -27,6 +27,7 @@ using System.ServiceProcess;
 using System.Security.Principal;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace MeshAssistant
 {
@@ -114,10 +115,10 @@ namespace MeshAssistant
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
         }
 
-        private void Agent_onSelfUpdate(string name, string hash, string url)
+        private void Agent_onSelfUpdate(string name, string hash, string url, string serverhash)
         {
-            if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSelfUpdateHandler(Agent_onSelfUpdate), name, hash, url); return; }
-            DownloadUpdate(hash, url);
+            if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSelfUpdateHandler(Agent_onSelfUpdate), name, hash, url, serverhash); return; }
+            DownloadUpdate(hash, url, serverhash);
         }
 
         private void Agent_onAmtState(System.Collections.Generic.Dictionary<string, object> state)
@@ -436,10 +437,12 @@ namespace MeshAssistant
         //
 
         string seflUpdateDownloadHash = null;
+        string serverTlsCertHash = null;
 
-        private void DownloadUpdate(string hash, string url)
+        private void DownloadUpdate(string hash, string url, string serverHash)
         {
             seflUpdateDownloadHash = hash;
+            serverTlsCertHash = serverHash;
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
             Uri x = webRequest.RequestUri;
             webRequest.Method = "GET";
@@ -448,8 +451,10 @@ namespace MeshAssistant
             webRequest.ServerCertificateValidationCallback += RemoteCertificateValidationCallback;
         }
 
-        public static bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        public bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
+            // Check MeshCentral server's TLS certificate. This is our first security layer.
+            if ((serverTlsCertHash != null) && (serverTlsCertHash != certificate.GetCertHashString().ToLower()) && (serverTlsCertHash != GetMeshKeyHash(certificate).ToLower()) && (serverTlsCertHash != GetMeshCertHash(certificate).ToLower())) return false;
             return true;
         }
 
@@ -477,7 +482,7 @@ namespace MeshAssistant
                     fileStream.Flush();
                     fileStream.Close();
 
-                    // Hash the resulting file
+                    // Hash the resulting file, check that it's correct. This is our second security layer.
                     byte[] downloadHash;
                     using (var sha384 = SHA384Managed.Create()) { using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe")) { downloadHash = sha384.ComputeHash(stream); } }
                     string downloadHashHex = BitConverter.ToString(downloadHash).Replace("-", string.Empty).ToLower();
@@ -499,6 +504,26 @@ namespace MeshAssistant
                 }
             }
             catch (Exception ex) { }
+        }
+
+        // Return a modified base64 SHA384 hash string of the certificate public key
+        public static string GetMeshKeyHash(X509Certificate cert)
+        {
+            return ByteArrayToHexString(new SHA384Managed().ComputeHash(cert.GetPublicKey()));
+        }
+
+        // Return a modified base64 SHA384 hash string of the certificate
+        public static string GetMeshCertHash(X509Certificate cert)
+        {
+            return ByteArrayToHexString(new SHA384Managed().ComputeHash(cert.GetRawCertData()));
+        }
+
+        public static string ByteArrayToHexString(byte[] Bytes)
+        {
+            StringBuilder Result = new StringBuilder(Bytes.Length * 2);
+            string HexAlphabet = "0123456789ABCDEF";
+            foreach (byte B in Bytes) { Result.Append(HexAlphabet[(int)(B >> 4)]); Result.Append(HexAlphabet[(int)(B & 0xF)]); }
+            return Result.ToString();
         }
 
     }

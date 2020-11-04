@@ -64,7 +64,7 @@ namespace MeshAssistant
         public delegate void onAmtStateHandler(Dictionary<string, object> state);
         public event onAmtStateHandler onAmtState;
 
-        public delegate void onSelfUpdateHandler(string name, string hash, string url);
+        public delegate void onSelfUpdateHandler(string name, string hash, string url, string serverhash);
         public event onSelfUpdateHandler onSelfUpdate;
 
         public static ServiceControllerStatus GetServiceStatus() { agentService.Refresh(); return agentService.Status; }
@@ -380,10 +380,12 @@ namespace MeshAssistant
                             string name = null;
                             string hash = null;
                             string url = null;
-                            if (jsonAction.ContainsKey("name")) { name = jsonAction["name"].ToString(); }
-                            if (jsonAction.ContainsKey("hash")) { hash = jsonAction["hash"].ToString(); }
-                            if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); }
-                            if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) { onSelfUpdate(name, hash, url); }
+                            string serverhash = null;
+                            if (jsonAction.ContainsKey("name")) { name = jsonAction["name"].ToString(); } // Download tool name
+                            if (jsonAction.ContainsKey("hash")) { hash = jsonAction["hash"].ToString(); } // File Hash
+                            if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); } // Server url
+                            if (jsonAction.ContainsKey("serverhash")) { serverhash = jsonAction["serverhash"].ToString(); } // Server TLS certificate hash
+                            if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) { onSelfUpdate(name, hash, url, serverhash); }
                             break;
                         }
                 }
