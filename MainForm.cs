@@ -44,8 +44,11 @@ namespace MeshAssistant
         public RequestHelpForm requestHelpForm = null;
         public SessionsForm sessionsForm = null;
         public MeInfoForm meInfoForm = null;
+        public ConsoleForm consoleForm = null;
         public bool isAdministrator = false;
         public bool forceExit = false;
+        public bool noUpdate = false;
+        public ArrayList pastConsoleCommands = new ArrayList();
 
         public MainForm(string[] args)
         {
@@ -56,7 +59,8 @@ namespace MeshAssistant
             string delete = null;
             foreach (string arg in this.args)
             {
-                if ((arg.Length == 8) && (arg == "-visible")) { startVisible = true; }
+                if ((arg.Length == 8) && (arg.ToLower() == "-visible")) { startVisible = true; }
+                if ((arg.Length == 9) && (arg.ToLower() == "-noupdate")) { noUpdate = true; }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-delete:") { delete = arg.Substring(8); }
             }
@@ -89,6 +93,8 @@ namespace MeshAssistant
             agent.onSessionChanged += Agent_onSessionChanged;
             agent.onAmtState += Agent_onAmtState;
             agent.onSelfUpdate += Agent_onSelfUpdate;
+            agent.onCancelHelp += Agent_onCancelHelp;
+            agent.onConsoleMessage += Agent_onConsoleMessage;
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
             agent.ConnectPipe();
@@ -115,10 +121,23 @@ namespace MeshAssistant
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
         }
 
+        private void Agent_onConsoleMessage(string str)
+        {
+            if (consoleForm == null) return;
+            if (this.InvokeRequired) { this.Invoke(new MeshAgent.onConsoleHandler(Agent_onConsoleMessage), str); return; }
+            consoleForm.appendText(str);
+        }
+
+        private void Agent_onCancelHelp()
+        {
+            if (this.InvokeRequired) { this.Invoke(new MeshAgent.onCancelHelpHandler(Agent_onCancelHelp)); return; }
+            if (helpRequested == true) { requestHelpButton_Click(null, null); }
+        }
+
         private void Agent_onSelfUpdate(string name, string hash, string url, string serverhash)
         {
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSelfUpdateHandler(Agent_onSelfUpdate), name, hash, url, serverhash); return; }
-            DownloadUpdate(hash, url, serverhash);
+            if (noUpdate == false) DownloadUpdate(hash, url, serverhash);
         }
 
         private void Agent_onAmtState(System.Collections.Generic.Dictionary<string, object> state)
@@ -202,8 +221,8 @@ namespace MeshAssistant
                 this.Invoke(new MeshAgent.onStateChangedHandler(Agent_onStateChanged), state, serverState);
                 return;
             }
-            bool openUrlVisible = ((state == 1) && (agent.ServerUri != null));
-            try { openSiteToolStripMenuItem.Visible = openUrlVisible; } catch (Exception) { return; }
+            //bool openUrlVisible = ((state == 1) && (agent.ServerUri != null));
+            //try { openSiteToolStripMenuItem.Visible = openUrlVisible; } catch (Exception) { return; }
             switch (state)
             {
                 case 0:
@@ -267,6 +286,9 @@ namespace MeshAssistant
             {
                 if (snapShotForm != null) { snapShotForm.Close(); }
                 if (requestHelpForm != null) { requestHelpForm.Close(); }
+                if (sessionsForm != null) { sessionsForm.Close(); }
+                if (meInfoForm != null) { meInfoForm.Close(); }
+                if (consoleForm != null) { consoleForm.Close(); }
             }
         }
 
@@ -349,6 +371,18 @@ namespace MeshAssistant
                 else
                 {
                     snapShotForm.Focus();
+                }
+            }
+            if (e.KeyCode == Keys.F9)
+            {
+                if (consoleForm == null)
+                {
+                    consoleForm = new ConsoleForm(this);
+                    consoleForm.Show(this);
+                }
+                else
+                {
+                    consoleForm.Focus();
                 }
             }
         }
@@ -503,7 +537,7 @@ namespace MeshAssistant
                     }
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception) { }
         }
 
         // Return a modified base64 SHA384 hash string of the certificate public key

@@ -67,6 +67,12 @@ namespace MeshAssistant
         public delegate void onSelfUpdateHandler(string name, string hash, string url, string serverhash);
         public event onSelfUpdateHandler onSelfUpdate;
 
+        public delegate void onCancelHelpHandler();
+        public event onCancelHelpHandler onCancelHelp;
+
+        public delegate void onConsoleHandler(string str);
+        public event onConsoleHandler onConsoleMessage;
+
         public static ServiceControllerStatus GetServiceStatus() { agentService.Refresh(); return agentService.Status; }
         public static void StartService() { try { agentService.Start(); } catch (Exception) { } }
         public static void StopService() { try { agentService.Stop(); } catch (Exception) { } }
@@ -323,6 +329,11 @@ namespace MeshAssistant
             return SendCommand("amtstate", "");
         }
 
+        public bool SendConsoleCommand(string cmd)
+        {
+            return SendCommand("console", cmd);
+        }
+
         private void ReadPipe(IAsyncResult r)
         {
             int len = pipeClient.EndRead(r);
@@ -343,7 +354,7 @@ namespace MeshAssistant
                 {
                     case "serverstate":
                         {
-                            if (jsonAction.ContainsKey("url") && (jsonAction["url"] != null)) { ServerUri = new Uri(jsonAction["url"].ToString().Replace("wss://", "https://").Replace("ws://", "http://").Replace("/agent.ashx", "")); } else { ServerUri = null; }
+                            if (jsonAction.ContainsKey("url") && (jsonAction["url"] != null)) { try { ServerUri = new Uri(jsonAction["url"].ToString().Replace("wss://", "https://").Replace("ws://", "http://").Replace("/agent.ashx", "")); } catch (Exception) { ServerUri = null; } } else { ServerUri = null; }
                             if (jsonAction.ContainsKey("amt")) { IntelAmtSupport = (bool)jsonAction["amt"]; }
                             ChangeState(1, int.Parse(jsonAction["value"].ToString()));
                             break;
@@ -386,6 +397,18 @@ namespace MeshAssistant
                             if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); } // Server url
                             if (jsonAction.ContainsKey("serverhash")) { serverhash = jsonAction["serverhash"].ToString(); } // Server TLS certificate hash
                             if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) { onSelfUpdate(name, hash, url, serverhash); }
+                            break;
+                        }
+                    case "cancelhelp":
+                        {
+                            if (onCancelHelp != null) { onCancelHelp(); }
+                            break;
+                        }
+                    case "console":
+                        {
+                            string cmd = null;
+                            if (jsonAction.ContainsKey("value")) { cmd = jsonAction["value"].ToString(); } // Download tool name
+                            if ((cmd != null) && (onConsoleMessage != null)) { onConsoleMessage(cmd); }
                             break;
                         }
                 }
