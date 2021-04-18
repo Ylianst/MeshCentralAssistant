@@ -95,7 +95,7 @@ namespace MeshAssistant
             try
             {
                 RegistryKey localKey32 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, RegistryView.Registry32);
-                localKey32 = localKey32.OpenSubKey(@"SOFTWARE\Open Source\MeshAgent2");
+                localKey32 = localKey32.OpenSubKey(@"SOFTWARE\Open Source\Mesh Agent");
                 if (localKey32 != null)
                 {
                     string nodeidb64 = localKey32.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
@@ -112,7 +112,7 @@ namespace MeshAssistant
             try
             {
                 RegistryKey localKey64 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, RegistryView.Registry64);
-                localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\MeshAgent2");
+                localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\Mesh Agent");
                 if (localKey64 != null)
                 {
                     string nodeidb64 = localKey64.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
@@ -128,7 +128,7 @@ namespace MeshAssistant
             try
             {
                 RegistryKey localKey32 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry32);
-                localKey32 = localKey32.OpenSubKey(@"SOFTWARE\Open Source\MeshAgent2");
+                localKey32 = localKey32.OpenSubKey(@"SOFTWARE\Open Source\Mesh Agent");
                 if (localKey32 != null)
                 {
                     string nodeidb64 = localKey32.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
@@ -145,7 +145,7 @@ namespace MeshAssistant
             try
             {
                 RegistryKey localKey64 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry64);
-                localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\MeshAgent2");
+                localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\Mesh Agent");
                 if (localKey64 != null)
                 {
                     string nodeidb64 = localKey64.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
