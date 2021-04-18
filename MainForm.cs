@@ -17,6 +17,7 @@ limitations under the License.
 using System;
 using System.IO;
 using System.Net;
+using System.Linq;
 using System.Drawing;
 using System.Reflection;
 using System.Collections;
@@ -25,6 +26,7 @@ using System.Net.Security;
 using System.Windows.Forms;
 using System.ServiceProcess;
 using System.Security.Principal;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -49,6 +51,9 @@ namespace MeshAssistant
         public bool forceExit = false;
         public bool noUpdate = false;
         public ArrayList pastConsoleCommands = new ArrayList();
+        public Dictionary<string, string> agents = null;
+        public string selectedAgentName = null;
+        public string currentAgentName = null;
 
         public MainForm(string[] args)
         {
@@ -63,6 +68,7 @@ namespace MeshAssistant
                 if ((arg.Length == 9) && (arg.ToLower() == "-noupdate")) { noUpdate = true; }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-delete:") { delete = arg.Substring(8); }
+                if (arg.Length > 11 && arg.Substring(0, 11).ToLower() == "-agentname:") { selectedAgentName = arg.Substring(11); }
             }
 
             if (update != null)
@@ -87,7 +93,23 @@ namespace MeshAssistant
             ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
 
             InitializeComponent();
-            agent = new MeshAgent("MeshCentralAssistant");
+
+            // Get the list of agents on the system
+            agents = MeshAgent.GetAgentInfo(selectedAgentName);
+            string[] agentNames = agents.Keys.ToArray();
+            if (agents.Count == 0) { currentAgentName = null; } else { currentAgentName = agentNames[0]; }
+            connectToAgent();
+
+            if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
+        }
+
+        private void connectToAgent()
+        {
+            if (currentAgentName == null) {
+                agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null);
+            } else {
+                agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName]);
+            }
             agent.onStateChanged += Agent_onStateChanged;
             agent.onQueryResult += Agent_onQueryResult;
             agent.onSessionChanged += Agent_onSessionChanged;
@@ -117,8 +139,6 @@ namespace MeshAssistant
                 stopAgentToolStripMenuItem.Visible = false;
                 toolStripMenuItem2.Visible = false;
             }
-
-            if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
         }
 
         private void Agent_onConsoleMessage(string str)

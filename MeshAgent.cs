@@ -1,5 +1,5 @@
 ﻿/*
-Copyright 2009-2020 Intel Corporation
+Copyright 2009-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ namespace MeshAssistant
 {
     public class MeshAgent
     {
-        private static ServiceController agentService = new ServiceController("Mesh Agent");
+        private static ServiceController agentService = null;
         private byte[] pipeBuffer = new byte[65535];
         private bool pipeWritePending = false;
         private ArrayList pipeWrites = new ArrayList();
@@ -43,6 +43,8 @@ namespace MeshAssistant
         public bool IntelAmtSupport = false;
         private string selfExecutableHashHex = null;
         private string softwareName = null;
+        private string serviceName = null;
+        private string[] nodeids = null;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -77,9 +79,12 @@ namespace MeshAssistant
         public static void StartService() { try { agentService.Start(); } catch (Exception) { } }
         public static void StopService() { try { agentService.Stop(); } catch (Exception) { } }
 
-        public MeshAgent(string softwareName)
+        public MeshAgent(string softwareName, string serviceName, string nodeids)
         {
             this.softwareName = softwareName;
+            this.serviceName = serviceName;
+            this.nodeids = nodeids.Split(',');
+            agentService = new ServiceController(serviceName);
 
             if (softwareName != null)
             {
@@ -90,12 +95,63 @@ namespace MeshAssistant
             }
         }
 
-        public static string GetNodeId32()
+        /// <summary>
+        /// Return a list of agent names and comma seperated nodeid's
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<string, string> GetAgentInfo(string selectedAgentName)
+        {
+            Dictionary<string, string> connections = new Dictionary<string, string>();
+            for (var i = 0; i < 4; i++) { GetAgentInfoEx(connections, i, selectedAgentName); }
+            return connections;
+        }
+
+        private static int GetAgentInfoEx(Dictionary<string, string> connections, int flags, string selectedAgentName)
+        {
+            int added = 0;
+            try
+            {
+                RegistryKey localKey = RegistryKey.OpenBaseKey(((flags & 1) == 0)?Microsoft.Win32.RegistryHive.LocalMachine: Microsoft.Win32.RegistryHive.CurrentUser, ((flags & 2) == 0) ? RegistryView.Registry32 : RegistryView.Registry64);
+                localKey = localKey.OpenSubKey(@"SOFTWARE\Open Source");
+                if (localKey != null)
+                {
+                    string[] subKeys = localKey.GetSubKeyNames();
+                    foreach (string subKey in subKeys)
+                    {
+                        if (subKey == "MeshAgent2") continue; // This is the old agent key, ignore it.
+                        if ((selectedAgentName != null) && (selectedAgentName != subKey)) continue; // This is not an agent we care about
+                        try
+                        {
+                            RegistryKey localKey2 = localKey.OpenSubKey(subKey);
+                            if (localKey2.GetValueKind("NodeId") == RegistryValueKind.String)
+                            {
+                                string nodeid = localKey2.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
+                                if (connections.ContainsKey(subKey))
+                                {
+                                    string ids = connections[subKey];
+                                    if (ids.IndexOf(nodeid) == -1) { ids += (',' + nodeid); connections[subKey] = ids; }
+                                }
+                                else
+                                {
+                                    connections.Add(subKey, nodeid);
+                                }
+                                added++;
+                            }
+                        }
+                        catch (Exception) { }
+                    }
+                }
+            }
+            catch (Exception) { }
+            return added;
+        }
+
+        public string GetNodeId32()
         {
             try
             {
                 RegistryKey localKey32 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, RegistryView.Registry32);
-                localKey32 = localKey32.OpenSubKey(@"SOFTWARE\Open Source\Mesh Agent");
+                localKey32 = localKey32.OpenSubKey(@"SOFTWARE\Open Source\" + serviceName);
                 if (localKey32 != null)
                 {
                     string nodeidb64 = localKey32.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
@@ -107,12 +163,12 @@ namespace MeshAssistant
         }
 
 
-        public static string GetNodeId64()
+        public string GetNodeId64()
         {
             try
             {
                 RegistryKey localKey64 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, RegistryView.Registry64);
-                localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\Mesh Agent");
+                localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\" + serviceName);
                 if (localKey64 != null)
                 {
                     string nodeidb64 = localKey64.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
@@ -123,12 +179,12 @@ namespace MeshAssistant
             return null;
         }
 
-        public static string GetUserNodeId32()
+        public string GetUserNodeId32()
         {
             try
             {
                 RegistryKey localKey32 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry32);
-                localKey32 = localKey32.OpenSubKey(@"SOFTWARE\Open Source\Mesh Agent");
+                localKey32 = localKey32.OpenSubKey(@"SOFTWARE\Open Source\" + serviceName);
                 if (localKey32 != null)
                 {
                     string nodeidb64 = localKey32.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
@@ -140,12 +196,12 @@ namespace MeshAssistant
         }
 
 
-        public static string GetUserNodeId64()
+        public string GetUserNodeId64()
         {
             try
             {
                 RegistryKey localKey64 = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.CurrentUser, RegistryView.Registry64);
-                localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\Mesh Agent");
+                localKey64 = localKey64.OpenSubKey(@"SOFTWARE\Open Source\" + serviceName);
                 if (localKey64 != null)
                 {
                     string nodeidb64 = localKey64.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
@@ -222,74 +278,95 @@ namespace MeshAssistant
         public bool ConnectPipe()
         {
             string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-
             if (pipeClient != null) return true;
-            string nodeid = GetNodeId64();
-            if (nodeid != null)
-            {
-                pipeClient = new NamedPipeClientStream(".", nodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.None);
-                try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
-                if ((pipeClient != null) && pipeClient.IsConnected)
-                {
-                    ServiceAgent = true;
-                    ChangeState(1, 0);
-                    SendCommand("register", userName);
-                    SendCommand("sessions", "");
-                    pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
-                    return true;
-                }
-                pipeClient = null;
-            }
 
-            nodeid = GetNodeId32();
-            if (nodeid != null)
+            if (nodeids != null)
             {
-                pipeClient = new NamedPipeClientStream(".", nodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
-                try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
-                if ((pipeClient != null) && pipeClient.IsConnected)
-                {
-                    ServiceAgent = true;
-                    ChangeState(1, 0);
-                    SendCommand("register", userName);
-                    SendCommand("sessions", "");
-                    pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
-                    return true;
+                foreach (string n in nodeids) {
+                    string nodeidhex = string.Concat(Convert.FromBase64String(n).Select(b => b.ToString("X2")));
+                    pipeClient = new NamedPipeClientStream(".", nodeidhex + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.None);
+                    try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
+                    if ((pipeClient != null) && pipeClient.IsConnected)
+                    {
+                        ServiceAgent = true;
+                        ChangeState(1, 0);
+                        SendCommand("register", userName);
+                        SendCommand("sessions", "");
+                        pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        return true;
+                    }
                 }
-                pipeClient = null;
+                return false;
             }
-
-            nodeid = GetUserNodeId64();
-            if (nodeid != null)
+            else
             {
-                pipeClient = new NamedPipeClientStream(".", nodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
-                try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
-                if ((pipeClient != null) && pipeClient.IsConnected)
+                string xnodeid = GetNodeId64();
+                if (xnodeid != null)
                 {
-                    ServiceAgent = false;
-                    ChangeState(1, 0);
-                    SendCommand("register", userName);
-                    SendCommand("sessions", "");
-                    pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
-                    return true;
+                    pipeClient = new NamedPipeClientStream(".", xnodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.None);
+                    try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
+                    if ((pipeClient != null) && pipeClient.IsConnected)
+                    {
+                        ServiceAgent = true;
+                        ChangeState(1, 0);
+                        SendCommand("register", userName);
+                        SendCommand("sessions", "");
+                        pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        return true;
+                    }
+                    pipeClient = null;
                 }
-                pipeClient = null;
-            }
 
-            nodeid = GetUserNodeId32();
-            if (nodeid != null)
-            {
-                pipeClient = new NamedPipeClientStream(".", nodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
-                try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
-                if ((pipeClient != null) && pipeClient.IsConnected)
+                xnodeid = GetNodeId32();
+                if (xnodeid != null)
                 {
-                    ServiceAgent = false;
-                    ChangeState(1, 0);
-                    SendCommand("register", userName);
-                    SendCommand("sessions", "");
-                    pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
-                    return true;
+                    pipeClient = new NamedPipeClientStream(".", xnodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
+                    try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
+                    if ((pipeClient != null) && pipeClient.IsConnected)
+                    {
+                        ServiceAgent = true;
+                        ChangeState(1, 0);
+                        SendCommand("register", userName);
+                        SendCommand("sessions", "");
+                        pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        return true;
+                    }
+                    pipeClient = null;
                 }
-                pipeClient = null;
+
+                xnodeid = GetUserNodeId64();
+                if (xnodeid != null)
+                {
+                    pipeClient = new NamedPipeClientStream(".", xnodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
+                    try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
+                    if ((pipeClient != null) && pipeClient.IsConnected)
+                    {
+                        ServiceAgent = false;
+                        ChangeState(1, 0);
+                        SendCommand("register", userName);
+                        SendCommand("sessions", "");
+                        pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        return true;
+                    }
+                    pipeClient = null;
+                }
+
+                xnodeid = GetUserNodeId32();
+                if (xnodeid != null)
+                {
+                    pipeClient = new NamedPipeClientStream(".", xnodeid + "-DAIPC", PipeDirection.InOut, PipeOptions.Asynchronous, TokenImpersonationLevel.Impersonation);
+                    try { pipeClient.Connect(10); } catch (Exception) { pipeClient = null; }
+                    if ((pipeClient != null) && pipeClient.IsConnected)
+                    {
+                        ServiceAgent = false;
+                        ChangeState(1, 0);
+                        SendCommand("register", userName);
+                        SendCommand("sessions", "");
+                        pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        return true;
+                    }
+                    pipeClient = null;
+                }
             }
             return false;
         }
