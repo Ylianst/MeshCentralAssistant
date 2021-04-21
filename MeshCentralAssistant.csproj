@@ -109,6 +109,7 @@
     <Compile Include="SessionsForm.Designer.cs">
       <DependentUpon>SessionsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="SnapShotForm.cs">
       <SubType>Form</SubType>
     </Compile>

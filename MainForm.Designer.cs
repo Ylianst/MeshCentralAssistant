@@ -37,6 +37,7 @@
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openSiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.intelMEStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.startAgentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopAgentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,14 +49,14 @@
             this.dialogContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.requestHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cancelHelpRequestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.showSessionsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.intelAMTStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.intelMEStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.agentSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainContextMenuStrip.SuspendLayout();
             this.dialogContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
@@ -96,13 +97,14 @@
             this.openSiteToolStripMenuItem,
             this.showSessionsToolStripMenuItem,
             this.intelMEStateToolStripMenuItem,
+            this.agentSelectToolStripMenuItem,
             this.toolStripMenuItem1,
             this.startAgentToolStripMenuItem,
             this.stopAgentToolStripMenuItem,
             this.toolStripMenuItem2,
             this.exitToolStripMenuItem});
             this.mainContextMenuStrip.Name = "mainContextMenuStrip";
-            this.mainContextMenuStrip.Size = new System.Drawing.Size(167, 214);
+            this.mainContextMenuStrip.Size = new System.Drawing.Size(167, 236);
             // 
             // openToolStripMenuItem
             // 
@@ -133,6 +135,14 @@
             this.showSessionsToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
             this.showSessionsToolStripMenuItem.Text = "Show Sessions...";
             this.showSessionsToolStripMenuItem.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
+            // 
+            // intelMEStateToolStripMenuItem
+            // 
+            this.intelMEStateToolStripMenuItem.Name = "intelMEStateToolStripMenuItem";
+            this.intelMEStateToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.intelMEStateToolStripMenuItem.Text = "Intel® ME State...";
+            this.intelMEStateToolStripMenuItem.Visible = false;
+            this.intelMEStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
@@ -226,6 +236,11 @@
             this.cancelHelpRequestToolStripMenuItem.Text = "Cancel Help Request";
             this.cancelHelpRequestToolStripMenuItem.Click += new System.EventHandler(this.requestHelpButton_Click);
             // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(180, 6);
+            // 
             // showSessionsToolStripMenuItem1
             // 
             this.showSessionsToolStripMenuItem1.Name = "showSessionsToolStripMenuItem1";
@@ -240,11 +255,6 @@
             this.intelAMTStateToolStripMenuItem.Text = "Intel® ME State...";
             this.intelAMTStateToolStripMenuItem.Visible = false;
             this.intelAMTStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem3
-            // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(180, 6);
             // 
             // pictureBox4
             // 
@@ -291,13 +301,11 @@
             this.pictureBox2.TabIndex = 8;
             this.pictureBox2.TabStop = false;
             // 
-            // intelMEStateToolStripMenuItem
+            // agentSelectToolStripMenuItem
             // 
-            this.intelMEStateToolStripMenuItem.Name = "intelMEStateToolStripMenuItem";
-            this.intelMEStateToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.intelMEStateToolStripMenuItem.Text = "Intel® ME State...";
-            this.intelMEStateToolStripMenuItem.Visible = false;
-            this.intelMEStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
+            this.agentSelectToolStripMenuItem.Name = "agentSelectToolStripMenuItem";
+            this.agentSelectToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.agentSelectToolStripMenuItem.Text = "Agent Select";
             // 
             // MainForm
             // 
@@ -360,6 +368,7 @@
         private System.Windows.Forms.ToolStripMenuItem intelAMTStateToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem intelMEStateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem agentSelectToolStripMenuItem;
     }
 }
 

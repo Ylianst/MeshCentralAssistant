@@ -97,18 +97,51 @@ namespace MeshAssistant
             // Get the list of agents on the system
             agents = MeshAgent.GetAgentInfo(selectedAgentName);
             string[] agentNames = agents.Keys.ToArray();
-            if (agents.Count == 0) { currentAgentName = null; } else { currentAgentName = agentNames[0]; }
+            if (agents.Count == 0) {
+                currentAgentName = null;
+                agentSelectToolStripMenuItem.Visible = false;
+            } else {
+                string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
+                currentAgentName = agentNames[0]; // Default
+                for (var i = 0; i < agentNames.Length; i++) { if (agentNames[i] == currentAgentSelection) { currentAgentName = agentNames[i]; } }
+                if (agentNames.Length > 1)
+                {
+                    List<ToolStripItem> subMenus = new List<ToolStripItem>();
+                    for (var i = 0; i < agentNames.Length; i++)
+                    {
+                        ToolStripMenuItem m = new ToolStripMenuItem();
+                        m.Name = agentNames[i];
+                        m.Text = agentNames[i];
+                        m.Checked = (agentNames[i] == currentAgentName);
+                        m.Click += agentSelection_Click;
+                        subMenus.Add(m);
+                    }
+                    agentSelectToolStripMenuItem.DropDownItems.AddRange(subMenus.ToArray());
+                    agentSelectToolStripMenuItem.Visible = true;
+                }
+            }
             connectToAgent();
 
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
         }
 
+        private void agentSelection_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem menu = (ToolStripMenuItem)sender;
+            if (currentAgentName == menu.Text) return;
+            currentAgentName = menu.Text;
+            foreach (ToolStripMenuItem submenu in agentSelectToolStripMenuItem.DropDownItems) { submenu.Checked = (submenu.Text == currentAgentName); }
+            connectToAgent();
+        }
+
         private void connectToAgent()
         {
+            if (agent != null) { agent.DisconnectPipe(); agent = null; }
             if (currentAgentName == null) {
                 agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null);
             } else {
                 agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName]);
+                Settings.SetRegValue("SelectedAgent", currentAgentName);
             }
             agent.onStateChanged += Agent_onStateChanged;
             agent.onQueryResult += Agent_onQueryResult;
@@ -138,6 +171,12 @@ namespace MeshAssistant
                 startAgentToolStripMenuItem.Visible = false;
                 stopAgentToolStripMenuItem.Visible = false;
                 toolStripMenuItem2.Visible = false;
+            }
+
+            if (currentAgentName != "Mesh Agent") {
+                this.Text = string.Format("{0} Assistant", currentAgentName);
+            } else {
+                this.Text = "MeshCentral Assistant";
             }
         }
 
