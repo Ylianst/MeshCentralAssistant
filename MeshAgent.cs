@@ -83,7 +83,8 @@ namespace MeshAssistant
         {
             this.softwareName = softwareName;
             this.serviceName = serviceName;
-            this.nodeids = nodeids.Split(',');
+            this.nodeids = null;
+            if (nodeids != null) { this.nodeids = nodeids.Split(','); }
             agentService = new ServiceController(serviceName);
 
             if (softwareName != null)

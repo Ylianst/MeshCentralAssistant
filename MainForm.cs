@@ -40,7 +40,8 @@ namespace MeshAssistant
         public bool allowShowDisplay = false;
         public bool doclose = false;
         public bool helpRequested = false;
-        public MeshAgent agent = null;
+        public MeshAgent agent = null; // This is a monitored agent
+        public MeshCentralAgent mcagent = null; // This is the built-in agent
         public int queryNumber = 0;
         public SnapShotForm snapShotForm = null;
         public RequestHelpForm requestHelpForm = null;
@@ -94,90 +95,146 @@ namespace MeshAssistant
 
             InitializeComponent();
 
+            // Check if the built-in agent will be activated
+            currentAgentName = null;
+            List<ToolStripItem> subMenus = new List<ToolStripItem>();
+            string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
+
+            if (MeshCentralAgent.checkMshFile()) {
+                mcagent = new MeshCentralAgent();
+                mcagent.onStateChanged += Mcagent_onStateChanged;
+                if (currentAgentSelection.Equals("~")) { currentAgentName = "~"; }
+                ToolStripMenuItem m = new ToolStripMenuItem();
+                m.Name = "AgentSelector-~";
+                m.Text = "Built-in agent";
+                m.Checked = ((currentAgentName != null) && (currentAgentName.Equals("~")));
+                m.Click += agentSelection_Click;
+                subMenus.Add(m);
+            }
+
             // Get the list of agents on the system
             agents = MeshAgent.GetAgentInfo(selectedAgentName);
             string[] agentNames = agents.Keys.ToArray();
-            if (agents.Count == 0) {
-                currentAgentName = null;
-                agentSelectToolStripMenuItem.Visible = false;
-            } else {
-                string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
-                currentAgentName = agentNames[0]; // Default
+            if (agents.Count > 0) {
+                if ((currentAgentName == null) || (currentAgentName != "~")) { currentAgentName = agentNames[0]; } // Default
                 for (var i = 0; i < agentNames.Length; i++) { if (agentNames[i] == currentAgentSelection) { currentAgentName = agentNames[i]; } }
                 if (agentNames.Length > 1)
                 {
-                    List<ToolStripItem> subMenus = new List<ToolStripItem>();
                     for (var i = 0; i < agentNames.Length; i++)
                     {
                         ToolStripMenuItem m = new ToolStripMenuItem();
-                        m.Name = agentNames[i];
+                        m.Name = "AgentSelector-" + agentNames[i];
                         m.Text = agentNames[i];
                         m.Checked = (agentNames[i] == currentAgentName);
                         m.Click += agentSelection_Click;
                         subMenus.Add(m);
                     }
-                    agentSelectToolStripMenuItem.DropDownItems.AddRange(subMenus.ToArray());
-                    agentSelectToolStripMenuItem.Visible = true;
                 }
             }
+            agentSelectToolStripMenuItem.DropDownItems.AddRange(subMenus.ToArray());
+            agentSelectToolStripMenuItem.Visible = (subMenus.Count > 1);
+
             connectToAgent();
 
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
         }
 
+        private void Mcagent_onStateChanged(int state)
+        {
+            if (InvokeRequired) { Invoke(new MeshCentralAgent.onStateChangedHandler(Mcagent_onStateChanged), state); return; }
+            updateBuiltinAgentStatus();
+        }
+
         private void agentSelection_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem menu = (ToolStripMenuItem)sender;
-            if (currentAgentName == menu.Text) return;
-            currentAgentName = menu.Text;
-            foreach (ToolStripMenuItem submenu in agentSelectToolStripMenuItem.DropDownItems) { submenu.Checked = (submenu.Text == currentAgentName); }
+            if (currentAgentName == menu.Name.Substring(14)) return;
+            currentAgentName = menu.Name.Substring(14);
+            foreach (ToolStripMenuItem submenu in agentSelectToolStripMenuItem.DropDownItems) {
+                submenu.Checked = (submenu.Name.Substring(14) == currentAgentName);
+            }
             connectToAgent();
+        }
+
+        private void updateBuiltinAgentStatus()
+        {
+            if (mcagent == null) return;
+            pictureBox1.Visible = false; // Green
+            pictureBox2.Visible = (mcagent.state == 0);  // Red
+            pictureBox3.Visible = (mcagent.state == 1) || (mcagent.state == 2); // Gray
+            pictureBox4.Visible = (mcagent.state == 3); // Question
+            if (mcagent.state == 0) { stateLabel.Text = "Disconnected"; requestHelpButton.Text = "Request Help"; }
+            if (mcagent.state == 1) { stateLabel.Text = "Connecting"; requestHelpButton.Text = "Cancel Help Request"; }
+            if (mcagent.state == 2) { stateLabel.Text = "Authenticating"; requestHelpButton.Text = "Cancel Help Request"; }
+            if (mcagent.state == 3) { stateLabel.Text = "Help Requested"; requestHelpButton.Text = "Cancel Help Request"; }
+            Agent_onSessionChanged();
+            requestHelpButton.Enabled = true;
+            if (mcagent.state == 0) { helpRequested = false; }
         }
 
         private void connectToAgent()
         {
             if (agent != null) { agent.DisconnectPipe(); agent = null; }
-            if (currentAgentName == null) {
-                agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null);
-            } else {
-                agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName]);
+            if ((mcagent != null) && (mcagent.state != 0)) { mcagent.disconnect(); }
+            if ((currentAgentName != null) && (currentAgentName.Equals("~")))
+            {
+                this.Text = "MeshCentral Assistant";
                 Settings.SetRegValue("SelectedAgent", currentAgentName);
-            }
-            agent.onStateChanged += Agent_onStateChanged;
-            agent.onQueryResult += Agent_onQueryResult;
-            agent.onSessionChanged += Agent_onSessionChanged;
-            agent.onAmtState += Agent_onAmtState;
-            agent.onSelfUpdate += Agent_onSelfUpdate;
-            agent.onCancelHelp += Agent_onCancelHelp;
-            agent.onConsoleMessage += Agent_onConsoleMessage;
-            this.StartPosition = FormStartPosition.Manual;
-            this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
-            agent.ConnectPipe();
-            UpdateServiceStatus();
-
-            pictureBox1.Visible = false;
-            pictureBox2.Visible = false;
-            pictureBox3.Visible = true;
-
-            isAdministrator = IsAdministrator();
-            if (isAdministrator)
-            {
-                startAgentToolStripMenuItem.Visible = true;
-                stopAgentToolStripMenuItem.Visible = true;
-                toolStripMenuItem2.Visible = true;
-            }
-            else
-            {
+                updateBuiltinAgentStatus();
                 startAgentToolStripMenuItem.Visible = false;
                 stopAgentToolStripMenuItem.Visible = false;
                 toolStripMenuItem2.Visible = false;
+                this.StartPosition = FormStartPosition.Manual;
+                this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
             }
+            else
+            {
+                if (currentAgentName == null) {
+                    agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null);
+                } else {
+                    agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName]);
+                    Settings.SetRegValue("SelectedAgent", currentAgentName);
+                }
+                agent.onStateChanged += Agent_onStateChanged;
+                agent.onQueryResult += Agent_onQueryResult;
+                agent.onSessionChanged += Agent_onSessionChanged;
+                agent.onAmtState += Agent_onAmtState;
+                agent.onSelfUpdate += Agent_onSelfUpdate;
+                agent.onCancelHelp += Agent_onCancelHelp;
+                agent.onConsoleMessage += Agent_onConsoleMessage;
+                this.StartPosition = FormStartPosition.Manual;
+                this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
+                agent.ConnectPipe();
+                UpdateServiceStatus();
 
-            if (currentAgentName != "Mesh Agent") {
-                this.Text = string.Format("{0} Assistant", currentAgentName);
-            } else {
-                this.Text = "MeshCentral Assistant";
+                pictureBox1.Visible = false;
+                pictureBox2.Visible = false;
+                pictureBox3.Visible = true;
+
+                isAdministrator = IsAdministrator();
+                if (isAdministrator)
+                {
+                    startAgentToolStripMenuItem.Visible = true;
+                    stopAgentToolStripMenuItem.Visible = true;
+                    toolStripMenuItem2.Visible = true;
+                }
+                else
+                {
+                    startAgentToolStripMenuItem.Visible = false;
+                    stopAgentToolStripMenuItem.Visible = false;
+                    toolStripMenuItem2.Visible = false;
+                }
+
+                if (currentAgentName != "Mesh Agent")
+                {
+                    this.Text = string.Format("{0} Assistant", currentAgentName);
+                }
+                else
+                {
+                    this.Text = "MeshCentral Assistant";
+                }
             }
+            Agent_onSessionChanged();
         }
 
         private void Agent_onConsoleMessage(string str)
@@ -207,24 +264,34 @@ namespace MeshAssistant
 
         private void Agent_onSessionChanged()
         {
+            if (agent == null) return;
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSessionChangedHandler(Agent_onSessionChanged)); return; }
 
-            // Called when sessions on the agent have changed.
-            int count = 0;
-            if (agent.DesktopSessions != null) { count += agent.DesktopSessions.Count; }
-            if (agent.TerminalSessions != null) { count += agent.TerminalSessions.Count; }
-            if (agent.FilesSessions != null) { count += agent.FilesSessions.Count; }
-            if (agent.TcpSessions != null) { count += agent.TcpSessions.Count; }
-            if (agent.UdpSessions != null) { count += agent.UdpSessions.Count; }
-            if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); }
-            if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; }
-            if (count == 0) { mainNotifyIcon.BalloonTipText = "No active remote sessions."; remoteSessionsLabel.Text = "No remote sessions"; }
-            //mainNotifyIcon.ShowBalloonTip(2000);
-            if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
+            if ((currentAgentName != null) && (currentAgentName.Equals("~")))
+            {
+                remoteSessionsLabel.Text = "Built-in Agent";
+            }
+            else
+            {
+                // Called when sessions on the agent have changed.
+                int count = 0;
+                if (agent.DesktopSessions != null) { count += agent.DesktopSessions.Count; }
+                if (agent.TerminalSessions != null) { count += agent.TerminalSessions.Count; }
+                if (agent.FilesSessions != null) { count += agent.FilesSessions.Count; }
+                if (agent.TcpSessions != null) { count += agent.TcpSessions.Count; }
+                if (agent.UdpSessions != null) { count += agent.UdpSessions.Count; }
+                if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); }
+                if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; }
+                if (count == 0) { mainNotifyIcon.BalloonTipText = "No active remote sessions."; remoteSessionsLabel.Text = "No remote sessions"; }
+                //mainNotifyIcon.ShowBalloonTip(2000);
+                if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
+            }
         }
 
         public void UpdateServiceStatus()
         {
+            if ((currentAgentName != null) && (currentAgentName.Equals("~"))) return;
+
             try
             {
                 ServiceControllerStatus status = MeshAgent.GetServiceStatus();
@@ -280,6 +347,13 @@ namespace MeshAssistant
                 this.Invoke(new MeshAgent.onStateChangedHandler(Agent_onStateChanged), state, serverState);
                 return;
             }
+
+            if (currentAgentName.Equals("~")) {
+                intelMEStateToolStripMenuItem.Visible = false;
+                intelAMTStateToolStripMenuItem.Visible = false;
+                return;
+            }
+
             //bool openUrlVisible = ((state == 1) && (agent.ServerUri != null));
             //try { openSiteToolStripMenuItem.Visible = openUrlVisible; } catch (Exception) { return; }
             switch (state)
@@ -365,9 +439,12 @@ namespace MeshAssistant
 
         private void connectionTimer_Tick(object sender, EventArgs e)
         {
-            if (timerSlowDown > 0) { timerSlowDown--; if (timerSlowDown == 0) { connectionTimer.Interval = 10000; } }
-            if (agent.State == 0) { agent.ConnectPipe(); }
-            UpdateServiceStatus();
+            if (agent != null)
+            {
+                if (timerSlowDown > 0) { timerSlowDown--; if (timerSlowDown == 0) { connectionTimer.Interval = 10000; } }
+                if (agent.State == 0) { agent.ConnectPipe(); }
+                UpdateServiceStatus();
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -448,48 +525,78 @@ namespace MeshAssistant
 
         private void requestHelpButton_Click(object sender, EventArgs e)
         {
-            if (helpRequested == true)
+            if (currentAgentName.Equals("~"))
             {
-                if (agent.CancelHelpRequest() == true)
+                if (mcagent.state == 0)
                 {
-                    helpRequested = false;
-                    requestHelpButton.Text = "Request Help";
-                    stateLabel.Text = "Connected to server";
-                    requestHelpToolStripMenuItem.Visible = true;
-                    cancelHelpRequestToolStripMenuItem.Visible = false;
-                    pictureBox1.Visible = true;
-                    pictureBox2.Visible = false;
-                    pictureBox3.Visible = false;
-                    pictureBox4.Visible = false;
+                    if (requestHelpForm != null)
+                    {
+                        requestHelpForm.Focus();
+                    }
+                    else
+                    {
+                        requestHelpForm = new RequestHelpForm(this);
+                        requestHelpForm.Show(this);
+                    }
+                }
+                else
+                {
+                    mcagent.disconnect();
                 }
             }
             else
             {
-                if (requestHelpForm != null)
+                if (helpRequested == true)
                 {
-                    requestHelpForm.Focus();
+                    if ((agent == null) || (agent.CancelHelpRequest() == true))
+                    {
+                        helpRequested = false;
+                        requestHelpButton.Text = "Request Help";
+                        stateLabel.Text = "Connected to server";
+                        requestHelpToolStripMenuItem.Visible = true;
+                        cancelHelpRequestToolStripMenuItem.Visible = false;
+                        pictureBox1.Visible = true;
+                        pictureBox2.Visible = false;
+                        pictureBox3.Visible = false;
+                        pictureBox4.Visible = false;
+                    }
                 }
                 else
                 {
-                    requestHelpForm = new RequestHelpForm(this);
-                    requestHelpForm.Show(this);
+                    if (requestHelpForm != null)
+                    {
+                        requestHelpForm.Focus();
+                    }
+                    else
+                    {
+                        requestHelpForm = new RequestHelpForm(this);
+                        requestHelpForm.Show(this);
+                    }
                 }
             }
         }
 
         public void RequestHelp(string details)
         {
-            if (agent.RequestHelp(details) == true)
+            if (currentAgentName.Equals("~"))
             {
-                helpRequested = true;
-                requestHelpButton.Text = "Cancel Help Request";
-                stateLabel.Text = "Help requested";
-                requestHelpToolStripMenuItem.Visible = false;
-                cancelHelpRequestToolStripMenuItem.Visible = true;
-                pictureBox1.Visible = false;
-                pictureBox2.Visible = false;
-                pictureBox3.Visible = false;
-                pictureBox4.Visible = true;
+                mcagent.HelpRequest = details;
+                mcagent.connect();
+            }
+            else
+            {
+                if (agent.RequestHelp(details) == true)
+                {
+                    helpRequested = true;
+                    requestHelpButton.Text = "Cancel Help Request";
+                    stateLabel.Text = "Help requested";
+                    requestHelpToolStripMenuItem.Visible = false;
+                    cancelHelpRequestToolStripMenuItem.Visible = true;
+                    pictureBox1.Visible = false;
+                    pictureBox2.Visible = false;
+                    pictureBox3.Visible = false;
+                    pictureBox4.Visible = true;
+                }
             }
         }
 
@@ -513,6 +620,7 @@ namespace MeshAssistant
 
         private void intelAMTStateToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (agent == null) return;
             if (meInfoForm != null)
             {
                 meInfoForm.Focus();

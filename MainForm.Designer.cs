@@ -38,6 +38,7 @@
             this.openSiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.intelMEStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.agentSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.startAgentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopAgentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,7 +57,6 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.agentSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainContextMenuStrip.SuspendLayout();
             this.dialogContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
@@ -104,7 +104,7 @@
             this.toolStripMenuItem2,
             this.exitToolStripMenuItem});
             this.mainContextMenuStrip.Name = "mainContextMenuStrip";
-            this.mainContextMenuStrip.Size = new System.Drawing.Size(167, 236);
+            this.mainContextMenuStrip.Size = new System.Drawing.Size(167, 214);
             // 
             // openToolStripMenuItem
             // 
@@ -143,6 +143,12 @@
             this.intelMEStateToolStripMenuItem.Text = "Intel® ME State...";
             this.intelMEStateToolStripMenuItem.Visible = false;
             this.intelMEStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
+            // 
+            // agentSelectToolStripMenuItem
+            // 
+            this.agentSelectToolStripMenuItem.Name = "agentSelectToolStripMenuItem";
+            this.agentSelectToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.agentSelectToolStripMenuItem.Text = "Agent Select";
             // 
             // toolStripMenuItem1
             // 
@@ -301,12 +307,6 @@
             this.pictureBox2.TabIndex = 8;
             this.pictureBox2.TabStop = false;
             // 
-            // agentSelectToolStripMenuItem
-            // 
-            this.agentSelectToolStripMenuItem.Name = "agentSelectToolStripMenuItem";
-            this.agentSelectToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.agentSelectToolStripMenuItem.Text = "Agent Select";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -316,10 +316,10 @@
             this.Controls.Add(this.remoteSessionsLabel);
             this.Controls.Add(this.requestHelpButton);
             this.Controls.Add(this.stateLabel);
+            this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox4);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.pictureBox3);
-            this.Controls.Add(this.pictureBox2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
