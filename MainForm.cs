@@ -103,6 +103,7 @@ namespace MeshAssistant
             if (MeshCentralAgent.checkMshFile()) {
                 mcagent = new MeshCentralAgent();
                 mcagent.onStateChanged += Mcagent_onStateChanged;
+                mcagent.onNotify += Mcagent_onNotify;
                 if (currentAgentSelection.Equals("~")) { currentAgentName = "~"; }
                 ToolStripMenuItem m = new ToolStripMenuItem();
                 m.Name = "AgentSelector-~";
@@ -137,6 +138,14 @@ namespace MeshAssistant
             connectToAgent();
 
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
+        }
+
+        private void Mcagent_onNotify(string title, string msg)
+        {
+            if (InvokeRequired) { Invoke(new MeshCentralAgent.onNotifyHandler(Mcagent_onNotify), title, msg); return; }
+            //MessageBox.Show(msg, title);
+            mainNotifyIcon.BalloonTipText = title + " - " + msg;
+            mainNotifyIcon.ShowBalloonTip(2000);
         }
 
         private void Mcagent_onStateChanged(int state)

@@ -12,6 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using System.Net.NetworkInformation;
+using System.Diagnostics;
 
 namespace MeshAssistant
 {
@@ -79,6 +80,10 @@ namespace MeshAssistant
             foreach (string line in lines) { int i = line.IndexOf('='); if (i > 0) { vals.Add(line.Substring(0, i), line.Substring(i + 1)); } }
             return vals;
         }
+
+        public delegate void onNotifyHandler(string title, string msg);
+        public event onNotifyHandler onNotify;
+        public void notify(string title, string msg) { if (onNotify != null) { onNotify(title, msg); } }
 
         public delegate void onDebugHandler(string msg);
         public event onDebugHandler onDebug;
@@ -151,6 +156,16 @@ namespace MeshAssistant
         private void sendSessionUpdate(string type, string value)
         {
             WebSocket.WriteStringWebSocket("{\"action\":\"sessions\",\"type\":\"" + type + "\",\"value\":" + value + "}");
+        }
+
+        private void sendConsoleEventLog(string cmd)
+        {
+            WebSocket.WriteStringWebSocket("{\"action\":\"log\",\"msgid\":17,\"msgArgs\":[\"" + escapeJsonString(cmd) + "\"],\"msg\":\"Processing console command: " + escapeJsonString(cmd) + "\"}");
+        }
+
+        private void sendOpenUrlEventLog(string url)
+        {
+            WebSocket.WriteStringWebSocket("{\"action\":\"log\",\"msgid\":20,\"msgArgs\":[\"" + escapeJsonString(url) + "\"],\"msg\":\"Opening: " + escapeJsonString(url) + "\"}");
         }
 
         private void sendHelpEventLog(string username, string helpstring)
@@ -234,11 +249,12 @@ namespace MeshAssistant
             string response = null;
             string[] cmd = parseArgString(rawcmd);
             if (cmd.Length == 0) return;
+            sendConsoleEventLog(rawcmd);
 
             switch (cmd[0])
             {
                 case "help": {
-                        response = "Available commands: \r\n" + "help, args, netinfo" + ".";
+                        response = "Available commands: \r\n" + "args, help, netinfo, notify, openurl" + ".";
                         break;
                     }
                 case "args":
@@ -253,9 +269,19 @@ namespace MeshAssistant
                         response = getNetworkInfo();
                         break;
                     }
+                case "openurl":
+                    {
+                        if (cmd.Length != 2) { response = "Usage: openurl [url]"; } else { Process.Start(cmd[1]); sendOpenUrlEventLog(cmd[1]); response = "Ok"; }
+                        break;
+                    }
+                case "notify":
+                    {
+                        if (cmd.Length != 3) { response = "Usage: notify [title] [message]"; } else { notify(cmd[1], cmd[2]); response = "Ok"; }
+                        break;
+                    }
                 default:
                     {
-                        response = "Unknown command \"" + cmd + "\", type \"help\" for list of avaialble commands.";
+                        response = "Unknown command \"" + cmd[0] + "\", type \"help\" for list of avaialble commands.";
                         break;
                     }
             }
@@ -284,6 +310,13 @@ namespace MeshAssistant
                 case "sysinfo": { break; }
                 case "coredump": { break; }
                 case "getcoredump": { break; }
+                case "openUrl":
+                    {
+                        if (jsonAction["url"].GetType() != typeof(string)) return;
+                        sendOpenUrlEventLog(jsonAction["url"].ToString());
+                        Process.Start(jsonAction["url"].ToString());
+                        break;
+                    }
                 case "msg": {
                         if (jsonAction["type"].GetType() != typeof(string)) return;
                         string eventType = jsonAction["type"].ToString();
@@ -308,6 +341,16 @@ namespace MeshAssistant
                                         }
                                     }
                                     if (jsonAction["value"].GetType() != typeof(string)) break;
+                                    break;
+                                }
+                            case "messagebox":
+                                {
+                                    if ((jsonAction["title"].GetType() == typeof(string)) && (jsonAction["msg"].GetType() == typeof(string)))
+                                    {
+                                        string title = jsonAction["title"].ToString();
+                                        string message = jsonAction["msg"].ToString();
+                                        notify(title, message);
+                                    }
                                     break;
                                 }
                             default:

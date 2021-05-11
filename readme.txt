@@ -1,9 +1,10 @@
 MeshCentral Assistant
 =====================
 
-For more information, [visit MeshCommander.com/MeshCentral2](http://www.meshcommander.com/meshcentral2).
+For more information, [visit MeshCentral.com](https://meshcentral.com).
 
-This is an early prototype of a tray icon tool for the MeshCentral Agent. It displays the state of the agent, you can start and stop the agent and request help.
+This is a tray icon tool for the MeshCentral. It displays the state of the agent, you can start and stop the agent and request help.
+If a meshagent.msh file is present in the same folder at the MeshCentralAssistant.exe, this tool will allow direct connection to the server.
 
 License
 -------
