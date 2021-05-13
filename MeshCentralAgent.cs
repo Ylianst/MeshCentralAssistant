@@ -4,13 +4,10 @@ using System.Net;
 using System.Text;
 using System.Linq;
 using System.Net.Sockets;
-using System.Net.Security;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Web.Script.Serialization;
 using System.Security.Cryptography.X509Certificates;
-using System.Windows.Forms;
-using Microsoft.Win32;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
 
@@ -32,6 +29,7 @@ namespace MeshAssistant
         private JavaScriptSerializer JSON = new JavaScriptSerializer();
         private webSocketClient WebSocket = null;
         private int ConnectionState = 0;
+        private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>();
 
         public MeshCentralAgent()
         {
@@ -382,8 +380,15 @@ namespace MeshAssistant
                                 {
                                     if ((jsonAction["value"].GetType() == typeof(string)) && (jsonAction["servertlshash"].GetType() == typeof(string)))
                                     {
-                                        string url = jsonAction["value"].ToString();
-                                        string hash = jsonAction["servertlshash"].ToString();
+                                        try
+                                        {
+                                            string url = jsonAction["value"].ToString();
+                                            string hash = jsonAction["servertlshash"].ToString();
+                                            if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
+                                            MeshCentralTunnel tunnel = new MeshCentralTunnel(this, new Uri(url), hash);
+                                            tunnels.Add(tunnel);
+                                        }
+                                        catch (Exception) { }
                                     }
                                     break;
                                 }

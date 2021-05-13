@@ -99,6 +99,7 @@
     </Compile>
     <Compile Include="MeshAgent.cs" />
     <Compile Include="MeshCentralAgent.cs" />
+    <Compile Include="MeshCentralTunnel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequestHelpForm.cs">

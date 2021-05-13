@@ -112,7 +112,7 @@ namespace MeshAssistant
             if (state != ConnectionStates.Disconnected) return false;
             SetState(ConnectionStates.Connecting);
             this.url = url;
-            this.tlsCertFingerprint = tlsCertFingerprint;
+            if (tlsCertFingerprint != null) { this.tlsCertFingerprint = tlsCertFingerprint.ToUpper(); }
             Uri proxyUri = null;
 
             Debug("Websocket Start, URL=" + url.ToString());
@@ -505,7 +505,14 @@ namespace MeshAssistant
         private bool VerifyServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (tlsCertFingerprint == null) return true;
-            string hash1 = GetMeshKeyHash(certificate);
+            if ((tlsCertFingerprint.Length == 32) && (certificate.GetCertHashString().Equals(tlsCertFingerprint))) { return true; }
+            if (tlsCertFingerprint.Length == 96)
+            {
+                if (GetMeshCertHash(certificate).Equals(tlsCertFingerprint)) { return true; }
+                if (GetMeshKeyHash(certificate).Equals(tlsCertFingerprint)) { return true; }
+            }
+
+            string hash1 = GetMeshCertHash(certificate);
             string hash2 = certificate.GetCertHashString();
             Debug("VerifyServerCertificate: tlsCertFingerprint = " + tlsCertFingerprint);
             Debug("VerifyServerCertificate: Hash1 = " + hash1);
