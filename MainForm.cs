@@ -40,6 +40,7 @@ namespace MeshAssistant
         public bool allowShowDisplay = false;
         public bool doclose = false;
         public bool helpRequested = false;
+        public bool autoConnect = false;
         public MeshAgent agent = null; // This is a monitored agent
         public MeshCentralAgent mcagent = null; // This is the built-in agent
         public int queryNumber = 0;
@@ -70,6 +71,7 @@ namespace MeshAssistant
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-delete:") { delete = arg.Substring(8); }
                 if (arg.Length > 11 && arg.Substring(0, 11).ToLower() == "-agentname:") { selectedAgentName = arg.Substring(11); }
+                if ((arg.Length == 12) && (arg.ToLower() == "-autoconnect")) { autoConnect = true; }
             }
 
             if (update != null)
@@ -105,6 +107,7 @@ namespace MeshAssistant
                 mcagent.onStateChanged += Mcagent_onStateChanged;
                 mcagent.onNotify += Mcagent_onNotify;
                 if (currentAgentSelection.Equals("~")) { currentAgentName = "~"; }
+                if (autoConnect == true) { currentAgentName = "~"; }
                 ToolStripMenuItem m = new ToolStripMenuItem();
                 m.Name = "AgentSelector-~";
                 m.Text = "Built-in agent";
@@ -195,6 +198,14 @@ namespace MeshAssistant
                 toolStripMenuItem2.Visible = false;
                 this.StartPosition = FormStartPosition.Manual;
                 this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
+
+                // If auto-connect is specified, connect now
+                if (autoConnect)
+                {
+                    autoConnect = false;
+                    mcagent.HelpRequest = null;
+                    mcagent.connect();
+                }
             }
             else
             {

@@ -151,6 +151,8 @@ namespace MeshAssistant
                 sendSessionUpdate("help", "{\"" + escapeJsonString(userName) + "\":\"" + escapeJsonString(HelpRequest) + "\"}");
                 sendHelpEventLog(userName, HelpRequest);
             }
+
+            WebSocket.WritePing();
         }
 
         private void sendSessionUpdate(string type, string value)
@@ -495,6 +497,7 @@ namespace MeshAssistant
             public bool xdebug = false;
             public bool xtlsdump = false;
             public bool xignoreCert = false;
+            private System.Threading.Timer pingTimer = null;
 
             public static string GetProxyForUrlUsingPac(string DestinationUrl, string PacUri)
             {
@@ -524,6 +527,7 @@ namespace MeshAssistant
 
             public void Dispose()
             {
+                if (pingTimer != null) { pingTimer.Dispose(); pingTimer = null; }
                 try { wsstream.Close(); } catch (Exception) { }
                 try { wsstream.Dispose(); } catch (Exception) { }
                 wsstream = null;
@@ -775,6 +779,8 @@ namespace MeshAssistant
                 try { wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this); } catch (Exception) { }
             }
 
+            private void PingTimerCallback(object state) { WritePong(); }
+
             private int ProcessBuffer(byte[] buffer, int offset, int len)
             {
                 string ss = UTF8Encoding.UTF8.GetString(buffer, offset, len);
@@ -791,6 +797,7 @@ namespace MeshAssistant
                     state = 2;
                     parent.changeState(2);
                     parent.connected();
+                    pingTimer = new System.Threading.Timer(new System.Threading.TimerCallback(PingTimerCallback), null, 120000, 120000); // Start a timer to pong every 2 minutes
                     return len; // TODO: Technically we need to return the header length before UTF8 convert.
                 }
                 else if (state == 2)
@@ -827,6 +834,10 @@ namespace MeshAssistant
                         // TODO: Do unmasking here.
                         headsize += 4;
                     }
+
+                    // For control commands with no playloads like ping and pong, handle this here.
+                    if (acclen == 0) { ProcessWsBuffer(null, 0, 0, accopcodes); state = 2; return headsize; }
+
                     //parent.Debug("#" + counter + ": Websocket frag header - FIN: " + ((accopcodes & 0x80) != 0) + ", OP: " + (accopcodes & 0x0F) + ", LEN: " + acclen + ", MASK: " + accmask);
                     state = 3;
                     return headsize;
@@ -845,8 +856,10 @@ namespace MeshAssistant
 
             private void ProcessWsBuffer(byte[] data, int offset, int len, int op)
             {
-                if (op == 130) { parent.processServerBinaryData(data, offset, len); }
-                //else if (op == 129) { parent.processServerTextData(UTF8Encoding.UTF8.GetString(data, offset, len)); }
+                if (op == 130) { parent.processServerBinaryData(data, offset, len); } // Binary
+                //else if (op == 129) { parent.processServerTextData(UTF8Encoding.UTF8.GetString(data, offset, len)); } // Text
+                else if ((op == 137) || (op == 9)) { WritePong(); } // Ping
+                else if ((op == 138) || (op == 10)) { } // Pong
             }
 
             private Dictionary<string, string> ParseHttpHeader(string header)
@@ -906,9 +919,6 @@ namespace MeshAssistant
                 // Check that everything is ok
                 if ((state < 2) || (len < 1) || (len > 65535)) { Dispose(); return; }
 
-                //Console.Write("Length: " + len + "\r\n");
-                //System.Threading.Thread.Sleep(0);
-
                 if (len < 126)
                 {
                     // Small fragment
@@ -929,6 +939,20 @@ namespace MeshAssistant
                     TlsDump("Out", buf, 0, len + 4);
                     try { wsstream.Write(buf, 0, len + 4); } catch (Exception ex) { Debug(ex.ToString()); }
                 }
+            }
+
+            public void WritePing()
+            {
+                byte[] buf = new byte[2];
+                buf[0] = 137; // Fragment op code (129 = text, 130 = binary, 137 = Ping, 138 = Pong)
+                try { wsstream.Write(buf, 0, 2); } catch (Exception ex) { Debug(ex.ToString()); }
+            }
+
+            public void WritePong()
+            {
+                byte[] buf = new byte[2];
+                buf[0] = 138; // Fragment op code (129 = text, 130 = binary, 137 = Ping, 138 = Pong)
+                try { wsstream.Write(buf, 0, 2); } catch (Exception ex) { Debug(ex.ToString()); }
             }
 
 
