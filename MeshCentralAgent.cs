@@ -30,7 +30,7 @@ namespace MeshAssistant
         private byte[] ServerNonce = null;
         private X509Certificate2 agentCert = null;
         private JavaScriptSerializer JSON = new JavaScriptSerializer();
-        private xwebclient WebSocket = null;
+        private webSocketClient WebSocket = null;
         private int ConnectionState = 0;
 
         public MeshCentralAgent()
@@ -108,10 +108,48 @@ namespace MeshAssistant
             if ((MeshId == null) || (MeshId.Length != 48)) return false;
             if (WebSocket != null) return false;
             if (debug) { try { File.AppendAllText("debug.log", "Connect to " + ServerUrl + "\r\n"); } catch (Exception) { } }
-            WebSocket = new xwebclient();
+            WebSocket = new webSocketClient();
+            WebSocket.pongTimeSeconds = 120; // Send a websocket pong every 2 minutes.
             WebSocket.xdebug = debug;
+            WebSocket.onStateChanged += WebSocket_onStateChanged;
+            WebSocket.onBinaryData += WebSocket_onBinaryData;
             ConnectionState = 1;
-            return WebSocket.Start(this, ServerUrl);
+            return WebSocket.Start(ServerUrl, null);
+        }
+
+        private void WebSocket_onStateChanged(webSocketClient sender, webSocketClient.ConnectionStates state)
+        {
+            if (state == webSocketClient.ConnectionStates.Disconnected)
+            {
+                disconnect();
+            }
+            else if (state == webSocketClient.ConnectionStates.Connecting)
+            {
+                changeState(1);
+            }
+            else if (state == webSocketClient.ConnectionStates.Connected)
+            {
+                changeState(2);
+                ConnectionState |= 2;
+
+                // Compute the remote certificate SHA384 hash
+                using (SHA384 sha384Hash = SHA384.Create())
+                {
+                    byte[] bytes = ServerTlsHash = sha384Hash.ComputeHash(WebSocket.RemoteCertificate.GetRawCertData());
+                    StringBuilder builder = new StringBuilder();
+                    for (int i = 0; i < bytes.Length; i++) { builder.Append(bytes[i].ToString("x2")); }
+                    ServerTlsHashStr = builder.ToString().ToUpper();
+                }
+                //Debug("Websocket TLS hash: " + ServerTlsHash);
+
+                // Send command 1, hash + nonce
+                Nonce = GenerateCryptographicRandom(48);
+                BinaryWriter bw = new BinaryWriter(new MemoryStream());
+                bw.Write(Convert.ToInt16(IPAddress.HostToNetworkOrder((short)1)));
+                bw.Write(ServerTlsHash);
+                bw.Write(Nonce);
+                WebSocket.SendBinary(((MemoryStream)bw.BaseStream).ToArray());
+            }
         }
 
         public void disconnect()
@@ -121,20 +159,7 @@ namespace MeshAssistant
             WebSocket.Dispose();
             WebSocket = null;
             ConnectionState = 0;
-        }
-
-        private void connected()
-        {
-            debugMsg("Connected");
-            ConnectionState |= 2;
-
-            // Send command 1, hash + nonce
-            Nonce = GenerateCryptographicRandom(48);
-            BinaryWriter bw = new BinaryWriter(new MemoryStream());
-            bw.Write(Convert.ToInt16(IPAddress.HostToNetworkOrder((short)1)));
-            bw.Write(ServerTlsHash);
-            bw.Write(Nonce);
-            WebSocket.WriteBinaryWebSocket(((MemoryStream)bw.BaseStream).ToArray());
+            changeState(0);
         }
 
         private void serverConnected()
@@ -151,28 +176,26 @@ namespace MeshAssistant
                 sendSessionUpdate("help", "{\"" + escapeJsonString(userName) + "\":\"" + escapeJsonString(HelpRequest) + "\"}");
                 sendHelpEventLog(userName, HelpRequest);
             }
-
-            WebSocket.WritePing();
         }
 
         private void sendSessionUpdate(string type, string value)
         {
-            WebSocket.WriteStringWebSocket("{\"action\":\"sessions\",\"type\":\"" + type + "\",\"value\":" + value + "}");
+            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"sessions\",\"type\":\"" + type + "\",\"value\":" + value + "}"));
         }
 
         private void sendConsoleEventLog(string cmd)
         {
-            WebSocket.WriteStringWebSocket("{\"action\":\"log\",\"msgid\":17,\"msgArgs\":[\"" + escapeJsonString(cmd) + "\"],\"msg\":\"Processing console command: " + escapeJsonString(cmd) + "\"}");
+            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":17,\"msgArgs\":[\"" + escapeJsonString(cmd) + "\"],\"msg\":\"Processing console command: " + escapeJsonString(cmd) + "\"}"));
         }
 
         private void sendOpenUrlEventLog(string url)
         {
-            WebSocket.WriteStringWebSocket("{\"action\":\"log\",\"msgid\":20,\"msgArgs\":[\"" + escapeJsonString(url) + "\"],\"msg\":\"Opening: " + escapeJsonString(url) + "\"}");
+            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":20,\"msgArgs\":[\"" + escapeJsonString(url) + "\"],\"msg\":\"Opening: " + escapeJsonString(url) + "\"}"));
         }
 
         private void sendHelpEventLog(string username, string helpstring)
         {
-            WebSocket.WriteStringWebSocket("{\"action\":\"log\",\"msgid\":98,\"msgArgs\":[\"" + escapeJsonString(username) + "\",\"" + escapeJsonString(helpstring) + "\"],\"msg\":\"Help Requested, user: " + escapeJsonString(username) + ", details: " + escapeJsonString(helpstring) + "\"}");
+            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":98,\"msgArgs\":[\"" + escapeJsonString(username) + "\",\"" + escapeJsonString(helpstring) + "\"],\"msg\":\"Help Requested, user: " + escapeJsonString(username) + ", details: " + escapeJsonString(helpstring) + "\"}"));
         }
 
         private string[] parseArgString(string cmd) {
@@ -206,7 +229,7 @@ namespace MeshAssistant
 
         private void sendNetworkInfo()
         {
-            WebSocket.WriteStringWebSocket("{\"action\":\"netinfo\",\"netif2\":" + getNetworkInfo() + "}");
+            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"netinfo\",\"netif2\":" + getNetworkInfo() + "}"));
         }
 
         private string getNetworkInfo()
@@ -289,7 +312,7 @@ namespace MeshAssistant
             }
 
             if (response != null) {
-                WebSocket.WriteStringWebSocket("{\"action\":\"msg\",\"type\":\"console\",\"value\":\"" + response.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"","\\\"") + "\",\"sessionid\":\"" + sessionid + "\"}");
+                WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"console\",\"value\":\"" + response.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\",\"sessionid\":\"" + sessionid + "\"}"));
             }
         }
 
@@ -306,7 +329,7 @@ namespace MeshAssistant
             string action = jsonAction["action"].ToString();
             switch (action)
             {
-                case "ping": { WebSocket.WriteStringWebSocket("{\"action\":\"pong\"}"); break; }
+                case "ping": { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"pong\"}")); break; }
                 case "pong": { break; }
                 case "errorlog": { break; }
                 case "sysinfo": { break; }
@@ -355,6 +378,15 @@ namespace MeshAssistant
                                     }
                                     break;
                                 }
+                            case "tunnel":
+                                {
+                                    if ((jsonAction["value"].GetType() == typeof(string)) && (jsonAction["servertlshash"].GetType() == typeof(string)))
+                                    {
+                                        string url = jsonAction["value"].ToString();
+                                        string hash = jsonAction["servertlshash"].ToString();
+                                    }
+                                    break;
+                                }
                             default:
                                 {
                                     debugMsg("Unprocessed event type: " + eventType);
@@ -378,7 +410,7 @@ namespace MeshAssistant
             return true;
         }
 
-        public void processServerBinaryData(byte[] data, int off, int len)
+        private void WebSocket_onBinaryData(webSocketClient sender, byte[] data, int off, int len, int orglen)
         {
             if (len < 2) return;
 
@@ -415,8 +447,7 @@ namespace MeshAssistant
                         bw.Write(Convert.ToInt16(IPAddress.HostToNetworkOrder((short)certData.Length)));
                         bw.Write(certData);
                         bw.Write(signature);
-                        WebSocket.WriteBinaryWebSocket(((MemoryStream)bw.BaseStream).ToArray());
-
+                        WebSocket.SendBinary(((MemoryStream)bw.BaseStream).ToArray());
                         break;
                     }
                 case 2:
@@ -455,10 +486,10 @@ namespace MeshAssistant
                         bw.Write(Convert.ToInt32(IPAddress.HostToNetworkOrder((int)0))); // Agent Version
                         bw.Write(Convert.ToInt32(IPAddress.HostToNetworkOrder((int)1))); // Platform Type, this is the icon: 1 = Desktop, 2 = Laptop, 3 = Mobile, 4 = Server, 5 = Disk, 6 = Router
                         bw.Write(MeshId); // Mesh ID. This is the identifier of the initial device group
-                        bw.Write(Convert.ToInt32(IPAddress.HostToNetworkOrder((int)8))); // Capabilities of the agent (bitmask): 1 = Desktop, 2 = Terminal, 4 = Files, 8 = Console, 16 = JavaScript, 32 = Temporary, 64 = Recovery
+                        bw.Write(Convert.ToInt32(IPAddress.HostToNetworkOrder((int)(4 + 8)))); // Capabilities of the agent (bitmask): 1 = Desktop, 2 = Terminal, 4 = Files, 8 = Console, 16 = JavaScript, 32 = Temporary, 64 = Recovery
                         bw.Write(Convert.ToInt16(IPAddress.HostToNetworkOrder((short)hostNameBytes.Length))); // Computer Name Length
                         bw.Write(hostNameBytes); // Computer name
-                        WebSocket.WriteBinaryWebSocket(((MemoryStream)bw.BaseStream).ToArray());
+                        WebSocket.SendBinary(((MemoryStream)bw.BaseStream).ToArray());
 
                         // If server already confirmed authenticaiton, signal authenticated connection
                         if (ConnectionState == 15) { changeState(3); serverConnected(); }
@@ -477,485 +508,6 @@ namespace MeshAssistant
                         break;
                     }
             }
-        }
-
-
-        public class xwebclient : IDisposable
-        {
-            private MeshCentralAgent parent = null;
-            private TcpClient wsclient = null;
-            private SslStream wsstream = null;
-            private NetworkStream wsrawstream = null;
-            private int state = 0;
-            private Uri url = null;
-            private byte[] readBuffer = new Byte[500];
-            private int readBufferLen = 0;
-            private int accopcodes = 0;
-            private bool accmask = false;
-            private int acclen = 0;
-            private bool proxyInUse = false;
-            public bool xdebug = false;
-            public bool xtlsdump = false;
-            public bool xignoreCert = false;
-            private System.Threading.Timer pingTimer = null;
-
-            public static string GetProxyForUrlUsingPac(string DestinationUrl, string PacUri)
-            {
-                IntPtr WinHttpSession = Win32Api.WinHttpOpen("User", Win32Api.WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, IntPtr.Zero, IntPtr.Zero, 0);
-
-                Win32Api.WINHTTP_AUTOPROXY_OPTIONS ProxyOptions = new Win32Api.WINHTTP_AUTOPROXY_OPTIONS();
-                Win32Api.WINHTTP_PROXY_INFO ProxyInfo = new Win32Api.WINHTTP_PROXY_INFO();
-
-                ProxyOptions.dwFlags = Win32Api.WINHTTP_AUTOPROXY_CONFIG_URL;
-                ProxyOptions.dwAutoDetectFlags = (Win32Api.WINHTTP_AUTO_DETECT_TYPE_DHCP | Win32Api.WINHTTP_AUTO_DETECT_TYPE_DNS_A);
-                ProxyOptions.lpszAutoConfigUrl = PacUri;
-
-                // Get Proxy 
-                bool IsSuccess = Win32Api.WinHttpGetProxyForUrl(WinHttpSession, DestinationUrl, ref ProxyOptions, ref ProxyInfo);
-                Win32Api.WinHttpCloseHandle(WinHttpSession);
-
-                if (IsSuccess)
-                {
-                    return ProxyInfo.lpszProxy;
-                }
-                else
-                {
-                    Console.WriteLine("Error: {0}", Win32Api.GetLastError());
-                    return null;
-                }
-            }
-
-            public void Dispose()
-            {
-                if (pingTimer != null) { pingTimer.Dispose(); pingTimer = null; }
-                try { wsstream.Close(); } catch (Exception) { }
-                try { wsstream.Dispose(); } catch (Exception) { }
-                wsstream = null;
-                wsclient = null;
-                state = -1;
-                parent.changeState(0);
-                parent.WebSocket = null;
-            }
-
-            public void Debug(string msg) { parent.debugMsg(msg);  if(xdebug) { try { File.AppendAllText("debug.log", "Debug-" + msg + "\r\n"); } catch (Exception) { } } }
-            public void TlsDump(string direction, byte[] data, int offset, int len) { if (xtlsdump) { try { File.AppendAllText("debug.log", direction + ": " + BitConverter.ToString(data, offset, len).Replace("-", string.Empty) + "\r\n"); } catch (Exception) { } } }
-
-            public bool Start(MeshCentralAgent parent, Uri url)
-            {
-                if (state != 0) return false;
-                parent.changeState(1);
-                state = 1;
-                this.parent = parent;
-                this.url = url;
-                Uri proxyUri = null;
-
-                // Check if we need to use a HTTP proxy (Auto-proxy way)
-                try
-                {
-                    RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-                    Object x = registryKey.GetValue("AutoConfigURL", null);
-                    if ((x != null) && (x.GetType() == typeof(string)))
-                    {
-                        string proxyStr = GetProxyForUrlUsingPac("http" + ((url.Port == 80) ? "" : "s") + "://" + url.Host + ":" + url.Port, x.ToString());
-                        if (proxyStr != null) { proxyUri = new Uri("http://" + proxyStr); }
-                    }
-                }
-                catch (Exception) { proxyUri = null; }
-
-                // Check if we need to use a HTTP proxy (Normal way)
-                if (proxyUri == null)
-                {
-                    var proxy = HttpWebRequest.GetSystemWebProxy();
-                    proxyUri = proxy.GetProxy(url);
-                    if ((url.Host.ToLower() == proxyUri.Host.ToLower()) && (url.Port == proxyUri.Port)) { proxyUri = null; }
-                }
-
-                if (proxyUri != null)
-                {
-                    // Proxy in use
-                    proxyInUse = true;
-                    wsclient = new TcpClient();
-                    Debug("Connecting with proxy in use: " + proxyUri.ToString());
-                    wsclient.BeginConnect(proxyUri.Host, proxyUri.Port, new AsyncCallback(OnConnectSink), this);
-                }
-                else
-                {
-                    // No proxy in use
-                    proxyInUse = false;
-                    wsclient = new TcpClient();
-                    Debug("Connecting without proxy");
-                    wsclient.BeginConnect(url.Host, url.Port, new AsyncCallback(OnConnectSink), this);
-                }
-                return true;
-            }
-
-            private void OnConnectSink(IAsyncResult ar)
-            {
-                if (wsclient == null) return;
-
-                // Accept the connection
-                try
-                {
-                    wsclient.EndConnect(ar);
-                }
-                catch (Exception ex)
-                {
-                    Debug("Websocket TCP failed to connect: " + ex.ToString());
-                    Dispose();
-                    return;
-                }
-
-                if (proxyInUse == true)
-                {
-                    // Send proxy connection request
-                    wsrawstream = wsclient.GetStream();
-                    byte[] proxyRequestBuf = UTF8Encoding.UTF8.GetBytes("CONNECT " + url.Host + ":" + url.Port + " HTTP/1.1\r\nHost: " + url.Host + ":" + url.Port + "\r\n\r\n");
-                    TlsDump("OutRaw", proxyRequestBuf, 0, proxyRequestBuf.Length);
-                    try { wsrawstream.Write(proxyRequestBuf, 0, proxyRequestBuf.Length); } catch (Exception ex) { Debug(ex.ToString()); }
-                    wsrawstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnProxyResponseSink), this);
-                }
-                else
-                {
-                    // Start TLS connection
-                    Debug("Websocket TCP connected, doing TLS...");
-                    wsstream = new SslStream(wsclient.GetStream(), false, VerifyServerCertificate, null);
-                    wsstream.BeginAuthenticateAsClient(url.Host, null, System.Security.Authentication.SslProtocols.Tls12, false, new AsyncCallback(OnTlsSetupSink), this);
-                }
-            }
-
-            private void OnProxyResponseSink(IAsyncResult ar)
-            {
-                if (wsrawstream == null) return;
-
-                int len = 0;
-                try { len = wsrawstream.EndRead(ar); } catch (Exception) { }
-                if (len == 0)
-                {
-                    // Disconnect
-                    Debug("Websocket proxy disconnected, length = 0.");
-                    Dispose();
-                    return;
-                }
-
-                TlsDump("InRaw", readBuffer, 0, readBufferLen);
-
-                readBufferLen += len;
-                string proxyResponse = UTF8Encoding.UTF8.GetString(readBuffer, 0, readBufferLen);
-                if (proxyResponse.IndexOf("\r\n\r\n") >= 0)
-                {
-                    // We get a full proxy response, we should get something like "HTTP/1.1 200 Connection established\r\n\r\n"
-                    if (proxyResponse.StartsWith("HTTP/1.1 200 "))
-                    {
-                        // All good, start TLS setup.
-                        readBufferLen = 0;
-                        Debug("Websocket TCP connected, doing TLS...");
-                        wsstream = new SslStream(wsrawstream, false, VerifyServerCertificate, null);
-                        wsstream.BeginAuthenticateAsClient(url.Host, null, System.Security.Authentication.SslProtocols.Tls12, false, new AsyncCallback(OnTlsSetupSink), this);
-                    }
-                    else
-                    {
-                        // Invalid response
-                        Debug("Proxy connection failed: " + proxyResponse);
-                        Dispose();
-                    }
-                }
-                else
-                {
-                    if (readBufferLen == readBuffer.Length)
-                    {
-                        // Buffer overflow
-                        Debug("Proxy connection failed");
-                        Dispose();
-                    }
-                    else
-                    {
-                        // Read more proxy data
-                        wsrawstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnProxyResponseSink), this);
-                    }
-                }
-            }
-
-            public string Base64Encode(string plainText)
-            {
-                var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-                return System.Convert.ToBase64String(plainTextBytes);
-            }
-
-            public string Base64Decode(string base64EncodedData)
-            {
-                var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
-                return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
-            }
-
-            private void OnTlsSetupSink(IAsyncResult ar)
-            {
-                if (wsstream == null) return;
-
-                // Accept the connection
-                try
-                {
-                    wsstream.EndAuthenticateAsClient(ar);
-                }
-                catch (Exception ex)
-                {
-                    // Disconnect
-                    if (ex.InnerException != null)
-                    {
-                        MessageBox.Show(ex.Message + ", Inner: " + ex.InnerException.ToString(), "MeshCentral Agent");
-                    }
-                    else
-                    {
-                        MessageBox.Show(ex.Message, "MeshCentral Agent");
-                    }
-                    Debug("Websocket TLS failed: " + ex.ToString());
-                    Dispose();
-                    return;
-                }
-
-                // Compute the remote certificate SHA384 hash
-                using (SHA384 sha384Hash = SHA384.Create())
-                {
-                    byte[] bytes = parent.ServerTlsHash = sha384Hash.ComputeHash(wsstream.RemoteCertificate.GetRawCertData());
-                    StringBuilder builder = new StringBuilder();
-                    for (int i = 0; i < bytes.Length; i++) { builder.Append(bytes[i].ToString("x2")); }
-                    parent.ServerTlsHashStr = builder.ToString().ToUpper();
-                }
-                Debug("Websocket TLS hash: " + parent.ServerTlsHash);
-
-                // Send the HTTP headers
-                Debug("Websocket TLS setup, sending HTTP header...");
-                string header = "GET " + url.PathAndQuery + " HTTP/1.1\r\nHost: " + url.Host + "\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13\r\n\r\n";
-                try { wsstream.Write(UTF8Encoding.UTF8.GetBytes(header)); } catch (Exception ex) { Debug(ex.ToString()); }
-
-                // Start receiving data
-                wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this);
-            }
-
-            private void OnTlsDataSink(IAsyncResult ar)
-            {
-                if (wsstream == null) return;
-
-                int len = 0;
-                try { len = wsstream.EndRead(ar); } catch (Exception) { }
-                if (len == 0)
-                {
-                    // Disconnect
-                    Debug("Websocket disconnected, length = 0.");
-                    Dispose();
-                    return;
-                }
-                //parent.Debug("#" + counter + ": Websocket got new data: " + len);
-                readBufferLen += len;
-                TlsDump("In", readBuffer, 0, len);
-
-                // Consume all of the data
-                int consumed = 0;
-                int ptr = 0;
-                do
-                {
-                    consumed = ProcessBuffer(readBuffer, ptr, readBufferLen - ptr);
-                    if (consumed < 0) { Dispose(); return; } // Error, close the connection
-                    ptr += consumed;
-                } while ((consumed > 0) && ((readBufferLen - consumed) > 0));
-
-                // Move the data forward
-                if ((ptr > 0) && (readBufferLen - ptr) > 0)
-                {
-                    //Console.Write("MOVE FORWARD\r\n");
-                    Array.Copy(readBuffer, ptr, readBuffer, 0, (readBufferLen - ptr));
-                }
-                readBufferLen = (readBufferLen - ptr);
-
-                // If the buffer is too small, double the size here.
-                if (readBuffer.Length - readBufferLen == 0)
-                {
-                    //Debug("Increasing the read buffer size from " + readBuffer.Length + " to " + (readBuffer.Length * 2) + ".");
-                    byte[] readBuffer2 = new byte[readBuffer.Length * 2];
-                    Array.Copy(readBuffer, 0, readBuffer2, 0, readBuffer.Length);
-                    readBuffer = readBuffer2;
-                }
-
-                // Receive more data
-                try { wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this); } catch (Exception) { }
-            }
-
-            private void PingTimerCallback(object state) { WritePong(); }
-
-            private int ProcessBuffer(byte[] buffer, int offset, int len)
-            {
-                string ss = UTF8Encoding.UTF8.GetString(buffer, offset, len);
-
-                if (state == 1)
-                {
-                    // Look for the end of the http header
-                    string header = UTF8Encoding.UTF8.GetString(buffer, offset, len);
-                    int i = header.IndexOf("\r\n\r\n");
-                    if (i == -1) return 0;
-                    Dictionary<string, string> parsedHeader = ParseHttpHeader(header.Substring(0, i));
-                    if ((parsedHeader == null) || (parsedHeader["_Path"] != "101")) { Debug("Websocket bad header."); return -1; } // Bad header, close the connection
-                    //Debug("Websocket got setup upgrade header.");
-                    state = 2;
-                    parent.changeState(2);
-                    parent.connected();
-                    pingTimer = new System.Threading.Timer(new System.Threading.TimerCallback(PingTimerCallback), null, 120000, 120000); // Start a timer to pong every 2 minutes
-                    return len; // TODO: Technically we need to return the header length before UTF8 convert.
-                }
-                else if (state == 2)
-                {
-                    // Parse a websocket fragment header
-                    if (len < 2) return 0;
-                    int headsize = 2;
-                    accopcodes = buffer[offset];
-                    accmask = ((buffer[offset + 1] & 0x80) != 0);
-                    acclen = (buffer[offset + 1] & 0x7F);
-
-                    if ((accopcodes & 0x0F) == 8)
-                    {
-                        // Close the websocket
-                        Debug("Websocket got closed fragment.");
-                        return -1;
-                    }
-
-                    if (acclen == 126)
-                    {
-                        if (len < 4) return 0;
-                        headsize = 4;
-                        acclen = (buffer[offset + 2] << 8) + (buffer[offset + 3]);
-                    }
-                    else if (acclen == 127)
-                    {
-                        if (len < 10) return 0;
-                        headsize = 10;
-                        acclen = (buffer[offset + 6] << 24) + (buffer[offset + 7] << 16) + (buffer[offset + 8] << 8) + (buffer[offset + 9]);
-                        Debug("Websocket receive large fragment: " + acclen);
-                    }
-                    if (accmask == true)
-                    {
-                        // TODO: Do unmasking here.
-                        headsize += 4;
-                    }
-
-                    // For control commands with no playloads like ping and pong, handle this here.
-                    if (acclen == 0) { ProcessWsBuffer(null, 0, 0, accopcodes); state = 2; return headsize; }
-
-                    //parent.Debug("#" + counter + ": Websocket frag header - FIN: " + ((accopcodes & 0x80) != 0) + ", OP: " + (accopcodes & 0x0F) + ", LEN: " + acclen + ", MASK: " + accmask);
-                    state = 3;
-                    return headsize;
-                }
-                else if (state == 3)
-                {
-                    // Parse a websocket fragment data
-                    if (len < acclen) return 0;
-                    //Console.Write("WSREAD: " + acclen + "\r\n");
-                    ProcessWsBuffer(buffer, offset, acclen, accopcodes);
-                    state = 2;
-                    return acclen;
-                }
-                return 0;
-            }
-
-            private void ProcessWsBuffer(byte[] data, int offset, int len, int op)
-            {
-                if (op == 130) { parent.processServerBinaryData(data, offset, len); } // Binary
-                //else if (op == 129) { parent.processServerTextData(UTF8Encoding.UTF8.GetString(data, offset, len)); } // Text
-                else if ((op == 137) || (op == 9)) { WritePong(); } // Ping
-                else if ((op == 138) || (op == 10)) { } // Pong
-            }
-
-            private Dictionary<string, string> ParseHttpHeader(string header)
-            {
-                string[] lines = header.Replace("\r\n", "\r").Split('\r');
-                if (lines.Length < 2) { return null; }
-                string[] directive = lines[0].Split(' ');
-                Dictionary<string, string> values = new Dictionary<string, string>();
-                values["_Action"] = directive[0];
-                values["_Path"] = directive[1];
-                values["_Protocol"] = directive[2];
-                for (int i = 1; i < lines.Length; i++)
-                {
-                    var j = lines[i].IndexOf(":");
-                    values[lines[i].Substring(0, j).ToLower()] = lines[i].Substring(j + 1).Trim();
-                }
-                return values;
-            }
-
-            // Return a modified base64 SHA384 hash string of the certificate public key
-            public static string GetMeshKeyHash(X509Certificate cert)
-            {
-                return ByteArrayToHexString(new SHA384Managed().ComputeHash(cert.GetPublicKey()));
-            }
-
-            // Return a modified base64 SHA384 hash string of the certificate
-            public static string GetMeshCertHash(X509Certificate cert)
-            {
-                return ByteArrayToHexString(new SHA384Managed().ComputeHash(cert.GetRawCertData()));
-            }
-
-            public static string ByteArrayToHexString(byte[] Bytes)
-            {
-                StringBuilder Result = new StringBuilder(Bytes.Length * 2);
-                string HexAlphabet = "0123456789ABCDEF";
-                foreach (byte B in Bytes) { Result.Append(HexAlphabet[(int)(B >> 4)]); Result.Append(HexAlphabet[(int)(B & 0xF)]); }
-                return Result.ToString();
-            }
-
-            private bool VerifyServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-            {
-                return true;
-            }
-
-            public void WriteStringWebSocket(string data) {
-                WriteBinaryWebSocket(UTF8Encoding.UTF8.GetBytes(data));
-            }
-
-            public void WriteBinaryWebSocket(byte[] data)
-            {
-                // Convert the string into a buffer with 4 byte of header space.
-                int len = data.Length;
-                byte[] buf = new byte[4 + data.Length];
-                Array.Copy(data, 0, buf, 4, data.Length);
-                len = buf.Length - 4;
-
-                // Check that everything is ok
-                if ((state < 2) || (len < 1) || (len > 65535)) { Dispose(); return; }
-
-                if (len < 126)
-                {
-                    // Small fragment
-                    buf[2] = 130; // Fragment op code (129 = text, 130 = binary)
-                    buf[3] = (byte)(len & 0x7F);
-                    //try { wsstream.BeginWrite(buf, 2, len + 2, new AsyncCallback(WriteWebSocketAsyncDone), args); } catch (Exception) { Dispose(); return; }
-                    TlsDump("Out", buf, 2, len + 2);
-                    try { wsstream.Write(buf, 2, len + 2); } catch (Exception ex) { Debug(ex.ToString()); }
-                }
-                else
-                {
-                    // Large fragment
-                    buf[0] = 130; // Fragment op code (129 = text, 130 = binary)
-                    buf[1] = 126;
-                    buf[2] = (byte)((len >> 8) & 0xFF);
-                    buf[3] = (byte)(len & 0xFF);
-                    //try { wsstream.BeginWrite(buf, 0, len + 4, new AsyncCallback(WriteWebSocketAsyncDone), args); } catch (Exception) { Dispose(); return; }
-                    TlsDump("Out", buf, 0, len + 4);
-                    try { wsstream.Write(buf, 0, len + 4); } catch (Exception ex) { Debug(ex.ToString()); }
-                }
-            }
-
-            public void WritePing()
-            {
-                byte[] buf = new byte[2];
-                buf[0] = 137; // Fragment op code (129 = text, 130 = binary, 137 = Ping, 138 = Pong)
-                try { wsstream.Write(buf, 0, 2); } catch (Exception ex) { Debug(ex.ToString()); }
-            }
-
-            public void WritePong()
-            {
-                byte[] buf = new byte[2];
-                buf[0] = 138; // Fragment op code (129 = text, 130 = binary, 137 = Ping, 138 = Pong)
-                try { wsstream.Write(buf, 0, 2); } catch (Exception ex) { Debug(ex.ToString()); }
-            }
-
-
         }
 
     }

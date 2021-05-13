@@ -120,6 +120,7 @@
     <Compile Include="SnapShotForm.Designer.cs">
       <DependentUpon>SnapShotForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="WebSocketClient.cs" />
     <Compile Include="Win32Api.cs" />
     <EmbeddedResource Include="ConsoleForm.resx">
       <DependentUpon>ConsoleForm.cs</DependentUpon>
