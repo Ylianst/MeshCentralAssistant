@@ -581,7 +581,7 @@ namespace MeshAssistant
             }
 
             // Check that everything is ok
-            if ((len < 1) || (len > 65535)) { Dispose(); return 0; }
+            if ((len < 0) || (len > 65535)) { Dispose(); return 0; }
 
             if (len < 126)
             {
