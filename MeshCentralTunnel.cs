@@ -2,6 +2,8 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Web.Script.Serialization;
+using System.IO;
+using System.Collections;
 
 namespace MeshAssistant
 {
@@ -58,7 +60,16 @@ namespace MeshAssistant
             // Parse the received JSON
             Dictionary<string, object> jsonAction = new Dictionary<string, object>();
             try { jsonAction = JSON.Deserialize<Dictionary<string, object>>(data); } catch (Exception) { return; }
-            if (jsonAction == null || jsonAction["action"].GetType() != typeof(string)) return;
+            if (jsonAction == null) return;
+            if (jsonAction.ContainsKey("ctrlChannel") && (jsonAction["ctrlChannel"].GetType() == typeof(string)) && (((string)jsonAction["ctrlChannel"]).Equals("102938")))
+            {
+                // This is a control command
+                if (!jsonAction.ContainsKey("type") || jsonAction["type"].GetType() != typeof(string)) return;
+                string type = (string)jsonAction["type"];
+                if (type.Equals("close")) { disconnect(); return; }
+            }
+
+            if (!jsonAction.ContainsKey("action") || jsonAction["action"].GetType() != typeof(string)) return;
 
             // Handle the JSON command
             string action = jsonAction["action"].ToString();
@@ -103,6 +114,20 @@ namespace MeshAssistant
             }
         }
 
+        private string escapeJsonString(string str)
+        {
+            var r = "";
+            foreach (char c in str)
+            {
+                if (c == '\r') { r += "\\r"; }
+                else if (c == '\n') { r += "\\n"; }
+                else if (c == '\\') { r += "\\\\"; }
+                else if (c == '\"') { r += "\\\""; }
+                else { r += c; }
+            }
+            return r;
+        }
+
         private void ParseFilesCommand(string data)
         {
             // Parse the received JSON
@@ -115,26 +140,89 @@ namespace MeshAssistant
 
             // Handle the JSON command
             string action = (string)jsonCommand["action"];
+            string response = null;
             switch (action)
             {
-                case "ls":
+                case "ls": // List folder
                     {
                         string path = "";
                         if (jsonCommand["path"].GetType() == typeof(string)) { path = (string)jsonCommand["path"]; }
                         if (path == "")
                         {
                             // Enumerate drives
-
-
+                            response = "{\"path\":\"" + path + "\"";
+                            if (reqid != 0) { response += ",\"reqid\":" + reqid; }
+                            response += ",\"dir\":[";
+                            bool firstDrive = true;
+                            foreach (var drive in DriveInfo.GetDrives())
+                            {
+                                if (drive.IsReady == false) continue;
+                                if (firstDrive) { firstDrive = false; } else { response += ","; }
+                                response += "{\"n\":\"" + escapeJsonString(drive.Name) + "\",\"t\":1}";
+                            }
+                            response += "]}";
                         } else {
                             // Enumerate folders
+                            response = "{\"path\":\"" + path + "\"";
+                            if (reqid != 0) { response += ",\"reqid\":" + reqid; }
+                            response += ",\"dir\":[";
+                            bool firstFile = true;
+                            if (path.EndsWith("\\") == false) { path += "\\";  }
+                            foreach (string folder in Directory.EnumerateDirectories(path))
+                            {
+                                DirectoryInfo d = new DirectoryInfo(folder);
+                                string t = d.CreationTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                                if (firstFile) { firstFile = false; } else { response += ","; }
+                                response += "{\"n\":\"" + escapeJsonString(d.Name) + "\",\"t\":2,\"d\":\"" + t + "\"}";
+                            }
+                            foreach (string folder in Directory.EnumerateFiles(path))
+                            {
+                                FileInfo f = new FileInfo(folder);
+                                //if (f.Attributes.HasFlag(FileAttributes.Hidden)) continue;
+                                string t = f.CreationTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                                if (firstFile) { firstFile = false; } else { response += ","; }
+                                response += "{\"n\":\"" + escapeJsonString(f.Name) + "\",\"t\":3,\"s\":" + f.Length + ",\"d\":\"" + t + "\"}";
+                            }
+                            response += "]}";
 
-
+                        }
+                        break;
+                    }
+                case "mkdir": // Create folder
+                    {
+                        string path = "";
+                        if (jsonCommand["path"].GetType() == typeof(string)) { path = (string)jsonCommand["path"]; }
+                        if (path != "") {
+                            Directory.CreateDirectory(path);
+                            parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":44,\"msgArgs\":[\"" + escapeJsonString(path) + "\"],\"msg\":\"Create folder: " + escapeJsonString(path) + "\"}"));
+                        }
+                        break;
+                    }
+                case "rm": // Remove folders or files
+                    {
+                        bool rec = false;
+                        string path = "";
+                        ArrayList delfiles = null;
+                        if (jsonCommand["path"].GetType() == typeof(string)) { path = (string)jsonCommand["path"]; }
+                        if (jsonCommand["rec"].GetType() == typeof(bool)) { rec = (bool)jsonCommand["rec"]; }
+                        if (jsonCommand["delfiles"].GetType() == typeof(ArrayList)) { delfiles = (ArrayList)jsonCommand["delfiles"]; }
+                        if ((path != "") && (delfiles != null))
+                        {
+                            path = path.Replace("/","\\");
+                            foreach (object o in delfiles)
+                            {
+                                if (o.GetType() != typeof(string)) continue;
+                                string delfile = (string)o;
+                                delfile = Path.Combine(path, delfile);
+                            }
                         }
                         break;
                     }
                 default: { break; }
             }
+
+            // "{\"action\":\"pong\"}"
+            if (response != null) { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(response)); }
 
         }
 

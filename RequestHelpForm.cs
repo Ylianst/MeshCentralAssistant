@@ -29,6 +29,7 @@ namespace MeshAssistant
     public partial class RequestHelpForm : Form
     {
         public MainForm parent;
+        public bool NoHelpRequestOk = false;
 
         public RequestHelpForm(MainForm parent)
         {
@@ -51,12 +52,13 @@ namespace MeshAssistant
 
         private void mainTextBox_TextChanged(object sender, EventArgs e)
         {
-            okButton.Enabled = (mainTextBox.Text.Length > 0);
+            okButton.Enabled = ((mainTextBox.Text.Length > 0) || NoHelpRequestOk);
         }
 
         private void RequestHelpForm_Load(object sender, EventArgs e)
         {
             mainTextBox.Focus();
+            mainTextBox_TextChanged(this, null);
         }
 
         private void RequestHelpForm_FormClosing(object sender, FormClosingEventArgs e)

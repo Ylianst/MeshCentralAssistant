@@ -556,6 +556,7 @@ namespace MeshAssistant
                     else
                     {
                         requestHelpForm = new RequestHelpForm(this);
+                        requestHelpForm.NoHelpRequestOk = true;
                         requestHelpForm.Show(this);
                     }
                 }
@@ -600,7 +601,7 @@ namespace MeshAssistant
         {
             if (currentAgentName.Equals("~"))
             {
-                mcagent.HelpRequest = details;
+                if (details.Length > 0) { mcagent.HelpRequest = details; } else { mcagent.HelpRequest = null; }
                 mcagent.connect();
             }
             else

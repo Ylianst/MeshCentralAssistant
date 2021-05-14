@@ -27,7 +27,7 @@ namespace MeshAssistant
         private byte[] ServerNonce = null;
         private X509Certificate2 agentCert = null;
         private JavaScriptSerializer JSON = new JavaScriptSerializer();
-        private webSocketClient WebSocket = null;
+        public webSocketClient WebSocket = null;
         private int ConnectionState = 0;
         private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>();
 
