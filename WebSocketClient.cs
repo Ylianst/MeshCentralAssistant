@@ -57,6 +57,8 @@ namespace MeshAssistant
         public int pongTimeSeconds = 0;
         private System.Threading.Timer pingTimer = null;
         private System.Threading.Timer pongTimer = null;
+        private bool pendingSendCall = false;
+        private MemoryStream pendingSendBuffer = null;
 
         // Outside variables
         public object tag = null;
@@ -84,6 +86,8 @@ namespace MeshAssistant
         public event onDebugMessageHandler onDebugMessage;
         public delegate void onStateChangedHandler(webSocketClient sender, ConnectionStates state);
         public event onStateChangedHandler onStateChanged;
+        public delegate void onSendOkHandler(webSocketClient sender);
+        public event onSendOkHandler onSendOk;
 
         public ConnectionStates State { get { return state; } }
 
@@ -102,6 +106,8 @@ namespace MeshAssistant
             if (pongTimer != null) { pongTimer.Dispose(); pongTimer = null; }
             if (wsstream != null) { try { wsstream.Close(); } catch (Exception) { } try { wsstream.Dispose(); } catch (Exception) { } wsstream = null; }
             if (wsclient != null) { wsclient = null; }
+            if (pendingSendBuffer != null) { pendingSendBuffer.Dispose(); pendingSendBuffer = null; }
+            pendingSendCall = false;
             SetState(ConnectionStates.Disconnected);
         }
 
@@ -270,6 +276,9 @@ namespace MeshAssistant
                 return;
             }
 
+            pendingSendBuffer = new MemoryStream();
+            pendingSendCall = false;
+
             // Send the HTTP headers
             Debug("Websocket TLS setup, sending HTTP header...");
             string header;
@@ -278,7 +287,7 @@ namespace MeshAssistant
             } else {
                 header = "GET " + url.PathAndQuery + " HTTP/1.1\r\nHost: " + url.Host + "\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13\r\n" + extraHeaders + "\r\n";
             }
-            wsstream.Write(UTF8Encoding.UTF8.GetBytes(header));
+            SendData(UTF8Encoding.UTF8.GetBytes(header));
 
             // Start receiving data
             wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this);
@@ -329,6 +338,26 @@ namespace MeshAssistant
 
             // Receive more data
             try { wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this); } catch (Exception) { }
+        }
+        private void WriteWebSocketAsyncDone(IAsyncResult ar)
+        {
+            if ((wsstream == null) || (pendingSendBuffer == null)) return;
+            try { wsstream.EndWrite(ar); } catch (Exception) { }
+            lock (pendingSendBuffer)
+            {
+                if (pendingSendBuffer == null) return;
+                if (pendingSendBuffer.Length > 0)
+                {
+                    byte[] buf = pendingSendBuffer.ToArray();
+                    try { wsstream.BeginWrite(buf, 0, buf.Length, new AsyncCallback(WriteWebSocketAsyncDone), null); } catch (Exception) { Dispose(); return; }
+                    pendingSendBuffer.SetLength(0);
+                }
+                else
+                {
+                    pendingSendCall = false;
+                    if (onSendOk != null) { onSendOk(this); }
+                }
+            }
         }
 
         private void PingTimerCallback(object state) { SendPing(null, 0, 0); }
@@ -595,8 +624,7 @@ namespace MeshAssistant
                 // Small fragment
                 buf[2] = op;
                 buf[3] = (byte)(len & 0x7F);
-                //try { wsstream.BeginWrite(buf, 2, len + 2, new AsyncCallback(WriteWebSocketAsyncDone), args); } catch (Exception) { Dispose(); return; }
-                wsstream.Write(buf, 2, len + 2);
+                SendData(buf, 2, len + 2);
             }
             else
             {
@@ -605,11 +633,25 @@ namespace MeshAssistant
                 buf[1] = 126;
                 buf[2] = (byte)((len >> 8) & 0xFF);
                 buf[3] = (byte)(len & 0xFF);
-                //try { wsstream.BeginWrite(buf, 0, len + 4, new AsyncCallback(WriteWebSocketAsyncDone), args); } catch (Exception) { Dispose(); return; }
-                wsstream.Write(buf, 0, len + 4);
+                SendData(buf, 0, len + 4);
             }
 
             return len;
+        }
+
+        private void SendData(byte[] buf) { SendData(buf, 0, buf.Length); }
+
+        private void SendData(byte[] buf, int off, int len)
+        {
+            if (pendingSendCall)
+            {
+                lock (pendingSendBuffer) { pendingSendBuffer.Write(buf, off, len); }
+            }
+            else
+            {
+                pendingSendCall = true;
+                try { wsstream.BeginWrite(buf, off, len, new AsyncCallback(WriteWebSocketAsyncDone), null); } catch (Exception) { Dispose(); return; }
+            }
         }
 
         public static string GetProxyForUrlUsingPac(string DestinationUrl, string PacUri)

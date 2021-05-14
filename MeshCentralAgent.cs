@@ -378,12 +378,13 @@ namespace MeshAssistant
                                 }
                             case "tunnel":
                                 {
-                                    if ((jsonAction["value"].GetType() == typeof(string)) && (jsonAction["servertlshash"].GetType() == typeof(string)))
+                                    if ((jsonAction.ContainsKey("value")) && (jsonAction["value"].GetType() == typeof(string)))
                                     {
                                         try
                                         {
                                             string url = jsonAction["value"].ToString();
-                                            string hash = jsonAction["servertlshash"].ToString();
+                                            string hash = null;
+                                            if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = jsonAction["servertlshash"].ToString(); }
                                             if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
                                             MeshCentralTunnel tunnel = new MeshCentralTunnel(this, new Uri(url), hash);
                                             tunnels.Add(tunnel);

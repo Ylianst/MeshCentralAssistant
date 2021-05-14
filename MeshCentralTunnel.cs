@@ -16,6 +16,8 @@ namespace MeshAssistant
         private MeshCentralAgent parent = null;
         private webSocketClient WebSocket = null;
         private JavaScriptSerializer JSON = new JavaScriptSerializer();
+        private Dictionary<string, object> jsonOptions = null;
+        private FileStream fileTransfer = null;
 
         public MeshCentralTunnel(MeshCentralAgent parent, Uri uri, string serverHash)
         {
@@ -46,9 +48,8 @@ namespace MeshAssistant
 
         public void disconnect()
         {
-            if (WebSocket == null) return;
-            WebSocket.Dispose();
-            WebSocket = null;
+            if (fileTransfer != null) { fileTransfer.Close(); fileTransfer = null; }
+            if (WebSocket != null) { WebSocket.Dispose(); WebSocket = null; }
         }
         
         private void connectedToServer()
@@ -96,12 +97,61 @@ namespace MeshAssistant
             }
             else if (state == 1) // Waitting for protocol
             {
+                // Parse the received JSON options
+                if (data.StartsWith("{")) {
+                    try { jsonOptions = JSON.Deserialize<Dictionary<string, object>>(data); } catch (Exception) { }
+                    if ((!jsonOptions.ContainsKey("type")) || (jsonOptions["type"].GetType() != typeof(string)) || (!((string)jsonOptions["type"]).Equals("options"))) { jsonOptions = null; }
+                    return;
+                }
                 if (int.TryParse(data, out protocol)) { state = 2; }
+
+                if (protocol == 10)
+                {
+                    // Basic file transfer
+                    if ((jsonOptions.ContainsKey("file")) && (jsonOptions["file"].GetType() == typeof(string)))
+                    {
+                        FileInfo f = new FileInfo((string)jsonOptions["file"]);
+                        if (f.Exists)
+                        {
+                            try
+                            {
+                                // Send the file
+                                WebSocket.onSendOk += WebSocket_onSendOk;
+                                fileTransfer = File.OpenRead(f.FullName);
+                                byte[] buf = new byte[65535];
+                                int len = fileTransfer.Read(buf, 0, buf.Length);
+                                if (len > 0) { WebSocket.SendBinary(buf, 0, len); } else { disconnect(); }
+                                WebSocket.SendString("{\"op\":\"ok\",\"size\":" + f.Length + "}");
+                                string x = "{\"action\":\"log\",\"msgid\":106,\"msgArgs\":[\"" + escapeJsonString(f.FullName) + "\"," + f.Length + "],\"msg\":\"Download: " + escapeJsonString(f.FullName) + ", Size: " + f.Length + "\"}";
+                                parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(x));
+                            }
+                            catch (Exception)
+                            {
+                                WebSocket.SendString("{\"op\":\"cancel\"}");
+                            }
+                        }
+                        else
+                        {
+                            WebSocket.SendString("{\"op\":\"cancel\"}");
+                        }
+                    }
+                }
+
                 return;
             }
             else if (state == 2) // Running
             {
                 if (data.StartsWith("{")) { processServerJsonData(data); return; }
+            }
+        }
+
+        private void WebSocket_onSendOk(webSocketClient sender)
+        {
+            if (fileTransfer != null)
+            {
+                byte[] buf = new byte[65535];
+                int len = fileTransfer.Read(buf, 0, buf.Length);
+                if (len > 0) { WebSocket.SendBinary(buf, 0, len); } else { disconnect(); }
             }
         }
 
@@ -192,7 +242,7 @@ namespace MeshAssistant
                 case "mkdir": // Create folder
                     {
                         string path = "";
-                        if (jsonCommand["path"].GetType() == typeof(string)) { path = (string)jsonCommand["path"]; }
+                        if ((jsonCommand.ContainsKey("path")) && (jsonCommand["path"].GetType() == typeof(string))) { path = (string)jsonCommand["path"]; }
                         if (path != "") {
                             path = path.Replace("/", "\\");
                             Directory.CreateDirectory(path);
