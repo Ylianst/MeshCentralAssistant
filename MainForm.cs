@@ -110,13 +110,14 @@ namespace MeshAssistant
                 if (autoConnect == true) { currentAgentName = "~"; }
                 ToolStripMenuItem m = new ToolStripMenuItem();
                 m.Name = "AgentSelector-~";
-                m.Text = "Built-in agent";
+                m.Text = "Direct Connect";
                 m.Checked = ((currentAgentName != null) && (currentAgentName.Equals("~")));
                 m.Click += agentSelection_Click;
                 subMenus.Add(m);
             }
 
             // Get the list of agents on the system
+            bool directConnectSeperator = false;
             agents = MeshAgent.GetAgentInfo(selectedAgentName);
             string[] agentNames = agents.Keys.ToArray();
             if (agents.Count > 0) {
@@ -126,6 +127,7 @@ namespace MeshAssistant
                 {
                     for (var i = 0; i < agentNames.Length; i++)
                     {
+                        if ((mcagent != null) && (!directConnectSeperator)) { subMenus.Add(new ToolStripSeparator()); directConnectSeperator = true; }
                         ToolStripMenuItem m = new ToolStripMenuItem();
                         m.Name = "AgentSelector-" + agentNames[i];
                         m.Text = agentNames[i];
