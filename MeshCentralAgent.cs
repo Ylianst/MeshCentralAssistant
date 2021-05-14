@@ -386,7 +386,7 @@ namespace MeshAssistant
                                             string hash = null;
                                             if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = jsonAction["servertlshash"].ToString(); }
                                             if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
-                                            MeshCentralTunnel tunnel = new MeshCentralTunnel(this, new Uri(url), hash);
+                                            MeshCentralTunnel tunnel = new MeshCentralTunnel(this, new Uri(url), hash, jsonAction);
                                             tunnels.Add(tunnel);
                                         }
                                         catch (Exception) { }

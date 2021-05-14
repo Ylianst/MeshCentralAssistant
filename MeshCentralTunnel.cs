@@ -10,6 +10,7 @@ namespace MeshAssistant
 {
     public class MeshCentralTunnel
     {
+        private Dictionary<string, object> creationArgs = null;
         private int state = 0; // 0 = Waitting for "c" or "cr", 1 = Waitting for protocol number, 2 = Running
         private int protocol = 0; // 5 = Files
         //private bool serverRecording = false;
@@ -17,17 +18,32 @@ namespace MeshAssistant
         private webSocketClient WebSocket = null;
         private JavaScriptSerializer JSON = new JavaScriptSerializer();
         private Dictionary<string, object> jsonOptions = null;
-        private FileStream fileTransfer = null;
+        private FileStream fileSendTransfer = null;
+        private FileStream fileRecvTransfer = null;
+        private string fileRecvTransferPath = null;
+        private int fileRecvTransferSize = 0;
+        private int fileRecvId = 0;
+        private string extraLogStr = "";
 
-        public MeshCentralTunnel(MeshCentralAgent parent, Uri uri, string serverHash)
+        public MeshCentralTunnel(MeshCentralAgent parent, Uri uri, string serverHash, Dictionary<string, object> creationArgs)
         {
             this.parent = parent;
+            this.creationArgs = creationArgs;
             WebSocket = new webSocketClient();
             WebSocket.pongTimeSeconds = 120; // Send a websocket pong every 2 minutes.
             WebSocket.onStateChanged += WebSocket_onStateChanged;
             WebSocket.onBinaryData += WebSocket_onBinaryData;
             WebSocket.onStringData += WebSocket_onStringData;
             WebSocket.Start(uri, serverHash);
+
+            // Setup extra log values
+            if (creationArgs != null)
+            {
+                if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { extraLogStr += ",\"userid\":\"" + escapeJsonString((string)creationArgs["userid"]) + "\""; }
+                if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { extraLogStr += ",\"username\":\"" + escapeJsonString((string)creationArgs["username"]) + "\""; }
+                if (creationArgs.ContainsKey("remoteaddr") && (creationArgs["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)creationArgs["remoteaddr"]) + "\""; }
+                if (creationArgs.ContainsKey("sessionid") && (creationArgs["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)creationArgs["sessionid"]) + "\""; }
+            }
         }
 
         private void WebSocket_onStateChanged(webSocketClient sender, webSocketClient.ConnectionStates state)
@@ -48,7 +64,8 @@ namespace MeshAssistant
 
         public void disconnect()
         {
-            if (fileTransfer != null) { fileTransfer.Close(); fileTransfer = null; }
+            if (fileSendTransfer != null) { fileSendTransfer.Close(); fileSendTransfer = null; }
+            if (fileRecvTransfer != null) { fileRecvTransfer.Close(); fileRecvTransfer = null; }
             if (WebSocket != null) { WebSocket.Dispose(); WebSocket = null; }
         }
         
@@ -117,13 +134,12 @@ namespace MeshAssistant
                             {
                                 // Send the file
                                 WebSocket.onSendOk += WebSocket_onSendOk;
-                                fileTransfer = File.OpenRead(f.FullName);
+                                fileSendTransfer = File.OpenRead(f.FullName);
                                 byte[] buf = new byte[65535];
-                                int len = fileTransfer.Read(buf, 0, buf.Length);
+                                int len = fileSendTransfer.Read(buf, 0, buf.Length);
                                 if (len > 0) { WebSocket.SendBinary(buf, 0, len); } else { disconnect(); }
                                 WebSocket.SendString("{\"op\":\"ok\",\"size\":" + f.Length + "}");
-                                string x = "{\"action\":\"log\",\"msgid\":106,\"msgArgs\":[\"" + escapeJsonString(f.FullName) + "\"," + f.Length + "],\"msg\":\"Download: " + escapeJsonString(f.FullName) + ", Size: " + f.Length + "\"}";
-                                parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(x));
+                                parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":106,\"msgArgs\":[\"" + escapeJsonString(f.FullName) + "\"," + f.Length + "],\"msg\":\"Download: " + escapeJsonString(f.FullName) + ", Size: " + f.Length + "\"" + extraLogStr + "}"));
                             }
                             catch (Exception)
                             {
@@ -147,10 +163,10 @@ namespace MeshAssistant
 
         private void WebSocket_onSendOk(webSocketClient sender)
         {
-            if (fileTransfer != null)
+            if (fileSendTransfer != null)
             {
                 byte[] buf = new byte[65535];
-                int len = fileTransfer.Read(buf, 0, buf.Length);
+                int len = fileSendTransfer.Read(buf, 0, buf.Length);
                 if (len > 0) { WebSocket.SendBinary(buf, 0, len); } else { disconnect(); }
             }
         }
@@ -158,10 +174,24 @@ namespace MeshAssistant
         private void WebSocket_onBinaryData(webSocketClient sender, byte[] data, int off, int len, int orglen)
         {
             if (state != 2) return;
-
             if (protocol == 5) // Files
             {
-                ParseFilesCommand(UTF8Encoding.UTF8.GetString(data, off, len));
+                if (data[off] == 123) { ParseFilesCommand(UTF8Encoding.UTF8.GetString(data, off, len)); }
+                else if (fileRecvTransfer != null) {
+                    bool err = false;
+                    if (data[off] == 0) {
+                        try { fileRecvTransfer.Write(data, off + 1, len - 1); } catch (Exception) { err = true; }
+                    } else {
+                        try { fileRecvTransfer.Write(data, off, len); } catch (Exception) { err = true; }
+                    }
+                    if (err) {
+                        try { fileRecvTransfer.Close(); fileRecvTransfer = null; } catch (Exception) { }
+                        fileRecvTransfer = null;
+                        WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploaderror\"}"));
+                    } else {
+                        WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploadack\",\"reqid\":" + fileRecvId + "}"));
+                    }
+                }
             }
         }
 
@@ -246,7 +276,7 @@ namespace MeshAssistant
                         if (path != "") {
                             path = path.Replace("/", "\\");
                             Directory.CreateDirectory(path);
-                            parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":44,\"msgArgs\":[\"" + escapeJsonString(path) + "\"],\"msg\":\"Create folder: " + escapeJsonString(path) + "\"}"));
+                            parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":44,\"msgArgs\":[\"" + escapeJsonString(path) + "\"],\"msg\":\"Create folder: " + escapeJsonString(path) + "\"" + extraLogStr + "}"));
                         }
                         break;
                     }
@@ -270,8 +300,8 @@ namespace MeshAssistant
                                 try { File.Delete(delfile); ok = true; } catch (Exception) { }
                                 if (ok == false) { try { Directory.Delete(delfile, rec); ok = true; } catch (Exception) { } }
                                 if (ok) {
-                                    if (rec) { parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":46,\"msgArgs\":[\"" + escapeJsonString(delfile) + "\",\"1\"],\"msg\":\"Delete recursive: \"" + escapeJsonString(delfile) + "\", 1 element(s) removed\"}")); }
-                                    else { parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":47,\"msgArgs\":[\"" + escapeJsonString(delfile) + "\",\"1\"],\"msg\":\"Delete: \"" + escapeJsonString(delfile) + "\", 1 element(s) removed\"}")); }
+                                    if (rec) { parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":46,\"msgArgs\":[\"" + escapeJsonString(delfile) + "\",\"1\"],\"msg\":\"Delete recursive: \\\"" + escapeJsonString(delfile) + "\\\", 1 element(s) removed\"" + extraLogStr + "}")); }
+                                    else { parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":47,\"msgArgs\":[\"" + escapeJsonString(delfile) + "\",\"1\"],\"msg\":\"Delete: \\\"" + escapeJsonString(delfile) + "\\\", 1 element(s) removed\"" + extraLogStr + "}")); }
                                 }
                             }
                         }
@@ -292,7 +322,7 @@ namespace MeshAssistant
                         string xnewname = Path.Combine(path, newname);
                         try { File.Move(xoldname, xnewname); ok = true; } catch (Exception) { }
                         if (ok == false) { try { DirectoryInfo d = new DirectoryInfo(xoldname); d.MoveTo(xnewname); ok = true; } catch (Exception) { } }
-                        if (ok) { parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":48,\"msgArgs\":[\"" + escapeJsonString(xoldname) + "\",\"" + escapeJsonString(newname) + "\"],\"msg\":\"Rename: " + escapeJsonString(xoldname) + " to " + escapeJsonString(newname) + "\"}")); }
+                        if (ok) { parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":48,\"msgArgs\":[\"" + escapeJsonString(xoldname) + "\",\"" + escapeJsonString(newname) + "\"],\"msg\":\"Rename: " + escapeJsonString(xoldname) + " to " + escapeJsonString(newname) + "\"" + extraLogStr + "}")); }
                         break;
                     }
                 case "copy": // Files copy
@@ -312,7 +342,7 @@ namespace MeshAssistant
                                 string sc = Path.Combine(scpath, name);
                                 string dc = Path.Combine(dspath, name);
                                 File.Copy(sc, dc);
-                                parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":51,\"msgArgs\":[\"" + escapeJsonString(sc) + "\",\"" + escapeJsonString(dc) + "\"],\"msg\":\"Copy: " + escapeJsonString(sc) + " to " + escapeJsonString(dc) + "\"}"));
+                                parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":51,\"msgArgs\":[\"" + escapeJsonString(sc) + "\",\"" + escapeJsonString(dc) + "\"],\"msg\":\"Copy: " + escapeJsonString(sc) + " to " + escapeJsonString(dc) + "\"" + extraLogStr + "}"));
                             } catch (Exception) { }
                         }
                         break;
@@ -334,7 +364,7 @@ namespace MeshAssistant
                                 string sc = Path.Combine(scpath, name);
                                 string dc = Path.Combine(dspath, name);
                                 File.Move(sc, dc);
-                                parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":52,\"msgArgs\":[\"" + escapeJsonString(sc) + "\",\"" + escapeJsonString(dc) + "\"],\"msg\":\"Move: " + escapeJsonString(sc) + " to " + escapeJsonString(dc) + "\"}"));
+                                parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":52,\"msgArgs\":[\"" + escapeJsonString(sc) + "\",\"" + escapeJsonString(dc) + "\"],\"msg\":\"Move: " + escapeJsonString(sc) + " to " + escapeJsonString(dc) + "\"" + extraLogStr + "}"));
                             } catch (Exception) { }
                         }
                         break;
@@ -375,6 +405,37 @@ namespace MeshAssistant
                         }
                         // We are done, tell the browser to refresh the folder
                         WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"refresh\"}"));
+                        break;
+                    }
+                case "upload": // Receive a file from the browser
+                    {
+                        string path = null;
+                        string name = null;
+                        int size = 0;
+                        if (jsonCommand.ContainsKey("path") && (jsonCommand["path"].GetType() == typeof(string))) { path = (string)jsonCommand["path"]; }
+                        if (jsonCommand.ContainsKey("name") && (jsonCommand["name"].GetType() == typeof(string))) { name = (string)jsonCommand["name"]; }
+                        if (jsonCommand.ContainsKey("size") && (jsonCommand["size"].GetType() == typeof(System.Int32))) { size = (int)jsonCommand["size"]; }
+                        if ((path == null) || (name == null) || (size <= 0) || !Directory.Exists(path)) { disconnect(); return; }
+
+                        string fullname = Path.Combine(path, name).Replace("/", "\\");
+                        try { fileRecvTransfer = File.OpenWrite(fullname); } catch (Exception) { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploaderror\",\"reqid\":" + reqid + "}")); break; }
+                        fileRecvId = reqid;
+                        fileRecvTransferPath = fullname;
+                        fileRecvTransferSize = size;
+                        WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploadstart\",\"reqid\":" + fileRecvId + "}"));
+
+                        break;
+                    }
+                case "uploaddone": // Received a file from the browser is done
+                    {
+                        if ((fileRecvId == reqid) && (fileRecvTransfer != null))
+                        {
+                            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploaddone\",\"reqid\":" + fileRecvId + "}"));
+                            try { fileRecvTransfer.Close(); } catch (Exception) { }
+                            fileRecvTransfer = null;
+                            fileRecvId = 0;
+                            parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":105,\"msgArgs\":[\"" + escapeJsonString(fileRecvTransferPath) + "\"," + fileRecvTransferSize + "],\"msg\":\"Download: " + escapeJsonString(fileRecvTransferPath) + ", Size: " + fileRecvTransferSize + "\"" + extraLogStr + "}"));
+                        }
                         break;
                     }
                 default: { break; }
