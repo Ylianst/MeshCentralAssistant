@@ -106,6 +106,7 @@ namespace MeshAssistant
                 mcagent = new MeshCentralAgent();
                 mcagent.onStateChanged += Mcagent_onStateChanged;
                 mcagent.onNotify += Mcagent_onNotify;
+                mcagent.onSessionChanged += Agent_onSessionChanged;
                 if (currentAgentSelection.Equals("~")) { currentAgentName = "~"; }
                 if (autoConnect == true) { currentAgentName = "~"; }
                 ToolStripMenuItem m = new ToolStripMenuItem();
@@ -121,8 +122,11 @@ namespace MeshAssistant
             agents = MeshAgent.GetAgentInfo(selectedAgentName);
             string[] agentNames = agents.Keys.ToArray();
             if (agents.Count > 0) {
-                if ((currentAgentName == null) || (currentAgentName != "~")) { currentAgentName = agentNames[0]; } // Default
-                for (var i = 0; i < agentNames.Length; i++) { if (agentNames[i] == currentAgentSelection) { currentAgentName = agentNames[i]; } }
+                if ((currentAgentName == null) || (currentAgentName != "~"))
+                {
+                    currentAgentName = agentNames[0]; // Default
+                    for (var i = 0; i < agentNames.Length; i++) { if (agentNames[i] == currentAgentSelection) { currentAgentName = agentNames[i]; } }
+                }
                 if (agentNames.Length > 1)
                 {
                     for (var i = 0; i < agentNames.Length; i++)
@@ -164,8 +168,12 @@ namespace MeshAssistant
             ToolStripMenuItem menu = (ToolStripMenuItem)sender;
             if (currentAgentName == menu.Name.Substring(14)) return;
             currentAgentName = menu.Name.Substring(14);
-            foreach (ToolStripMenuItem submenu in agentSelectToolStripMenuItem.DropDownItems) {
-                submenu.Checked = (submenu.Name.Substring(14) == currentAgentName);
+            foreach (Object obj in agentSelectToolStripMenuItem.DropDownItems) {
+                if (obj.GetType() == typeof(ToolStripMenuItem))
+                {
+                    ToolStripMenuItem submenu = (ToolStripMenuItem)obj;
+                    submenu.Checked = (submenu.Name.Substring(14) == currentAgentName);
+                }
             }
             connectToAgent();
         }
@@ -284,24 +292,42 @@ namespace MeshAssistant
             if (meInfoForm != null) { meInfoForm.updateInfo(state); }
         }
 
+        private int CountSessions(Dictionary<string, object> sessions)
+        {
+            if (sessions == null) return 0;
+            int count = 0;
+            lock (sessions) { foreach (string key in sessions.Keys) { count += (int)sessions[key]; } }
+            return count;
+        }
+
         private void Agent_onSessionChanged()
         {
-            if (agent == null) return;
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSessionChangedHandler(Agent_onSessionChanged)); return; }
 
-            if ((currentAgentName != null) && (currentAgentName.Equals("~")))
-            {
-                remoteSessionsLabel.Text = "Built-in Agent";
-            }
-            else
+            if ((mcagent != null) && (currentAgentName != null) && (currentAgentName.Equals("~")))
             {
                 // Called when sessions on the agent have changed.
                 int count = 0;
-                if (agent.DesktopSessions != null) { count += agent.DesktopSessions.Count; }
-                if (agent.TerminalSessions != null) { count += agent.TerminalSessions.Count; }
-                if (agent.FilesSessions != null) { count += agent.FilesSessions.Count; }
-                if (agent.TcpSessions != null) { count += agent.TcpSessions.Count; }
-                if (agent.UdpSessions != null) { count += agent.UdpSessions.Count; }
+                if (mcagent.DesktopSessions != null) { count += CountSessions(mcagent.DesktopSessions); }
+                if (mcagent.TerminalSessions != null) { count += CountSessions(mcagent.TerminalSessions); }
+                if (mcagent.FilesSessions != null) { count += CountSessions(mcagent.FilesSessions); }
+                if (mcagent.TcpSessions != null) { count += CountSessions(mcagent.TcpSessions); }
+                if (mcagent.UdpSessions != null) { count += CountSessions(mcagent.UdpSessions); }
+                if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); }
+                if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; }
+                if (count == 0) { mainNotifyIcon.BalloonTipText = "No active remote sessions."; remoteSessionsLabel.Text = "No remote sessions"; }
+                //mainNotifyIcon.ShowBalloonTip(2000);
+                if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
+            }
+            else if (agent != null)
+            {
+                // Called when sessions on the agent have changed.
+                int count = 0;
+                if (agent.DesktopSessions != null) { count += CountSessions(agent.DesktopSessions); }
+                if (agent.TerminalSessions != null) { count += CountSessions(agent.TerminalSessions); }
+                if (agent.FilesSessions != null) { count += CountSessions(agent.FilesSessions); }
+                if (agent.TcpSessions != null) { count += CountSessions(agent.TcpSessions); }
+                if (agent.UdpSessions != null) { count += CountSessions(agent.UdpSessions); }
                 if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); }
                 if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; }
                 if (count == 0) { mainNotifyIcon.BalloonTipText = "No active remote sessions."; remoteSessionsLabel.Text = "No remote sessions"; }

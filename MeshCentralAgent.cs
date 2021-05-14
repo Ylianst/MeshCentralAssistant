@@ -31,6 +31,18 @@ namespace MeshAssistant
         private int ConnectionState = 0;
         private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>();
 
+        // Sessions
+        public Dictionary<string, object> DesktopSessions = null;
+        public Dictionary<string, object> TerminalSessions = null;
+        public Dictionary<string, object> FilesSessions = null;
+        public Dictionary<string, object> TcpSessions = null;
+        public Dictionary<string, object> UdpSessions = null;
+        public Dictionary<string, object> MessagesSessions = null;
+
+        public delegate void onSessionChangedHandler();
+        public event onSessionChangedHandler onSessionChanged;
+        public void fireSessionChanged() { if (onSessionChanged != null) { onSessionChanged(); } }
+
         public MeshCentralAgent()
         {
             // Load the agent certificate and private key

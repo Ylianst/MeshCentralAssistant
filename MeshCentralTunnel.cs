@@ -24,6 +24,7 @@ namespace MeshAssistant
         private int fileRecvTransferSize = 0;
         private int fileRecvId = 0;
         private string extraLogStr = "";
+        private string sessionUserName = null;
 
         public MeshCentralTunnel(MeshCentralAgent parent, Uri uri, string serverHash, Dictionary<string, object> creationArgs)
         {
@@ -67,6 +68,20 @@ namespace MeshAssistant
             if (fileSendTransfer != null) { fileSendTransfer.Close(); fileSendTransfer = null; }
             if (fileRecvTransfer != null) { fileRecvTransfer.Close(); fileRecvTransfer = null; }
             if (WebSocket != null) { WebSocket.Dispose(); WebSocket = null; }
+
+            // Update session
+            if (sessionUserName != null)
+            {
+                if (protocol == 5)
+                {
+                    if (parent.FilesSessions.ContainsKey(sessionUserName)) {
+                        parent.FilesSessions[sessionUserName] = (int)parent.FilesSessions[sessionUserName] - 1;
+                        if ((int)parent.FilesSessions[sessionUserName] == 0) { parent.FilesSessions = null; }
+                    }
+                    parent.fireSessionChanged();
+                }
+                sessionUserName = null;
+            }
         }
         
         private void connectedToServer()
@@ -121,6 +136,30 @@ namespace MeshAssistant
                     return;
                 }
                 if (int.TryParse(data, out protocol)) { state = 2; }
+
+                // Add this session
+                if (creationArgs != null)
+                {
+                    if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["username"]; }
+                    if (creationArgs.ContainsKey("realname") && (creationArgs["realname"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["realname"]; }
+                    if (sessionUserName != null)
+                    {
+                        if (protocol == 5)
+                        {
+                            if (parent.FilesSessions == null) { parent.FilesSessions = new Dictionary<string, object>(); }
+                            if (parent.FilesSessions.ContainsKey(sessionUserName)) { parent.FilesSessions[sessionUserName] = (int)parent.FilesSessions[sessionUserName] + 1; } else { parent.FilesSessions[sessionUserName] = 1; }
+                            parent.fireSessionChanged();
+                        }
+                        /*
+                        public Dictionary<string, object> DesktopSessions = null;
+                        public Dictionary<string, object> TerminalSessions = null;
+                        public Dictionary<string, object> FilesSessions = null;
+                        public Dictionary<string, object> TcpSessions = null;
+                        public Dictionary<string, object> UdpSessions = null;
+                        public Dictionary<string, object> MessagesSessions = null;
+                        */
+                    }
+                }
 
                 if (protocol == 10)
                 {
