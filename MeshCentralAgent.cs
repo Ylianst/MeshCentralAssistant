@@ -41,7 +41,41 @@ namespace MeshAssistant
 
         public delegate void onSessionChangedHandler();
         public event onSessionChangedHandler onSessionChanged;
-        public void fireSessionChanged() { if (onSessionChanged != null) { onSessionChanged(); } }
+        public void fireSessionChanged(int protocol) {
+            if (onSessionChanged != null) { onSessionChanged(); }
+            if (WebSocket == null) return;
+
+            // Update the server with latest session
+            if (protocol == 2)
+            {
+                string r = "{\"action\":\"sessions\",\"type\":\"kvm\",\"value\":{";
+                if (DesktopSessions != null)
+                {
+                    bool first = true;
+                    foreach (string userid in DesktopSessions.Keys)
+                    {
+                        if (first) { first = false; } else { r += ","; }
+                        r += "\"" + userid + "\":" + (int)DesktopSessions[userid];
+                    }
+                }
+                r += "}}";
+                if (WebSocket != null) { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(r)); }
+            }
+            else if (protocol == 5)
+            {
+                string r = "{\"action\":\"sessions\",\"type\":\"files\",\"value\":{";
+                if (FilesSessions != null) {
+                    bool first = true;
+                    foreach (string userid in FilesSessions.Keys)
+                    {
+                        if (first) { first = false; } else { r += ","; }
+                        r += "\"" + userid + "\":" + (int)FilesSessions[userid];
+                    }
+                }
+                r += "}}";
+                if (WebSocket != null) { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(r)); }
+            }
+        }
 
         public MeshCentralAgent()
         {
@@ -504,7 +538,7 @@ namespace MeshAssistant
                         bw.Write(Convert.ToInt32(IPAddress.HostToNetworkOrder((int)0))); // Agent Version
                         bw.Write(Convert.ToInt32(IPAddress.HostToNetworkOrder((int)1))); // Platform Type, this is the icon: 1 = Desktop, 2 = Laptop, 3 = Mobile, 4 = Server, 5 = Disk, 6 = Router
                         bw.Write(MeshId); // Mesh ID. This is the identifier of the initial device group
-                        bw.Write(Convert.ToInt32(IPAddress.HostToNetworkOrder((int)(4 + 8)))); // Capabilities of the agent (bitmask): 1 = Desktop, 2 = Terminal, 4 = Files, 8 = Console, 16 = JavaScript, 32 = Temporary, 64 = Recovery
+                        bw.Write(Convert.ToInt32(IPAddress.HostToNetworkOrder((int)(1 + 4 + 8)))); // Capabilities of the agent (bitmask): 1 = Desktop, 2 = Terminal, 4 = Files, 8 = Console, 16 = JavaScript, 32 = Temporary, 64 = Recovery
                         bw.Write(Convert.ToInt16(IPAddress.HostToNetworkOrder((short)hostNameBytes.Length))); // Computer Name Length
                         bw.Write(hostNameBytes); // Computer name
                         WebSocket.SendBinary(((MemoryStream)bw.BaseStream).ToArray());

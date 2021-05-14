@@ -12,11 +12,12 @@ namespace MeshAssistant
     {
         private Dictionary<string, object> creationArgs = null;
         private int state = 0; // 0 = Waitting for "c" or "cr", 1 = Waitting for protocol number, 2 = Running
-        private int protocol = 0; // 5 = Files
+        private int protocol = 0; // 1 = Terminal, 2 = Desktop, 5 = Files, 10 = File Transfer
         //private bool serverRecording = false;
         private MeshCentralAgent parent = null;
-        private webSocketClient WebSocket = null;
+        public webSocketClient WebSocket = null;
         private JavaScriptSerializer JSON = new JavaScriptSerializer();
+        private MeshCentralDesktop Desktop = null;
         private Dictionary<string, object> jsonOptions = null;
         private FileStream fileSendTransfer = null;
         private FileStream fileRecvTransfer = null;
@@ -68,17 +69,27 @@ namespace MeshAssistant
             if (fileSendTransfer != null) { fileSendTransfer.Close(); fileSendTransfer = null; }
             if (fileRecvTransfer != null) { fileRecvTransfer.Close(); fileRecvTransfer = null; }
             if (WebSocket != null) { WebSocket.Dispose(); WebSocket = null; }
+            if (Desktop != null) { Desktop.Dispose(); Desktop = null; }
 
             // Update session
             if (sessionUserName != null)
             {
+                if (protocol == 2)
+                {
+                    if (parent.DesktopSessions.ContainsKey(sessionUserName))
+                    {
+                        parent.DesktopSessions[sessionUserName] = (int)parent.DesktopSessions[sessionUserName] - 1;
+                        if ((int)parent.DesktopSessions[sessionUserName] == 0) { parent.DesktopSessions = null; }
+                    }
+                    parent.fireSessionChanged(2);
+                }
                 if (protocol == 5)
                 {
                     if (parent.FilesSessions.ContainsKey(sessionUserName)) {
                         parent.FilesSessions[sessionUserName] = (int)parent.FilesSessions[sessionUserName] - 1;
                         if ((int)parent.FilesSessions[sessionUserName] == 0) { parent.FilesSessions = null; }
                     }
-                    parent.fireSessionChanged();
+                    parent.fireSessionChanged(5);
                 }
                 sessionUserName = null;
             }
@@ -140,28 +151,31 @@ namespace MeshAssistant
                 // Add this session
                 if (creationArgs != null)
                 {
-                    if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["username"]; }
-                    if (creationArgs.ContainsKey("realname") && (creationArgs["realname"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["realname"]; }
+                    //if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["username"]; }
+                    //if (creationArgs.ContainsKey("realname") && (creationArgs["realname"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["realname"]; }
+                    if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["userid"]; }
                     if (sessionUserName != null)
                     {
-                        if (protocol == 5)
+                        if (protocol == 2) // Desktop
+                        {
+                            if (parent.DesktopSessions == null) { parent.DesktopSessions = new Dictionary<string, object>(); }
+                            if (parent.DesktopSessions.ContainsKey(sessionUserName)) { parent.DesktopSessions[sessionUserName] = (int)parent.DesktopSessions[sessionUserName] + 1; } else { parent.DesktopSessions[sessionUserName] = 1; }
+                            parent.fireSessionChanged(2);
+                        }
+                        if (protocol == 5) // Files
                         {
                             if (parent.FilesSessions == null) { parent.FilesSessions = new Dictionary<string, object>(); }
                             if (parent.FilesSessions.ContainsKey(sessionUserName)) { parent.FilesSessions[sessionUserName] = (int)parent.FilesSessions[sessionUserName] + 1; } else { parent.FilesSessions[sessionUserName] = 1; }
-                            parent.fireSessionChanged();
+                            parent.fireSessionChanged(5);
                         }
-                        /*
-                        public Dictionary<string, object> DesktopSessions = null;
-                        public Dictionary<string, object> TerminalSessions = null;
-                        public Dictionary<string, object> FilesSessions = null;
-                        public Dictionary<string, object> TcpSessions = null;
-                        public Dictionary<string, object> UdpSessions = null;
-                        public Dictionary<string, object> MessagesSessions = null;
-                        */
                     }
                 }
 
-                if (protocol == 10)
+                if (protocol == 2)
+                {
+                    Desktop = new MeshCentralDesktop(this);
+                }
+                else if (protocol == 10)
                 {
                     // Basic file transfer
                     if ((jsonOptions.ContainsKey("file")) && (jsonOptions["file"].GetType() == typeof(string)))
@@ -213,7 +227,11 @@ namespace MeshAssistant
         private void WebSocket_onBinaryData(webSocketClient sender, byte[] data, int off, int len, int orglen)
         {
             if (state != 2) return;
-            if (protocol == 5) // Files
+            if (protocol == 2) // Desktop
+            {
+                if (Desktop != null) { Desktop.onBinaryData(data, off, len); }
+            }
+            else if (protocol == 5) // Files
             {
                 if (data[off] == 123) { ParseFilesCommand(UTF8Encoding.UTF8.GetString(data, off, len)); }
                 else if (fileRecvTransfer != null) {
