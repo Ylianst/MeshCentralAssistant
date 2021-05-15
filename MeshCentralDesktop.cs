@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace MeshAssistant
 {
@@ -22,6 +23,95 @@ namespace MeshAssistant
         private int encoderCompression = 30;
         private int encoderScaling = 1024;
         private int encoderFrameRate = 100;
+
+        [DllImport("user32.dll")]
+        public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, int dwExtraInfo);
+
+        [DllImport("user32")]
+        public static extern int SetCursorPos(int x, int y);
+
+        [DllImport("USER32.DLL")]
+        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll")]
+        private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+
+        [Flags]
+        enum MouseEventFlags : uint
+        {
+            MOUSEEVENTF_MOVE = 0x0001,
+            MOUSEEVENTF_LEFTDOWN = 0x0002,
+            MOUSEEVENTF_LEFTUP = 0x0004,
+            MOUSEEVENTF_RIGHTDOWN = 0x0008,
+            MOUSEEVENTF_RIGHTUP = 0x0010,
+            MOUSEEVENTF_MIDDLEDOWN = 0x0020,
+            MOUSEEVENTF_MIDDLEUP = 0x0040,
+            MOUSEEVENTF_XDOWN = 0x0080,
+            MOUSEEVENTF_XUP = 0x0100,
+            MOUSEEVENTF_WHEEL = 0x0800,
+            MOUSEEVENTF_VIRTUALDESK = 0x4000,
+            MOUSEEVENTF_ABSOLUTE = 0x8000
+        }
+
+        // Keystrokes, mouse motions, and button clicks.
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern uint SendInput(uint nInputs, ref INPUT pInputs, int cbSize);
+
+        // INPUT
+        [StructLayout(LayoutKind.Sequential)]
+        struct INPUT
+        {
+            public SendInputEventType type;
+            public MouseKeybdhardwareInputUnion mkhi; // Mouse, Keyboard, Hardware, Input
+        }
+
+        enum SendInputEventType : int
+        {
+            MOUSE = 0,
+            KEYBOARD = 1,
+            HARDWARE = 2
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        struct MouseKeybdhardwareInputUnion
+        {
+            [FieldOffset(0)]
+            public MouseInputData mi; // mouse input
+
+            [FieldOffset(0)]
+            public KEYBDINPUT ki; // keyboard input
+
+            [FieldOffset(0)]
+            public HARDWAREINPUT hi; // hardware input
+        }
+
+        struct MouseInputData
+        {
+            public int dx;
+            public int dy;
+            public uint mouseData;
+            public MouseEventFlags dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct KEYBDINPUT
+        {
+            public ushort wVk;
+            public ushort wScan;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct HARDWAREINPUT
+        {
+            public int uMsg;
+            public short wParamL;
+            public short wParamH;
+        }
 
         public MeshCentralDesktop(MeshCentralTunnel parent)
         {
@@ -62,6 +152,20 @@ namespace MeshAssistant
                     }
                 case 2: // Mouse
                     {
+                        if (cmdlen < 10) break;
+                        int b = ((data[off + 4] << 8) + data[off + 5]);
+                        int x = (1024 * ((data[off + 6] << 8) + data[off + 7])) / encoderScaling;
+                        int y = (1024 * ((data[off + 8] << 8) + data[off + 9])) / encoderScaling;
+                        int w = 0;
+                        if (cmdlen >= 12) { w = (int)((data[off + 10] << 8) + data[off + 11]); if (w > 32768) { w -= 65535; } }
+                        Cursor.Position = new Point(x, y);
+                        if ((b &  2) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_LEFTDOWN), x, y, 0, 0); }
+                        if ((b &  4) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_LEFTUP), x, y, 0, 0); }
+                        if ((b &  8) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_RIGHTDOWN), x, y, 0, 0); }
+                        if ((b & 16) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_RIGHTUP), x, y, 0, 0); }
+                        if ((b & 32) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_MIDDLEDOWN), x, y, 0, 0); }
+                        if ((b & 64) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_MIDDLEUP), x, y, 0, 0); }
+                        if (w != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_WHEEL), x, y, (uint)w, 0); }
                         break;
                     }
                 case 5: // Settings
@@ -91,6 +195,10 @@ namespace MeshAssistant
                         }
                         break;
                     }
+                case 8:
+                    {
+                        break;
+                    }
                 case 10: // Ctrl-Alt-Del
                     {
                         break;
@@ -118,6 +226,14 @@ namespace MeshAssistant
                         break;
                     }
                 case 85: // Unicode Key
+                    {
+                        break;
+                    }
+                case 87:
+                    {
+                        break;
+                    }
+                default:
                     {
                         break;
                     }
@@ -152,6 +268,9 @@ namespace MeshAssistant
 
                 try
                 {
+                    // Take a look at the mouse cursor
+                    //Cursor mouseCursor = Cursor.Current;
+
                     // Get the size and location of the currently selected screen
                     Size tscreensize = Size.Empty;
                     Point tscreenlocation = Point.Empty;
