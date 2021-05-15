@@ -52,7 +52,7 @@ namespace MeshAssistant
         private DeflateStream inflate;
         private MemoryStream deflateMemory;
         private static byte[] inflateEnd = { 0x00, 0x00, 0xff, 0xff };
-        private static byte[] inflateStart = { 0x00, 0x00, 0x00, 0x00 };
+        private static byte[] inflateStart = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         public int pingTimeSeconds = 0;
         public int pongTimeSeconds = 0;
         private System.Threading.Timer pingTimer = null;
@@ -590,7 +590,7 @@ namespace MeshAssistant
             if ((deflateMemory != null) && (len > 32) && (AllowCompression))
             {
                 deflateMemory.SetLength(0);
-                deflateMemory.Write(inflateStart, 0, 4);
+                deflateMemory.Write(inflateStart, 0, 10);
                 DeflateStream deflate = new DeflateStream(deflateMemory, CompressionMode.Compress, true);
                 deflate.Write(data, offset, len);
                 deflate.Dispose();
@@ -600,40 +600,51 @@ namespace MeshAssistant
                     // Use the compressed data
                     int newlen = (int)deflateMemory.Length;
                     buf = deflateMemory.GetBuffer();
-                    len = newlen - 4;
+                    len = newlen - 10;
                     op |= 0x40; // Add compression op
                 } else {
                     // Don't use the compress data
                     // Convert the string into a buffer with 4 byte of header space.
-                    buf = new byte[4 + len];
-                    Array.Copy(data, offset, buf, 4, len);
+                    buf = new byte[10 + len];
+                    Array.Copy(data, offset, buf, 10, len);
                 }
             }
             else
             {
                 // Convert the string into a buffer with 4 byte of header space.
-                buf = new byte[4 + len];
-                if (len > 0) { Array.Copy(data, offset, buf, 4, len); }
+                buf = new byte[10 + len];
+                if (len > 0) { Array.Copy(data, offset, buf, 10, len); }
             }
 
             // Check that everything is ok
-            if ((len < 0) || (len > 65535)) { Dispose(); return 0; }
+            if (len < 0) { Dispose(); return 0; }
 
             if (len < 126)
             {
                 // Small fragment
-                buf[2] = op;
-                buf[3] = (byte)(len & 0x7F);
-                SendData(buf, 2, len + 2);
+                buf[8] = op;
+                buf[9] = (byte)(len & 0x7F);
+                SendData(buf, 8, len + 2);
+            }
+            else if (len < 65535)
+            {
+                // Medium fragment
+                buf[6] = op;
+                buf[7] = 126;
+                buf[8] = (byte)((len >> 8) & 0xFF);
+                buf[9] = (byte)(len & 0xFF);
+                SendData(buf, 6, len + 4);
             }
             else
             {
                 // Large fragment
                 buf[0] = op;
-                buf[1] = 126;
-                buf[2] = (byte)((len >> 8) & 0xFF);
-                buf[3] = (byte)(len & 0xFF);
-                SendData(buf, 0, len + 4);
+                buf[1] = 127;
+                buf[6] = (byte)((len >> 24) & 0xFF);
+                buf[7] = (byte)((len >> 16) & 0xFF);
+                buf[8] = (byte)((len >> 8) & 0xFF);
+                buf[9] = (byte)(len & 0xFF);
+                SendData(buf, 0, len + 10);
             }
 
             return len;
