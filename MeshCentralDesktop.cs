@@ -33,6 +33,9 @@ namespace MeshAssistant
             EncoderParameter myEncoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, encoderCompression);
             myEncoderParameters.Param[0] = myEncoderParameter;
 
+            // Send displays
+            SendDisplays();
+
             // Start the capture thread
             mainThread = new Thread(new ThreadStart(MainDesktopLoop));
             mainThread.Start();
@@ -92,6 +95,24 @@ namespace MeshAssistant
                     {
                         break;
                     }
+                case 11: // Query displays
+                    {
+                        SendDisplays();
+                        break;
+                    }
+                case 12: // Set display
+                    {
+                        if (cmdlen < 6) break;
+                        int selectedDisplay = ((data[off + 4] << 8) + data[off + 5]);
+                        if (selectedDisplay == 65535) {
+                            currentDisplay = -1;
+                        } else {
+                            if (selectedDisplay < 1) break;
+                            if (selectedDisplay > Screen.AllScreens.Length) break;
+                            currentDisplay = (selectedDisplay - 1);
+                        }                        
+                        break;
+                    }
                 case 15: // Touch
                     {
                         break;
@@ -101,6 +122,24 @@ namespace MeshAssistant
                         break;
                     }
             }
+        }
+
+        private void SendDisplays()
+        {
+            Screen[] screens = Screen.AllScreens;
+            int screenCount = screens.Length;
+            if (screenCount > 1) { screenCount++; }
+            byte[] buf = new byte[8 + (screenCount * 2)];
+            buf[1] = 11; // Get Displays
+            buf[3] = (byte)buf.Length; // Command Length
+            buf[5] = (byte)screenCount; // Display count
+            if (currentDisplay == -1) { buf[6] = 255; buf[7] = 255; } else { buf[7] = (byte)currentDisplay; } // Selected Display
+            int ptr = 8;
+            for (var i = 0; i < screens.Length; i++) { buf[ptr] = 0; buf[ptr + 1] = (byte)(i + 1); ptr += 2; }
+            if (screens.Length > 1) { buf[ptr] = 255; buf[ptr + 1] = 255; }
+
+            // Send normal command
+            parent.WebSocket.SendBinary(buf, 0, buf.Length);
         }
 
         private void MainDesktopLoop()
