@@ -10,11 +10,13 @@ using System.Web.Script.Serialization;
 using System.Security.Cryptography.X509Certificates;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace MeshAssistant
 {
     public class MeshCentralAgent
     {
+        private MainForm parent;
         public bool debug = false;
         public int state = 0;
         public string HelpRequest = null;
@@ -77,8 +79,10 @@ namespace MeshAssistant
             }
         }
 
-        public MeshCentralAgent()
+        public MeshCentralAgent(MainForm parent)
         {
+            this.parent = parent;
+
             // Load the agent certificate and private key
             agentCert = LoadAgentCertificate();
 
@@ -356,7 +360,7 @@ namespace MeshAssistant
             }
 
             if (response != null) {
-                WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"console\",\"value\":\"" + response.Replace("\r", "\\r").Replace("\n", "\\n").Replace("\"", "\\\"") + "\",\"sessionid\":\"" + sessionid + "\"}"));
+                WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"console\",\"value\":\"" + escapeJsonString(response) + "\",\"sessionid\":\"" + sessionid + "\"}"));
             }
         }
 
@@ -392,8 +396,8 @@ namespace MeshAssistant
                         switch (eventType)
                         {
                             case "console": {
-                                    if (jsonAction["value"].GetType() != typeof(string)) break;
-                                    if (jsonAction["sessionid"].GetType() != typeof(string)) break;
+                                    if ((!jsonAction.ContainsKey("value")) && (jsonAction["value"].GetType() != typeof(string))) break;
+                                    if ((!jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() != typeof(string))) break;
                                     string cmd = jsonAction["value"].ToString();
                                     string sessionid = jsonAction["sessionid"].ToString();
                                     processConsoleCommand(cmd, sessionid);
@@ -401,7 +405,7 @@ namespace MeshAssistant
                                 }
                             case "localapp":
                                 {
-                                    if (jsonAction["value"].GetType() == typeof(Dictionary<string, object>)) {
+                                    if ((jsonAction.ContainsKey("value")) && (jsonAction["value"].GetType() == typeof(Dictionary<string, object>))) {
                                         Dictionary<string, object> localappvalue = (Dictionary<string, object>)jsonAction["value"];
                                         if (localappvalue["cmd"].GetType() == typeof(string))
                                         {
@@ -409,12 +413,11 @@ namespace MeshAssistant
                                             if (cmdvalue == "cancelhelp") { disconnect(); }
                                         }
                                     }
-                                    if (jsonAction["value"].GetType() != typeof(string)) break;
                                     break;
                                 }
                             case "messagebox":
                                 {
-                                    if ((jsonAction["title"].GetType() == typeof(string)) && (jsonAction["msg"].GetType() == typeof(string)))
+                                    if ((jsonAction.ContainsKey("title")) && (jsonAction["title"].GetType() == typeof(string)) && (jsonAction.ContainsKey("msg")) && (jsonAction["msg"].GetType() == typeof(string)))
                                     {
                                         string title = jsonAction["title"].ToString();
                                         string message = jsonAction["msg"].ToString();
@@ -439,6 +442,8 @@ namespace MeshAssistant
                                     }
                                     break;
                                 }
+                            case "getclip": { GetClipboard(jsonAction); break; }
+                            case "setclip": { SetClipboard(jsonAction); break; }
                             default:
                                 {
                                     debugMsg("Unprocessed event type: " + eventType);
@@ -452,6 +457,50 @@ namespace MeshAssistant
                         debugMsg("Unprocessed command: " + action);
                         break;
                     }
+            }
+        }
+
+        private delegate void ClipboardHandler(Dictionary<string, object> jsonAction);
+
+        private void GetClipboard(Dictionary<string, object> jsonAction)
+        {
+            // Clipboard can only be fetched from the main thread
+            if (parent.InvokeRequired) { parent.Invoke(new ClipboardHandler(GetClipboard), jsonAction); return; }
+            if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string)) && (jsonAction.ContainsKey("tag")) && (jsonAction["tag"].GetType() == typeof(System.Int32)))
+            {
+                string extraLogStr = "";
+                if (jsonAction.ContainsKey("userid") && (jsonAction["userid"].GetType() == typeof(string))) { extraLogStr += ",\"userid\":\"" + escapeJsonString((string)jsonAction["userid"]) + "\""; }
+                if (jsonAction.ContainsKey("username") && (jsonAction["username"].GetType() == typeof(string))) { extraLogStr += ",\"username\":\"" + escapeJsonString((string)jsonAction["username"]) + "\""; }
+                if (jsonAction.ContainsKey("remoteaddr") && (jsonAction["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)jsonAction["remoteaddr"]) + "\""; }
+                if (jsonAction.ContainsKey("sessionid") && (jsonAction["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)jsonAction["sessionid"]) + "\""; }
+
+                string sessionid = (string)jsonAction["sessionid"];
+                int tag = (int)jsonAction["tag"];
+                if (Clipboard.ContainsText(TextDataFormat.Text))
+                {
+                    string clipboardValue = Clipboard.GetText();
+                    WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":21,\"msgArgs\":[" + clipboardValue.Length + "],\"msg\":\"Getting clipboard content, " + clipboardValue.Length + " byte(s)\"" + extraLogStr + "}"));
+                    WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"getclip\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"data\":\"" + escapeJsonString(clipboardValue) + "\",\"tag\":" + tag + "}"));
+                }
+            }
+        }
+
+        private void SetClipboard(Dictionary<string, object> jsonAction)
+        {
+            // Clipboard can only be set from the main thread
+            if (parent.InvokeRequired) { parent.Invoke(new ClipboardHandler(SetClipboard), jsonAction); return; }
+            if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string)) && (jsonAction.ContainsKey("data")) && (jsonAction["data"].GetType() == typeof(string)))
+            {
+                string extraLogStr = "";
+                if (jsonAction.ContainsKey("userid") && (jsonAction["userid"].GetType() == typeof(string))) { extraLogStr += ",\"userid\":\"" + escapeJsonString((string)jsonAction["userid"]) + "\""; }
+                if (jsonAction.ContainsKey("username") && (jsonAction["username"].GetType() == typeof(string))) { extraLogStr += ",\"username\":\"" + escapeJsonString((string)jsonAction["username"]) + "\""; }
+                if (jsonAction.ContainsKey("remoteaddr") && (jsonAction["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)jsonAction["remoteaddr"]) + "\""; }
+                if (jsonAction.ContainsKey("sessionid") && (jsonAction["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)jsonAction["sessionid"]) + "\""; }
+
+                string clipboardData = (string)jsonAction["data"];
+                Clipboard.SetText(clipboardData);
+                string sessionid = (string)jsonAction["sessionid"];
+                WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"setclip\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"success\":true}"));
             }
         }
 

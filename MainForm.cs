@@ -103,7 +103,7 @@ namespace MeshAssistant
             string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
 
             if (MeshCentralAgent.checkMshFile()) {
-                mcagent = new MeshCentralAgent();
+                mcagent = new MeshCentralAgent(this);
                 mcagent.onStateChanged += Mcagent_onStateChanged;
                 mcagent.onNotify += Mcagent_onNotify;
                 mcagent.onSessionChanged += Agent_onSessionChanged;
