@@ -26,6 +26,32 @@ namespace MeshAssistant
         private int fileRecvId = 0;
         private string extraLogStr = "";
         private string sessionUserName = null;
+        public long userRights = 0;
+
+        public enum MeshRights : long
+        {
+            EDITMESH            = 0x00000001,
+            MANAGEUSERS         = 0x00000002,
+            MANAGECOMPUTERS     = 0x00000004,
+            REMOTECONTROL       = 0x00000008,
+            AGENTCONSOLE        = 0x00000010,
+            SERVERFILES         = 0x00000020,
+            WAKEDEVICE          = 0x00000040,
+            SETNOTES            = 0x00000080,
+            REMOTEVIEWONLY      = 0x00000100,
+            NOTERMINAL          = 0x00000200,
+            NOFILES             = 0x00000400,
+            NOAMT               = 0x00000800,
+            DESKLIMITEDINPUT    = 0x00001000,
+            LIMITEVENTS         = 0x00002000,
+            CHATNOTIFY          = 0x00004000,
+            UNINSTALL           = 0x00008000,
+            NODESKTOP           = 0x00010000,
+            REMOTECOMMAND       = 0x00020000,
+            RESETOFF            = 0x00040000,
+            GUESTSHARING        = 0x00080000,
+            ADMIN               = 0xFFFFFFFF
+        }
 
         public MeshCentralTunnel(MeshCentralAgent parent, Uri uri, string serverHash, Dictionary<string, object> creationArgs)
         {
@@ -45,6 +71,7 @@ namespace MeshAssistant
                 if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { extraLogStr += ",\"username\":\"" + escapeJsonString((string)creationArgs["username"]) + "\""; }
                 if (creationArgs.ContainsKey("remoteaddr") && (creationArgs["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)creationArgs["remoteaddr"]) + "\""; }
                 if (creationArgs.ContainsKey("sessionid") && (creationArgs["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)creationArgs["sessionid"]) + "\""; }
+                if (creationArgs.ContainsKey("rights") && ((creationArgs["rights"].GetType() == typeof(System.Int32)) || (creationArgs["rights"].GetType() == typeof(System.Int64)))) { userRights = (long)creationArgs["rights"]; }
             }
         }
 

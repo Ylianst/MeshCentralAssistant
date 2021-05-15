@@ -29,14 +29,78 @@ namespace MeshAssistant
         [DllImport("user32.dll")]
         public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, int dwExtraInfo);
 
-        [DllImport("user32")]
+        [DllImport("user32.dll")]
         public static extern int SetCursorPos(int x, int y);
 
-        [DllImport("USER32.DLL")]
+        [DllImport("user32.dll")]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
         [DllImport("user32.dll")]
         private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+
+        [DllImport("User32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, int uMsg, int wParam, string lParam);
+
+        [DllImport("user32.dll")]
+        private static extern int MapVirtualKey(int uCode, uint uMapType);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern uint SendInput(uint nInputs, Input[] pInputs, int cbSize);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetMessageExtraInfo();
+
+        const uint MAPVK_VK_TO_VSC = 0x00;
+        const uint MAPVK_VSC_TO_VK = 0x01;
+        const uint MAPVK_VK_TO_CHAR = 0x02;
+        const uint MAPVK_VSC_TO_VK_EX = 0x03;
+        const uint MAPVK_VK_TO_VSC_EX = 0x04;
+
+        public struct Input
+        {
+            public int type;
+            public InputUnion u;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MouseInput
+        {
+            public int dx;
+            public int dy;
+            public uint mouseData;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct HardwareInput
+        {
+            public uint uMsg;
+            public ushort wParamL;
+            public ushort wParamH;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KeyboardInput
+        {
+            public ushort wVk;
+            public ushort wScan;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct InputUnion
+        {
+            [FieldOffset(0)]
+            public MouseInput mi;
+            [FieldOffset(0)]
+            public KeyboardInput ki;
+            [FieldOffset(0)]
+            public HardwareInput hi;
+        }
 
         [Flags]
         enum MouseEventFlags : uint
@@ -115,6 +179,15 @@ namespace MeshAssistant
             public short wParamH;
         }
 
+        [Flags]
+        public enum KeyEventF
+        {
+            KeyDown = 0x0000,
+            ExtendedKey = 0x0001,
+            KeyUp = 0x0002,
+            Unicode = 0x0004,
+            Scancode = 0x0008
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         struct POINT
@@ -173,11 +246,55 @@ namespace MeshAssistant
             {
                 case 1: // Key
                     {
+                        if (cmdlen < 6) break;
+
+                        // Check user rights. If view only, ignore this command
+                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                        bool limitedinput = false;
+                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
+
+                        // Decode the command
+                        int action = data[off + 4];
+                        int key = data[off + 5];
+
+                        // Check limited input
+                        if (limitedinput && (action > 1)) break; // With limited input, extended keys are not allowed
+                        // TODO
+
+                        // Setup the flags
+                        uint flags = 0;
+                        if (action == 1) { flags += (uint)(KeyEventF.KeyUp); }
+                        if (action == 3) { flags += (uint)(KeyEventF.ExtendedKey | KeyEventF.KeyUp); }
+                        if (action == 4) { flags += (uint)(KeyEventF.ExtendedKey); }
+
+                        // Send the input
+                        Input[] inputs = new Input[]
+                        {
+                            new Input
+                            {
+                                type = (int)SendInputEventType.KEYBOARD,
+                                u = new InputUnion
+                                {
+                                    ki = new KeyboardInput
+                                    {
+                                        wVk = (ushort)key,
+                                        wScan = (ushort)MapVirtualKey((int)key, MAPVK_VK_TO_VSC),
+                                        dwFlags = flags,
+                                        dwExtraInfo = GetMessageExtraInfo()
+                                    }
+                                }
+                            }
+                        };
+                        SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
                         break;
                     }
                 case 2: // Mouse
                     {
                         if (cmdlen < 10) break;
+
+                        // Check user rights. If view only, ignore this command
+                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+
                         int b = ((data[off + 4] << 8) + data[off + 5]);
                         int x = (1024 * ((data[off + 6] << 8) + data[off + 7])) / encoderScaling;
                         int y = (1024 * ((data[off + 8] << 8) + data[off + 9])) / encoderScaling;
@@ -227,6 +344,10 @@ namespace MeshAssistant
                     }
                 case 10: // Ctrl-Alt-Del
                     {
+                        // Check user rights. If view only, ignore this command
+                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) break;
+                        // This is not supported since we are not running as a admin service
                         break;
                     }
                 case 11: // Query displays
@@ -249,10 +370,50 @@ namespace MeshAssistant
                     }
                 case 15: // Touch
                     {
+                        // Check user rights. If view only, ignore this command
+                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+
                         break;
                     }
                 case 85: // Unicode Key
                     {
+                        if (cmdlen < 7) break;
+
+                        // Check user rights. If view only, ignore this command
+                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                        bool limitedinput = false;
+                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
+
+                        // Decode the command
+                        int action = data[off + 4];
+                        int key = (data[off + 5] << 8) + data[off + 6];
+
+                        // Check limited input
+                        // TODO
+
+                        // Setup the flags
+                        uint flags = (uint)(KeyEventF.Unicode);
+                        if (action == 1) { flags += (uint)(KeyEventF.KeyUp); }
+
+                        // Send the input
+                        Input[] inputs = new Input[]
+                        {
+                            new Input
+                            {
+                                type = (int)SendInputEventType.KEYBOARD,
+                                u = new InputUnion
+                                {
+                                    ki = new KeyboardInput
+                                    {
+                                        wVk = 0,
+                                        wScan = (ushort)key,
+                                        dwFlags = flags,
+                                        dwExtraInfo = GetMessageExtraInfo()
+                                    }
+                                }
+                            }
+                        };
+                        SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
                         break;
                     }
                 case 87:
