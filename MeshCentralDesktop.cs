@@ -22,9 +22,22 @@ namespace MeshAssistant
         private int encoderType = 1;
         private int encoderCompression = 30;
         private int encoderScaling = 1024;
+        private int newEncoderScaling = 1024;
+        private bool encoderScalingChanged = false;
         private int encoderFrameRate = 100;
         private int mousePointer = 0;
-        private int[] crcs = null;
+        private long[] oldcrcs = null;
+        private long[] newcrcs = null;
+        private int tilesWide = 0;
+        private int tilesHigh = 0;
+        private int tilesFullWide = 0;
+        private int tilesFullHigh = 0;
+        private int tilesRemainingWidth = 0;
+        private int tilesRemainingHeight = 0;
+        private int tilesCount = 0;
+        private Rectangle screenRect = Rectangle.Empty;
+        private int screenScaleWidth = 0;
+        private int screenScaleHeight = 0;
 
         [DllImport("user32.dll")]
         public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, int dwExtraInfo);
@@ -328,7 +341,7 @@ namespace MeshAssistant
                             int xencoderScaling = ((data[off + 6] << 8) + data[off + 7]);
                             if (xencoderScaling > 1024) { xencoderScaling = 1024; }
                             if (xencoderScaling < 128) { xencoderScaling = 128; }
-                            if (xencoderScaling != encoderScaling) { encoderScaling = xencoderScaling; ScreenSize = Size.Empty; }
+                            if (xencoderScaling != encoderScaling) { newEncoderScaling = xencoderScaling; encoderScalingChanged = true; }
                         }
                         if (cmdlen >= 10) {
                             int xencoderFrameRate = ((data[off + 8] << 8) + data[off + 9]);
@@ -510,34 +523,138 @@ namespace MeshAssistant
                     }
 
                     // If the size of the screen does not match the current client set size, update the client
-                    if ((ScreenSize.Width != tscreensize.Width) || (ScreenSize.Height != tscreensize.Height) || (captureBitmap == null))
+                    if ((ScreenSize.Width != tscreensize.Width) || (ScreenSize.Height != tscreensize.Height) || (captureBitmap == null) || (encoderScalingChanged == true)) 
                     {
+                        encoderScaling = newEncoderScaling;
+                        encoderScalingChanged = false;
                         ScreenSize = tscreensize;
+                        screenScaleWidth = ((encoderScaling * ScreenSize.Width) / 1024);
+                        screenScaleHeight = ((encoderScaling * ScreenSize.Height) / 1024);
+
                         byte[] screenSizeCmd = new byte[8];
                         screenSizeCmd[1] = 7; // Command 7, screen size
                         screenSizeCmd[3] = 8; // Command size, 8 bytes
-                        screenSizeCmd[4] = (byte)(((encoderScaling * ScreenSize.Width) / 1024) >> 8);
-                        screenSizeCmd[5] = (byte)(((encoderScaling * ScreenSize.Width) / 1024) & 0xFF);
-                        screenSizeCmd[6] = (byte)(((encoderScaling * ScreenSize.Height) / 1024) >> 8);
-                        screenSizeCmd[7] = (byte)(((encoderScaling * ScreenSize.Height) / 1024) & 0xFF);
+                        screenSizeCmd[4] = (byte)(screenScaleWidth >> 8);
+                        screenSizeCmd[5] = (byte)(screenScaleWidth & 0xFF);
+                        screenSizeCmd[6] = (byte)(screenScaleHeight >> 8);
+                        screenSizeCmd[7] = (byte)(screenScaleHeight & 0xFF);
                         parent.WebSocket.SendBinary(screenSizeCmd);
 
                         // Update the main bitmap and setup the CRC's.
+                        screenRect = new Rectangle(0, 0, screenScaleWidth, screenScaleHeight);
                         captureBitmap = new Bitmap(ScreenSize.Width, ScreenSize.Height, PixelFormat.Format24bppRgb);
-                        crcs = new int[((ScreenSize.Width >> 5) * (ScreenSize.Height >> 5))]; // 32 x 32 tiles
+                        tilesWide = tilesFullWide = (screenScaleWidth >> 6);
+                        tilesHigh = tilesFullHigh = (screenScaleHeight >> 6);
+                        tilesRemainingWidth = (screenScaleWidth % 64);
+                        tilesRemainingHeight = (screenScaleHeight % 64);
+                        if (tilesRemainingWidth != 0) { tilesWide++; }
+                        if (tilesRemainingHeight != 0) { tilesHigh++; }
+                        tilesCount = (tilesWide * tilesHigh);
+                        oldcrcs = new long[tilesCount]; // 64 x 64 tiles
+                        newcrcs = new long[tilesCount]; // 64 x 64 tiles
                     }
 
                     // Capture the screen & scale it if needed
                     Graphics captureGraphics = Graphics.FromImage(captureBitmap);
                     captureGraphics.CopyFromScreen(tscreenlocation.X, tscreenlocation.Y, 0, 0, ScreenSize);
                     Bitmap scaledCaptureBitmap = captureBitmap;
-                    if (encoderScaling != 1024) { scaledCaptureBitmap = new Bitmap(captureBitmap, (encoderScaling * ScreenSize.Width) / 1024, (encoderScaling * ScreenSize.Height) / 1024); }
+                    if (encoderScaling != 1024) { scaledCaptureBitmap = new Bitmap(captureBitmap, screenScaleWidth, screenScaleHeight); }
 
-                    // TODO: Computer CRC's and send any changed images
-                    SendBitmap(0, 0, scaledCaptureBitmap);
+                    // Compute all tile CRC's
+                    computeAllCRCs(scaledCaptureBitmap);
+
+                    //  Send all changed tiles
+                    int sendCount = 0;
+                    for (int i = 0; i < tilesHigh; i++)
+                    {
+                        for (int j = 0; j < tilesWide; j++)
+                        {
+                            int tileNumber = (i * tilesWide) + j;
+                            if (oldcrcs[tileNumber] != newcrcs[tileNumber]) {
+                                SendSubBitmap(scaledCaptureBitmap, (j * 64), (i * 64), 64, 64);
+                                oldcrcs[tileNumber] = newcrcs[tileNumber];
+                                sendCount++;
+                            }
+                        }
+                    }
+                    Console.WriteLine(sendCount);
                 }
-                catch (Exception) { }
+                catch (Exception ex) {
+                    int i = 5;
+                }
             }
+        }
+
+        private void computeAllCRCs(Bitmap image)
+        {
+            // Lock the bitmap's bits.  
+            Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+            BitmapData bmpData = image.LockBits(rect, ImageLockMode.ReadOnly, image.PixelFormat);
+
+            // Clear all CRC's
+            for (int i = 0; i < tilesCount; i++) { newcrcs[i] = 0; }
+
+            // Get the address of the first line.
+            IntPtr bitmapPtr = bmpData.Scan0;
+            int ptr = 0;
+            int tileWidthReads = 24;
+            int tileWidthRemainReads = (tilesRemainingWidth * 3) / 8;
+            if (image.PixelFormat == PixelFormat.Format32bppArgb) { tileWidthReads = 32; tileWidthRemainReads = (tilesRemainingWidth * 4) / 8; }
+
+            // Handle all of the full tiles for the height
+            for (int i = 0; i < tilesFullHigh; i++) {
+                for (int j = 0; j < 64; j++) {
+                    for (int k = 0; k < tilesFullWide; k++) {
+                        for (int l = 0; l < tileWidthReads; l++) {
+                            newcrcs[(i * tilesWide) + k] = CRC(Marshal.ReadInt64(bitmapPtr, ptr), newcrcs[(i * tilesWide) + k]);
+                            ptr += 8;
+                        }
+                    }
+                    if (tilesRemainingWidth > 0)
+                    {
+                        // Handle the reminder of the width
+                        for (int l = 0; l < tileWidthRemainReads; l++)
+                        {
+                            newcrcs[(i * tilesWide) + tilesFullWide] = CRC(Marshal.ReadInt64(bitmapPtr, ptr), newcrcs[(i * tilesWide) + tilesFullWide]);
+                            ptr += 8;
+                        }
+                    }
+                }
+            }
+
+            // Handle the reminder of the height
+            if (tilesRemainingHeight > 0)
+            {
+                for (int j = 0; j < tilesRemainingHeight; j++)
+                {
+                    for (int k = 0; k < tilesFullWide; k++)
+                    {
+                        for (int l = 0; l < tileWidthReads; l++)
+                        {
+                            newcrcs[(tilesFullHigh * tilesWide) + k] = CRC(Marshal.ReadInt64(bitmapPtr, ptr), newcrcs[(tilesFullHigh * tilesWide) + k]);
+                            ptr += 8;
+                        }
+                    }
+                    if (tilesRemainingWidth > 0)
+                    {
+                        // Handle the reminder of the width
+                        for (int l = 0; l < tileWidthRemainReads; l++)
+                        {
+                            newcrcs[(tilesFullHigh * tilesWide) + tilesFullWide] = CRC(Marshal.ReadInt64(bitmapPtr, ptr), newcrcs[(tilesFullHigh * tilesWide) + tilesFullWide]);
+                            ptr += 8;
+                        }
+                    }
+                }
+            }
+
+            // Unlock the bits.
+            image.UnlockBits(bmpData);
+        }
+
+        private void SendSubBitmap(Bitmap image, int x, int y, int w, int h)
+        {
+            //SendBitmap(x, y, image.Clone(new Rectangle(x, y, w, h), image.PixelFormat));
+            SendBitmap(x, y, image.Clone(Rectangle.Intersect(screenRect, new Rectangle(x, y, w, h)), image.PixelFormat));
         }
 
         private void SendBitmap(int x, int y, Bitmap image)
@@ -595,6 +712,12 @@ namespace MeshAssistant
             ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
             foreach (ImageCodecInfo codec in codecs) { if (codec.FormatID == format.Guid) { return codec; } }
             return null;
+        }
+
+        private long CRC(long a, long b)
+        {
+            // TODO
+            return a + b;
         }
 
     }
