@@ -59,6 +59,7 @@ namespace MeshAssistant
         private System.Threading.Timer pongTimer = null;
         private bool pendingSendCall = false;
         private MemoryStream pendingSendBuffer = null;
+        public long PendingSendLength { get { return (pendingSendBuffer == null)? 0 : pendingSendBuffer.Length; } }
 
         // Outside variables
         public object tag = null;

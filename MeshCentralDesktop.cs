@@ -24,6 +24,7 @@ namespace MeshAssistant
         private int encoderScaling = 1024;
         private int encoderFrameRate = 100;
         private int mousePointer = 0;
+        private int[] crcs = null;
 
         [DllImport("user32.dll")]
         public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, int dwExtraInfo);
@@ -290,6 +291,7 @@ namespace MeshAssistant
                 if (mainThread == null) return;
                 Thread.Sleep(encoderFrameRate);
                 if (mainThread == null) return;
+                if (parent.WebSocket.PendingSendLength > 1024) continue; // If there is data pending in the outbound buffer, skip this round.
 
                 try
                 {
@@ -359,66 +361,71 @@ namespace MeshAssistant
                         screenSizeCmd[7] = (byte)(((encoderScaling * ScreenSize.Height) / 1024) & 0xFF);
                         parent.WebSocket.SendBinary(screenSizeCmd);
 
-                        // TODO: Clear CRC's.
+                        // Update the main bitmap and setup the CRC's.
                         captureBitmap = new Bitmap(ScreenSize.Width, ScreenSize.Height, PixelFormat.Format24bppRgb);
+                        crcs = new int[((ScreenSize.Width >> 5) * (ScreenSize.Height >> 5))]; // 32 x 32 tiles
                     }
 
-                    // Capture the screen
+                    // Capture the screen & scale it if needed
                     Graphics captureGraphics = Graphics.FromImage(captureBitmap);
                     captureGraphics.CopyFromScreen(tscreenlocation.X, tscreenlocation.Y, 0, 0, ScreenSize);
+                    Bitmap scaledCaptureBitmap = captureBitmap;
+                    if (encoderScaling != 1024) { scaledCaptureBitmap = new Bitmap(captureBitmap, (encoderScaling * ScreenSize.Width) / 1024, (encoderScaling * ScreenSize.Height) / 1024); }
 
-                    memoryBuffer.SetLength(0);
-                    memoryBuffer.Write(skipHeader, 0, 16); // Skip the first 16 bytes
-                    if (encoderScaling == 1024) {
-                        captureBitmap.Save(memoryBuffer, jgpEncoder, myEncoderParameters); // Write the JPEG image at 100% scale
-                    } else {
-                        Bitmap resized = new Bitmap(captureBitmap, (encoderScaling * ScreenSize.Width) / 1024, (encoderScaling * ScreenSize.Height) / 1024);
-                        resized.Save(memoryBuffer, jgpEncoder, myEncoderParameters); // Write the scaled JPEG image
-                    }
-                    byte[] imageCmd = memoryBuffer.GetBuffer();
-                    int cmdlen = (int)(memoryBuffer.Length - 8);
-                    int x = 0;
-                    int y = 0;
-
-                    // Jumbo command
-                    if (memoryBuffer.Length > 65000) {
-                        imageCmd[0] = 0;
-                        imageCmd[1] = 27; // Command 27, JUMBO
-                        imageCmd[2] = 0;
-                        imageCmd[3] = 8; // Command size, 8 bytes
-                        imageCmd[4] = (byte)((cmdlen >> 24) & 0xFF);
-                        imageCmd[5] = (byte)((cmdlen >> 16) & 0xFF);
-                        imageCmd[6] = (byte)((cmdlen >> 8) & 0xFF);
-                        imageCmd[7] = (byte)((cmdlen) & 0xFF);
-
-                        // Tile command
-                        imageCmd[8] = 0;
-                        imageCmd[9] = 3; // Command 3, tile
-                        imageCmd[10] = 0;
-                        imageCmd[11] = 0;
-                        imageCmd[12] = (byte)(x >> 8);   // X
-                        imageCmd[13] = (byte)(x & 0xFF); // X
-                        imageCmd[14] = (byte)(y >> 8);   // Y
-                        imageCmd[15] = (byte)(y & 0xFF); // Y
-
-                        // Send with JUMBO command
-                        parent.WebSocket.SendBinary(imageCmd, 0, cmdlen + 8);
-                    } else {
-                        // Tile command
-                        imageCmd[8] = 0;
-                        imageCmd[9] = 3; // Command 3, tile
-                        imageCmd[10] = (byte)(cmdlen >> 8);   // Command size, 8 bytes + image
-                        imageCmd[11] = (byte)(cmdlen & 0xFF); // Command size, 8 bytes + image
-                        imageCmd[12] = (byte)(x >> 8);   // X
-                        imageCmd[13] = (byte)(x & 0xFF); // X
-                        imageCmd[14] = (byte)(y >> 8);   // Y
-                        imageCmd[15] = (byte)(y & 0xFF); // Y
-
-                        // Send normal command
-                        parent.WebSocket.SendBinary(imageCmd, 8, cmdlen);
-                    }
+                    // TODO: Computer CRC's and send any changed images
+                    SendBitmap(0, 0, scaledCaptureBitmap);
                 }
                 catch (Exception) { }
+            }
+        }
+
+        private void SendBitmap(int x, int y, Bitmap image)
+        {
+            memoryBuffer.SetLength(0);
+            memoryBuffer.Write(skipHeader, 0, 16); // Skip the first 16 bytes
+            image.Save(memoryBuffer, jgpEncoder, myEncoderParameters); // Write the JPEG image at 100% scale
+            byte[] imageCmd = memoryBuffer.GetBuffer();
+            int cmdlen = (int)(memoryBuffer.Length - 8);
+
+            // Jumbo command
+            if (memoryBuffer.Length > 65000)
+            {
+                imageCmd[0] = 0;
+                imageCmd[1] = 27; // Command 27, JUMBO
+                imageCmd[2] = 0;
+                imageCmd[3] = 8; // Command size, 8 bytes
+                imageCmd[4] = (byte)((cmdlen >> 24) & 0xFF);
+                imageCmd[5] = (byte)((cmdlen >> 16) & 0xFF);
+                imageCmd[6] = (byte)((cmdlen >> 8) & 0xFF);
+                imageCmd[7] = (byte)((cmdlen) & 0xFF);
+
+                // Tile command
+                imageCmd[8] = 0;
+                imageCmd[9] = 3; // Command 3, tile
+                imageCmd[10] = 0;
+                imageCmd[11] = 0;
+                imageCmd[12] = (byte)(x >> 8);   // X
+                imageCmd[13] = (byte)(x & 0xFF); // X
+                imageCmd[14] = (byte)(y >> 8);   // Y
+                imageCmd[15] = (byte)(y & 0xFF); // Y
+
+                // Send with JUMBO command
+                parent.WebSocket.SendBinary(imageCmd, 0, cmdlen + 8);
+            }
+            else
+            {
+                // Tile command
+                imageCmd[8] = 0;
+                imageCmd[9] = 3; // Command 3, tile
+                imageCmd[10] = (byte)(cmdlen >> 8);   // Command size, 8 bytes + image
+                imageCmd[11] = (byte)(cmdlen & 0xFF); // Command size, 8 bytes + image
+                imageCmd[12] = (byte)(x >> 8);   // X
+                imageCmd[13] = (byte)(x & 0xFF); // X
+                imageCmd[14] = (byte)(y >> 8);   // Y
+                imageCmd[15] = (byte)(y & 0xFF); // Y
+
+                // Send normal command
+                parent.WebSocket.SendBinary(imageCmd, 8, cmdlen);
             }
         }
 
@@ -430,4 +437,43 @@ namespace MeshAssistant
         }
 
     }
+
+
+    public class CRC32
+    {
+        private readonly uint[] ChecksumTable;
+        private readonly uint Polynomial = 0xEDB88320;
+
+        public CRC32()
+        {
+            ChecksumTable = new uint[0x100];
+            for (uint index = 0; index < 0x100; ++index)
+            {
+                uint item = index;
+                for (int bit = 0; bit < 8; ++bit) { item = ((item & 1) != 0) ? (Polynomial ^ (item >> 1)) : (item >> 1); }
+                ChecksumTable[index] = item;
+            }
+        }
+
+        public byte[] ComputeHash(byte[] data)
+        {
+            uint result = 0xFFFFFFFF;
+            for (var i = 0; i < data.Length; i++) { result = ChecksumTable[(result & 0xFF) ^ (byte)data[i]] ^ (result >> 8); }
+            byte[] hash = BitConverter.GetBytes(~result);
+            Array.Reverse(hash);
+            return hash;
+        }
+
+        public byte[] ComputeHash(Stream stream)
+        {
+            uint result = 0xFFFFFFFF;
+            int current;
+            while ((current = stream.ReadByte()) != -1) { result = ChecksumTable[(result & 0xFF) ^ (byte)current] ^ (result >> 8); }
+            byte[] hash = BitConverter.GetBytes(~result);
+            Array.Reverse(hash);
+            return hash;
+        }
+
+    }
 }
+
