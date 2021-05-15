@@ -18,6 +18,10 @@ namespace MeshAssistant
         private MemoryStream memoryBuffer = new MemoryStream();
         private byte[] skipHeader = new byte[16];
         private Bitmap captureBitmap = null;
+        private int encoderType = 1;
+        private int encoderCompression = 30;
+        private int encoderScaling = 1024;
+        private int encoderFrameRate = 100;
 
         public MeshCentralDesktop(MeshCentralTunnel parent)
         {
@@ -26,7 +30,7 @@ namespace MeshAssistant
             // Setup the JPEG encoder
             jgpEncoder = GetEncoder(ImageFormat.Jpeg);
             myEncoderParameters = new EncoderParameters(1);
-            EncoderParameter myEncoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 40L);
+            EncoderParameter myEncoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, encoderCompression);
             myEncoderParameters.Param[0] = myEncoderParameter;
 
             // Start the capture thread
@@ -47,7 +51,7 @@ namespace MeshAssistant
             int cmdlen = ((data[off + 2] << 8) + data[off + 3]);
             if (cmdlen != len) return;
 
-            switch(cmd)
+            switch (cmd)
             {
                 case 1: // Key
                     {
@@ -55,6 +59,33 @@ namespace MeshAssistant
                     }
                 case 2: // Mouse
                     {
+                        break;
+                    }
+                case 5: // Settings
+                    {
+                        if (cmdlen < 6) break;
+                        encoderType = data[off + 4];
+                        int xencoderCompression = data[off + 5];
+                        if (xencoderCompression < 0) { xencoderCompression = 0; }
+                        if (xencoderCompression > 100) { xencoderCompression = 100; }
+                        if (xencoderCompression != encoderCompression)
+                        {
+                            EncoderParameter myEncoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, encoderCompression);
+                            myEncoderParameters.Param[0] = myEncoderParameter;
+                        }
+                        if (cmdlen >= 8)
+                        {
+                            int xencoderScaling = ((data[off + 6] << 8) + data[off + 7]);
+                            if (xencoderScaling > 1024) { xencoderScaling = 1024; }
+                            if (xencoderScaling < 128) { xencoderScaling = 128; }
+                            if (xencoderScaling != encoderScaling) { encoderScaling = xencoderScaling; ScreenSize = Size.Empty; }
+                        }
+                        if (cmdlen >= 10) {
+                            int xencoderFrameRate = ((data[off + 8] << 8) + data[off + 9]);
+                            if (xencoderFrameRate < 50) { xencoderFrameRate = 50; }
+                            if (xencoderFrameRate > 30000) { xencoderFrameRate = 30000; }
+                            if (xencoderFrameRate != encoderFrameRate) { encoderFrameRate = xencoderFrameRate; }
+                        }
                         break;
                     }
                 case 10: // Ctrl-Alt-Del
@@ -77,7 +108,7 @@ namespace MeshAssistant
             while (true)
             {
                 if (mainThread == null) return;
-                Thread.Sleep(1000);
+                Thread.Sleep(encoderFrameRate);
                 if (mainThread == null) return;
 
                 try
@@ -105,8 +136,6 @@ namespace MeshAssistant
                         tscreenlocation = Screen.AllScreens[currentDisplay].Bounds.Location;
                     }
 
-                    //tscreensize = new Size(256, 256);// TEST
-
                     // If the size of the screen does not match the current client set size, update the client
                     if ((ScreenSize.Width != tscreensize.Width) || (ScreenSize.Height != tscreensize.Height) || (captureBitmap == null))
                     {
@@ -114,10 +143,10 @@ namespace MeshAssistant
                         byte[] screenSizeCmd = new byte[8];
                         screenSizeCmd[1] = 7; // Command 7, screen size
                         screenSizeCmd[3] = 8; // Command size, 8 bytes
-                        screenSizeCmd[4] = (byte)(ScreenSize.Width >> 8);
-                        screenSizeCmd[5] = (byte)(ScreenSize.Width & 0xFF);
-                        screenSizeCmd[6] = (byte)(ScreenSize.Height >> 8);
-                        screenSizeCmd[7] = (byte)(ScreenSize.Height & 0xFF);
+                        screenSizeCmd[4] = (byte)(((encoderScaling * ScreenSize.Width) / 1024) >> 8);
+                        screenSizeCmd[5] = (byte)(((encoderScaling * ScreenSize.Width) / 1024) & 0xFF);
+                        screenSizeCmd[6] = (byte)(((encoderScaling * ScreenSize.Height) / 1024) >> 8);
+                        screenSizeCmd[7] = (byte)(((encoderScaling * ScreenSize.Height) / 1024) & 0xFF);
                         parent.WebSocket.SendBinary(screenSizeCmd);
 
                         // TODO: Clear CRC's.
@@ -127,10 +156,15 @@ namespace MeshAssistant
                     // Capture the screen
                     Graphics captureGraphics = Graphics.FromImage(captureBitmap);
                     captureGraphics.CopyFromScreen(tscreenlocation.X, tscreenlocation.Y, 0, 0, ScreenSize);
-                    
+
                     memoryBuffer.SetLength(0);
                     memoryBuffer.Write(skipHeader, 0, 16); // Skip the first 16 bytes
-                    captureBitmap.Save(memoryBuffer, jgpEncoder, myEncoderParameters); // Write the JPEG image
+                    if (encoderScaling == 1024) {
+                        captureBitmap.Save(memoryBuffer, jgpEncoder, myEncoderParameters); // Write the JPEG image at 100% scale
+                    } else {
+                        Bitmap resized = new Bitmap(captureBitmap, (encoderScaling * ScreenSize.Width) / 1024, (encoderScaling * ScreenSize.Height) / 1024);
+                        resized.Save(memoryBuffer, jgpEncoder, myEncoderParameters); // Write the scaled JPEG image
+                    }
                     byte[] imageCmd = memoryBuffer.GetBuffer();
                     int cmdlen = (int)(memoryBuffer.Length - 8);
                     int x = 0;
@@ -174,7 +208,7 @@ namespace MeshAssistant
                         parent.WebSocket.SendBinary(imageCmd, 8, cmdlen);
                     }
                 }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
         }
 
