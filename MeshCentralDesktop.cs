@@ -23,6 +23,7 @@ namespace MeshAssistant
         private int encoderCompression = 30;
         private int encoderScaling = 1024;
         private int encoderFrameRate = 100;
+        private int mousePointer = 0;
 
         [DllImport("user32.dll")]
         public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, int dwExtraInfo);
@@ -112,6 +113,29 @@ namespace MeshAssistant
             public short wParamL;
             public short wParamH;
         }
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct POINT
+        {
+            public Int32 x;
+            public Int32 y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CURSORINFO
+        {
+            public Int32 cbSize;        // Specifies the size, in bytes, of the structure. 
+                                        // The caller must set this to Marshal.SizeOf(typeof(CURSORINFO)).
+            public Int32 flags;         // Specifies the cursor state. This parameter can be one of the following values:
+                                        //    0             The cursor is hidden.
+                                        //    CURSOR_SHOWING    The cursor is showing.
+            public IntPtr hCursor;          // Handle to the cursor. 
+            public POINT ptScreenPos;       // A POINT structure that receives the screen coordinates of the cursor. 
+        }
+
+        [DllImport("user32.dll")]
+        static extern bool GetCursorInfo(out CURSORINFO pci);
 
         public MeshCentralDesktop(MeshCentralTunnel parent)
         {
@@ -270,7 +294,34 @@ namespace MeshAssistant
                 try
                 {
                     // Take a look at the mouse cursor
-                    //Cursor mouseCursor = Cursor.Current;
+                    // var mouseCursors = ['default', 'progress', 'crosshair', 'pointer', 'help', 'text', 'no-drop', 'move', 'nesw-resize', 'ns-resize', 'nwse-resize', 'w-resize', 'alias', 'wait', 'none', 'not-allowed', 'col-resize', 'row-resize', 'copy', 'zoom-in', 'zoom-out'];
+                    CURSORINFO pci;
+                    pci.cbSize = Marshal.SizeOf(typeof(CURSORINFO));
+                    GetCursorInfo(out pci);
+                    int pointerType = 0;
+                    if (pci.hCursor == Cursors.Default.Handle) { pointerType = 0; } // Default
+                    else if (pci.hCursor == Cursors.Cross.Handle) { pointerType = 2; } // Crosshair
+                    else if (pci.hCursor == Cursors.Hand.Handle) { pointerType = 3; } // Pointer
+                    else if (pci.hCursor == Cursors.Help.Handle) { pointerType = 4; } // Help
+                    else if (pci.hCursor == Cursors.IBeam.Handle) { pointerType = 5; } // Text
+                    else if (pci.hCursor == Cursors.SizeNESW.Handle) { pointerType = 8; } // nesw-resize
+                    else if (pci.hCursor == Cursors.SizeNS.Handle) { pointerType = 9; } // ns-resize
+                    else if (pci.hCursor == Cursors.SizeNWSE.Handle) { pointerType = 10; } // nwse-resize
+                    else if (pci.hCursor == Cursors.SizeWE.Handle) { pointerType = 11; } // w-resize
+                    else if (pci.hCursor == Cursors.WaitCursor.Handle) { pointerType = 13; } // Wait
+                    else if (pci.hCursor == Cursors.No.Handle) { pointerType = 15; } // not-allowed
+                    else if (pci.hCursor == Cursors.VSplit.Handle) { pointerType = 16; } // col-resize
+                    else if (pci.hCursor == Cursors.HSplit.Handle) { pointerType = 17; } // col-resize
+                    else if (pci.hCursor == Cursors.AppStarting.Handle) { pointerType = 13; } // Wait
+                    if (mousePointer != pointerType) // Update the mouse pointer
+                    {
+                        byte[] mousePointerCmd = new byte[5];
+                        mousePointerCmd[1] = 88;
+                        mousePointerCmd[3] = 5;
+                        mousePointerCmd[4] = (byte)pointerType;
+                        parent.WebSocket.SendBinary(mousePointerCmd, 0, 5);
+                        mousePointer = pointerType;
+                    }
 
                     // Get the size and location of the currently selected screen
                     Size tscreensize = Size.Empty;
