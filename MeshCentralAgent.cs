@@ -135,9 +135,9 @@ namespace MeshAssistant
             return vals;
         }
 
-        public delegate void onNotifyHandler(string title, string msg);
+        public delegate void onNotifyHandler(string userid, string title, string msg);
         public event onNotifyHandler onNotify;
-        public void notify(string title, string msg) { if (onNotify != null) { onNotify(title, msg); } }
+        public void notify(string userid, string title, string msg) { if (onNotify != null) { onNotify(userid, title, msg); } }
 
         public delegate void onDebugHandler(string msg);
         public event onDebugHandler onDebug;
@@ -331,7 +331,7 @@ namespace MeshAssistant
             return response;
         }
 
-        public void processConsoleCommand(string rawcmd, string sessionid)
+        public void processConsoleCommand(string rawcmd, string sessionid, string userid)
         {
             string response = null;
             string[] cmd = parseArgString(rawcmd);
@@ -363,7 +363,7 @@ namespace MeshAssistant
                     }
                 case "notify":
                     {
-                        if (cmd.Length != 3) { response = "Usage: notify [title] [message]"; } else { notify(cmd[1], cmd[2]); response = "Ok"; }
+                        if (cmd.Length != 3) { response = "Usage: notify [title] [message]"; } else { notify(userid, cmd[1], cmd[2]); response = "Ok"; }
                         break;
                     }
                 default:
@@ -386,6 +386,9 @@ namespace MeshAssistant
             Dictionary<string, object> jsonAction = new Dictionary<string, object>();
             try { jsonAction = JSON.Deserialize<Dictionary<string, object>>(data); } catch (Exception) { return; }
             if (jsonAction == null || jsonAction["action"].GetType() != typeof(string)) return;
+            string userid = null;
+            if (jsonAction.ContainsKey("userid") && (jsonAction["userid"].GetType() == typeof(string))) { userid = (string)jsonAction["userid"]; }
+            if ((userid != null) && (jsonAction.ContainsKey("realname")) && (jsonAction["realname"].GetType() == typeof(string))) { userrealname[userid] = (string)jsonAction["realname"]; }
 
             // Handle the JSON command
             string action = jsonAction["action"].ToString();
@@ -399,8 +402,9 @@ namespace MeshAssistant
                 case "getcoredump": { break; }
                 case "getUserImage":
                     {
-                        if (!jsonAction.ContainsKey("userid") || (jsonAction["userid"].GetType() != typeof(string))) return;
-                        string userid = (string)jsonAction["userid"];
+                        if (userid == null) return;
+
+                        // Get the image
                         string imagestr = null;
                         if (jsonAction.ContainsKey("image") && (jsonAction["image"].GetType() == typeof(string))) { imagestr = (string)jsonAction["image"]; }
                         Image userImage = null;
@@ -430,7 +434,7 @@ namespace MeshAssistant
                                     if ((!jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() != typeof(string))) break;
                                     string cmd = jsonAction["value"].ToString();
                                     string sessionid = jsonAction["sessionid"].ToString();
-                                    processConsoleCommand(cmd, sessionid);
+                                    processConsoleCommand(cmd, sessionid, userid);
                                     break;
                                 }
                             case "localapp":
@@ -447,23 +451,20 @@ namespace MeshAssistant
                                 }
                             case "messagebox":
                                 {
+                                    // Check if we have a user image, if not, request it and update user real name if available
+                                    if ((userid != null) && (!userimages.ContainsKey(userid))) { getUserImage(userid); }
                                     if ((jsonAction.ContainsKey("title")) && (jsonAction["title"].GetType() == typeof(string)) && (jsonAction.ContainsKey("msg")) && (jsonAction["msg"].GetType() == typeof(string)))
                                     {
                                         string title = jsonAction["title"].ToString();
                                         string message = jsonAction["msg"].ToString();
-                                        notify(title, message);
+                                        notify(userid, title, message);
                                     }
                                     break;
                                 }
                             case "tunnel":
                                 {
                                     // Check if we have a user image, if not, request it and update user real name if available
-                                    if ((jsonAction.ContainsKey("userid")) && (jsonAction["userid"].GetType() == typeof(string)))
-                                    {
-                                        string userid = (string)jsonAction["userid"];
-                                        if ((jsonAction.ContainsKey("realname")) && (jsonAction["realname"].GetType() == typeof(string))) { userrealname[userid] = (string)jsonAction["realname"]; }
-                                        if (!userimages.ContainsKey(userid)) { getUserImage(userid); }
-                                    }
+                                    if ((userid != null) && (!userimages.ContainsKey(userid))) { getUserImage(userid); }
 
                                     // Start the new tunnel
                                     if ((jsonAction.ContainsKey("value")) && (jsonAction["value"].GetType() == typeof(string)))

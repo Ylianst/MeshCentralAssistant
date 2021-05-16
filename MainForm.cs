@@ -57,6 +57,7 @@ namespace MeshAssistant
         public Dictionary<string, string> agents = null;
         public string selectedAgentName = null;
         public string currentAgentName = null;
+        public NotifyForm notifyForm = null;
 
         public MainForm(string[] args)
         {
@@ -151,6 +152,24 @@ namespace MeshAssistant
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
         }
 
+        public delegate void ShowNotificationHandler(string userid, string title, string message);
+
+        public void ShowNotification(string userid, string title, string message)
+        {
+            if (this.InvokeRequired) { this.Invoke(new ShowNotificationHandler(ShowNotification), userid, title, message); }
+            string realname = userid.Split('/')[2];
+            if (mcagent.userrealname.ContainsKey(userid)) { realname = mcagent.userrealname[userid]; }
+            Image userImage = null;
+            if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
+            if (notifyForm == null) { notifyForm = new NotifyForm(this); notifyForm.Show(this); }
+            notifyForm.userid = userid;
+            notifyForm.Message = message;
+            notifyForm.UserName = realname;
+            notifyForm.UserImage = userImage;
+            if ((title != null) && (title.Length > 0)) { notifyForm.Title = title; }
+            notifyForm.Focus();
+        }
+
         private void Mcagent_onSessionChanged()
         {
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onSessionChangedHandler(Mcagent_onSessionChanged)); return; }
@@ -161,14 +180,22 @@ namespace MeshAssistant
         {
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onUserInfoChangeHandler(Mcagent_onUserInfoChange), userid, change); return; }
             updateBuiltinAgentStatus();
+
+            // If the notification dialog is showing, check if we can update the real name and/or image
+            if ((notifyForm != null) && (notifyForm.userid == userid))
+            {
+                if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { notifyForm.UserImage = mcagent.userimages[userid]; }
+                if (mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { notifyForm.UserName = mcagent.userrealname[userid]; }
+            }
         }
 
-        private void Mcagent_onNotify(string title, string msg)
+        private void Mcagent_onNotify(string userid, string title, string msg)
         {
-            if (InvokeRequired) { Invoke(new MeshCentralAgent.onNotifyHandler(Mcagent_onNotify), title, msg); return; }
+            if (InvokeRequired) { Invoke(new MeshCentralAgent.onNotifyHandler(Mcagent_onNotify), userid, title, msg); return; }
+            ShowNotification(userid, title, msg);
             //MessageBox.Show(msg, title);
-            mainNotifyIcon.BalloonTipText = title + " - " + msg;
-            mainNotifyIcon.ShowBalloonTip(2000);
+            //mainNotifyIcon.BalloonTipText = title + " - " + msg;
+            //mainNotifyIcon.ShowBalloonTip(2000);
         }
 
         private void Mcagent_onStateChanged(int state)
