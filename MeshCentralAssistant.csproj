@@ -177,6 +177,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MeshIconHelp2.png" />
+    <None Include="images\user.png" />
     <Content Include="MeshServer.ico" />
     <Content Include="readme.txt" />
   </ItemGroup>

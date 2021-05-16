@@ -11,6 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace MeshAssistant
 {
@@ -31,7 +32,9 @@ namespace MeshAssistant
         private JavaScriptSerializer JSON = new JavaScriptSerializer();
         public webSocketClient WebSocket = null;
         private int ConnectionState = 0;
-        private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>();
+        private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>(); // List of active tunnels
+        public Dictionary<string, Image> userimages = new Dictionary<string, Image>(); // UserID --> Image
+        public Dictionary<string, string> userrealname = new Dictionary<string, string>(); // UserID --> Realname
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -40,6 +43,9 @@ namespace MeshAssistant
         public Dictionary<string, object> TcpSessions = null;
         public Dictionary<string, object> UdpSessions = null;
         public Dictionary<string, object> MessagesSessions = null;
+
+        public delegate void onUserInfoChangeHandler(string userid, int change); // Change: 1 = Image, 2 = Realname
+        public event onUserInfoChangeHandler onUserInfoChange;
 
         public delegate void onSessionChangedHandler();
         public event onSessionChangedHandler onSessionChanged;
@@ -156,6 +162,8 @@ namespace MeshAssistant
             if ((MeshId == null) || (MeshId.Length != 48)) return false;
             if (WebSocket != null) return false;
             if (debug) { try { File.AppendAllText("debug.log", "Connect to " + ServerUrl + "\r\n"); } catch (Exception) { } }
+            userimages = new Dictionary<string, Image>(); // UserID --> Image
+            userrealname = new Dictionary<string, string>(); // UserID --> Realname
             WebSocket = new webSocketClient();
             WebSocket.pongTimeSeconds = 120; // Send a websocket pong every 2 minutes.
             WebSocket.xdebug = debug;
@@ -208,6 +216,7 @@ namespace MeshAssistant
             WebSocket = null;
             ConnectionState = 0;
             changeState(0);
+            foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.disconnect(); }
         }
 
         private void serverConnected()
@@ -278,6 +287,11 @@ namespace MeshAssistant
         private void sendNetworkInfo()
         {
             WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"netinfo\",\"netif2\":" + getNetworkInfo() + "}"));
+        }
+
+        private void getUserImage(string userid)
+        {
+            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"getUserImage\",\"userid\":\"" + escapeJsonString(userid) + "\"}"));
         }
 
         private string getNetworkInfo()
@@ -383,15 +397,31 @@ namespace MeshAssistant
                 case "sysinfo": { break; }
                 case "coredump": { break; }
                 case "getcoredump": { break; }
+                case "getUserImage":
+                    {
+                        if (!jsonAction.ContainsKey("userid") || (jsonAction["userid"].GetType() != typeof(string))) return;
+                        string userid = (string)jsonAction["userid"];
+                        string imagestr = null;
+                        if (jsonAction.ContainsKey("image") && (jsonAction["image"].GetType() == typeof(string))) { imagestr = (string)jsonAction["image"]; }
+                        Image userImage = null;
+                        if ((imagestr != null) && (imagestr.StartsWith("data:image/jpeg;base64,")))
+                        {
+                            // Decode the image
+                            try { userImage = Image.FromStream(new MemoryStream(Convert.FromBase64String(imagestr.Substring(23)))); } catch (Exception) { }
+                        }
+                        if (userImage != null) { userimages[userid] = userImage; if (onUserInfoChange != null) { onUserInfoChange(userid, 1); } } // Send and event the user image
+                        else { userimages[userid] = null; } // Indicate that no user image
+                        break;
+                    }
                 case "openUrl":
                     {
-                        if (jsonAction["url"].GetType() != typeof(string)) return;
+                        if (!jsonAction.ContainsKey("url") || (jsonAction["url"].GetType() != typeof(string))) return;
                         sendOpenUrlEventLog(jsonAction["url"].ToString());
                         Process.Start(jsonAction["url"].ToString());
                         break;
                     }
                 case "msg": {
-                        if (jsonAction["type"].GetType() != typeof(string)) return;
+                        if (!jsonAction.ContainsKey("type") || (jsonAction["type"].GetType() != typeof(string))) return;
                         string eventType = jsonAction["type"].ToString();
                         switch (eventType)
                         {
@@ -427,6 +457,15 @@ namespace MeshAssistant
                                 }
                             case "tunnel":
                                 {
+                                    // Check if we have a user image, if not, request it and update user real name if available
+                                    if ((jsonAction.ContainsKey("userid")) && (jsonAction["userid"].GetType() == typeof(string)))
+                                    {
+                                        string userid = (string)jsonAction["userid"];
+                                        if ((jsonAction.ContainsKey("realname")) && (jsonAction["realname"].GetType() == typeof(string))) { userrealname[userid] = (string)jsonAction["realname"]; }
+                                        if (!userimages.ContainsKey(userid)) { getUserImage(userid); }
+                                    }
+
+                                    // Start the new tunnel
                                     if ((jsonAction.ContainsKey("value")) && (jsonAction["value"].GetType() == typeof(string)))
                                     {
                                         try

@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Drawing.Drawing2D;
 
 namespace MeshAssistant
 {
@@ -106,7 +107,8 @@ namespace MeshAssistant
                 mcagent = new MeshCentralAgent(this);
                 mcagent.onStateChanged += Mcagent_onStateChanged;
                 mcagent.onNotify += Mcagent_onNotify;
-                mcagent.onSessionChanged += Agent_onSessionChanged;
+                mcagent.onSessionChanged += Mcagent_onSessionChanged; ;
+                mcagent.onUserInfoChange += Mcagent_onUserInfoChange; ;
                 if (currentAgentSelection.Equals("~")) { currentAgentName = "~"; }
                 if (autoConnect == true) { currentAgentName = "~"; }
                 ToolStripMenuItem m = new ToolStripMenuItem();
@@ -149,6 +151,18 @@ namespace MeshAssistant
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
         }
 
+        private void Mcagent_onSessionChanged()
+        {
+            if (InvokeRequired) { Invoke(new MeshCentralAgent.onSessionChangedHandler(Mcagent_onSessionChanged)); return; }
+            updateBuiltinAgentStatus();
+        }
+
+        private void Mcagent_onUserInfoChange(string userid, int change)
+        {
+            if (InvokeRequired) { Invoke(new MeshCentralAgent.onUserInfoChangeHandler(Mcagent_onUserInfoChange), userid, change); return; }
+            updateBuiltinAgentStatus();
+        }
+
         private void Mcagent_onNotify(string title, string msg)
         {
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onNotifyHandler(Mcagent_onNotify), title, msg); return; }
@@ -178,13 +192,46 @@ namespace MeshAssistant
             connectToAgent();
         }
 
+        private string[] getSessionUserIdList()
+        {
+            ArrayList r = new ArrayList();
+            if (mcagent.DesktopSessions != null) { foreach (string u in mcagent.DesktopSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (mcagent.TerminalSessions != null) { foreach (string u in mcagent.TerminalSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (mcagent.FilesSessions != null) { foreach (string u in mcagent.FilesSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (mcagent.TcpSessions != null) { foreach (string u in mcagent.TcpSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (mcagent.UdpSessions != null) { foreach (string u in mcagent.UdpSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            return (string[])r.ToArray(typeof(string));
+        }
+
+        public Image RoundCorners(Image StartImage, int CornerRadius, Color BackgroundColor)
+        {
+            CornerRadius *= 2;
+            Bitmap RoundedImage = new Bitmap(StartImage.Width, StartImage.Height);
+            using (Graphics g = Graphics.FromImage(RoundedImage))
+            {
+                g.Clear(BackgroundColor);
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                Brush brush = new TextureBrush(StartImage);
+                GraphicsPath gp = new GraphicsPath();
+                gp.AddArc(0, 0, CornerRadius, CornerRadius, 180, 90);
+                gp.AddArc(0 + RoundedImage.Width - CornerRadius, 0, CornerRadius, CornerRadius, 270, 90);
+                gp.AddArc(0 + RoundedImage.Width - CornerRadius, 0 + RoundedImage.Height - CornerRadius, CornerRadius, CornerRadius, 0, 90);
+                gp.AddArc(0, 0 + RoundedImage.Height - CornerRadius, CornerRadius, CornerRadius, 90, 90);
+                g.FillPath(brush, gp);
+                return RoundedImage;
+            }
+        }
+
         private void updateBuiltinAgentStatus()
         {
             if (mcagent == null) return;
-            pictureBox1.Visible = false; // Green
-            pictureBox2.Visible = (mcagent.state == 0);  // Red
-            pictureBox3.Visible = (mcagent.state == 1) || (mcagent.state == 2); // Gray
-            pictureBox4.Visible = (mcagent.state == 3); // Question
+
+            pictureBoxGreen.Visible = false; // Green
+            pictureBoxRed.Visible = (mcagent.state == 0);  // Red
+            pictureBoxYellow.Visible = (mcagent.state == 1) || (mcagent.state == 2); // Gray
+            pictureBoxQuestion.Visible = (mcagent.state == 3); // Question
+            pictureBoxUser.Visible = false;
+            pictureBoxCustom.Visible = false;
             if (mcagent.state == 0) { stateLabel.Text = "Disconnected"; requestHelpButton.Text = "Request Help"; }
             if (mcagent.state == 1) { stateLabel.Text = "Connecting"; requestHelpButton.Text = "Cancel Help Request"; }
             if (mcagent.state == 2) { stateLabel.Text = "Authenticating"; requestHelpButton.Text = "Cancel Help Request"; }
@@ -192,6 +239,33 @@ namespace MeshAssistant
             Agent_onSessionChanged();
             requestHelpButton.Enabled = true;
             if (mcagent.state == 0) { helpRequested = false; }
+
+
+            string[] userids = getSessionUserIdList();
+            if (userids.Length > 0)
+            {
+                string userid = userids[0];
+                string realname = userid.Split('/')[2];
+                if (mcagent.userrealname.ContainsKey(userid)) { realname = mcagent.userrealname[userid]; }
+                stateLabel.Text = realname;
+                pictureBoxGreen.Visible = false; // Green
+                pictureBoxRed.Visible = false;  // Red
+                pictureBoxYellow.Visible = false; // Gray
+                pictureBoxQuestion.Visible = false; // Question
+                Image userImage = null;
+                if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
+                if (userImage == null)
+                {
+                    pictureBoxUser.Visible = true;
+                    pictureBoxCustom.Visible = false;
+                }
+                else
+                {
+                    pictureBoxUser.Visible = false;
+                    pictureBoxCustom.Image = RoundCorners(userImage, 30, this.BackColor);
+                    pictureBoxCustom.Visible = true;
+                }
+            }
         }
 
         private void connectToAgent()
@@ -237,9 +311,9 @@ namespace MeshAssistant
                 agent.ConnectPipe();
                 UpdateServiceStatus();
 
-                pictureBox1.Visible = false;
-                pictureBox2.Visible = false;
-                pictureBox3.Visible = true;
+                pictureBoxGreen.Visible = false;
+                pictureBoxRed.Visible = false;
+                pictureBoxYellow.Visible = true;
 
                 isAdministrator = IsAdministrator();
                 if (isAdministrator)
@@ -346,10 +420,12 @@ namespace MeshAssistant
                 startAgentToolStripMenuItem.Enabled = (status == ServiceControllerStatus.Stopped);
                 stopAgentToolStripMenuItem.Enabled = (status != ServiceControllerStatus.Stopped);
                 if (agent.State != 0) return;
-                pictureBox1.Visible = false; // Green
-                pictureBox2.Visible = true;  // Red
-                pictureBox3.Visible = false; // Yellow
-                pictureBox4.Visible = false; // Help
+                pictureBoxGreen.Visible = false; // Green
+                pictureBoxRed.Visible = true;  // Red
+                pictureBoxYellow.Visible = false; // Yellow
+                pictureBoxQuestion.Visible = false; // Help
+                pictureBoxUser.Visible = false;
+                pictureBoxCustom.Visible = false;
                 switch (status)
                 {
                     case ServiceControllerStatus.ContinuePending: { stateLabel.Text = "Agent is continue pending"; break; }
@@ -408,10 +484,12 @@ namespace MeshAssistant
             {
                 case 0:
                     {
-                        pictureBox1.Visible = false; // Green
-                        pictureBox2.Visible = true;  // Red
-                        pictureBox3.Visible = false; // Yellow
-                        pictureBox4.Visible = false; // Help
+                        pictureBoxGreen.Visible = false; // Green
+                        pictureBoxRed.Visible = true;  // Red
+                        pictureBoxYellow.Visible = false; // Yellow
+                        pictureBoxQuestion.Visible = false; // Help
+                        pictureBoxUser.Visible = false; // User
+                        pictureBoxCustom.Visible = false;
                         UpdateServiceStatus();
                         requestHelpToolStripMenuItem.Enabled = false;
                         requestHelpToolStripMenuItem.Visible = true;
@@ -423,19 +501,23 @@ namespace MeshAssistant
                 case 1:
                     {
                         if (serverState == 1) {
-                            pictureBox1.Visible = true;
-                            pictureBox2.Visible = false;
-                            pictureBox3.Visible = false;
-                            pictureBox4.Visible = false;
+                            pictureBoxGreen.Visible = true;
+                            pictureBoxRed.Visible = false;
+                            pictureBoxYellow.Visible = false;
+                            pictureBoxQuestion.Visible = false;
+                            pictureBoxUser.Visible = false;
+                            pictureBoxCustom.Visible = false;
                             stateLabel.Text = "Connected to server";
                             requestHelpToolStripMenuItem.Enabled = true;
                             requestHelpToolStripMenuItem.Visible = true;
                             cancelHelpRequestToolStripMenuItem.Visible = false;
                         } else {
-                            pictureBox1.Visible = false;
-                            pictureBox2.Visible = false;
-                            pictureBox3.Visible = true;
-                            pictureBox4.Visible = false;
+                            pictureBoxGreen.Visible = false;
+                            pictureBoxRed.Visible = false;
+                            pictureBoxYellow.Visible = true;
+                            pictureBoxQuestion.Visible = false;
+                            pictureBoxUser.Visible = false;
+                            pictureBoxCustom.Visible = false;
                             stateLabel.Text = "Agent is active";
                             requestHelpToolStripMenuItem.Enabled = false;
                             requestHelpToolStripMenuItem.Visible = true;
@@ -604,10 +686,12 @@ namespace MeshAssistant
                         stateLabel.Text = "Connected to server";
                         requestHelpToolStripMenuItem.Visible = true;
                         cancelHelpRequestToolStripMenuItem.Visible = false;
-                        pictureBox1.Visible = true;
-                        pictureBox2.Visible = false;
-                        pictureBox3.Visible = false;
-                        pictureBox4.Visible = false;
+                        pictureBoxGreen.Visible = true;
+                        pictureBoxRed.Visible = false;
+                        pictureBoxYellow.Visible = false;
+                        pictureBoxQuestion.Visible = false;
+                        pictureBoxUser.Visible = false;
+                        pictureBoxCustom.Visible = false;
                     }
                 }
                 else
@@ -641,10 +725,12 @@ namespace MeshAssistant
                     stateLabel.Text = "Help requested";
                     requestHelpToolStripMenuItem.Visible = false;
                     cancelHelpRequestToolStripMenuItem.Visible = true;
-                    pictureBox1.Visible = false;
-                    pictureBox2.Visible = false;
-                    pictureBox3.Visible = false;
-                    pictureBox4.Visible = true;
+                    pictureBoxGreen.Visible = false;
+                    pictureBoxRed.Visible = false;
+                    pictureBoxYellow.Visible = false;
+                    pictureBoxQuestion.Visible = true;
+                    pictureBoxUser.Visible = false;
+                    pictureBoxCustom.Visible = false;
                 }
             }
         }
