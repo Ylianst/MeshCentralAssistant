@@ -231,7 +231,9 @@ namespace MeshAssistant
             pictureBoxYellow.Visible = (mcagent.state == 1) || (mcagent.state == 2); // Gray
             pictureBoxQuestion.Visible = (mcagent.state == 3); // Question
             pictureBoxUser.Visible = false;
+            pictureBoxUsers.Visible = false;
             pictureBoxCustom.Visible = false;
+            pictureBoxUsers.Visible = false;
             if (mcagent.state == 0) { stateLabel.Text = "Disconnected"; requestHelpButton.Text = "Request Help"; }
             if (mcagent.state == 1) { stateLabel.Text = "Connecting"; requestHelpButton.Text = "Cancel Help Request"; }
             if (mcagent.state == 2) { stateLabel.Text = "Authenticating"; requestHelpButton.Text = "Cancel Help Request"; }
@@ -242,7 +244,7 @@ namespace MeshAssistant
 
 
             string[] userids = getSessionUserIdList();
-            if (userids.Length > 0)
+            if (userids.Length == 1)
             {
                 string userid = userids[0];
                 string realname = userid.Split('/')[2];
@@ -265,6 +267,15 @@ namespace MeshAssistant
                     pictureBoxCustom.Image = RoundCorners(userImage, 30, this.BackColor);
                     pictureBoxCustom.Visible = true;
                 }
+            }
+            if (userids.Length > 1)
+            {
+                stateLabel.Text = "Multiple Users";
+                pictureBoxGreen.Visible = false; // Green
+                pictureBoxRed.Visible = false;  // Red
+                pictureBoxYellow.Visible = false; // Gray
+                pictureBoxQuestion.Visible = false; // Question
+                pictureBoxUsers.Visible = true;
             }
         }
 
@@ -425,6 +436,7 @@ namespace MeshAssistant
                 pictureBoxYellow.Visible = false; // Yellow
                 pictureBoxQuestion.Visible = false; // Help
                 pictureBoxUser.Visible = false;
+                pictureBoxUsers.Visible = false;
                 pictureBoxCustom.Visible = false;
                 switch (status)
                 {
@@ -489,6 +501,7 @@ namespace MeshAssistant
                         pictureBoxYellow.Visible = false; // Yellow
                         pictureBoxQuestion.Visible = false; // Help
                         pictureBoxUser.Visible = false; // User
+                        pictureBoxUsers.Visible = false;
                         pictureBoxCustom.Visible = false;
                         UpdateServiceStatus();
                         requestHelpToolStripMenuItem.Enabled = false;
@@ -506,6 +519,7 @@ namespace MeshAssistant
                             pictureBoxYellow.Visible = false;
                             pictureBoxQuestion.Visible = false;
                             pictureBoxUser.Visible = false;
+                            pictureBoxUsers.Visible = false;
                             pictureBoxCustom.Visible = false;
                             stateLabel.Text = "Connected to server";
                             requestHelpToolStripMenuItem.Enabled = true;
@@ -517,6 +531,7 @@ namespace MeshAssistant
                             pictureBoxYellow.Visible = true;
                             pictureBoxQuestion.Visible = false;
                             pictureBoxUser.Visible = false;
+                            pictureBoxUsers.Visible = false;
                             pictureBoxCustom.Visible = false;
                             stateLabel.Text = "Agent is active";
                             requestHelpToolStripMenuItem.Enabled = false;
@@ -691,6 +706,7 @@ namespace MeshAssistant
                         pictureBoxYellow.Visible = false;
                         pictureBoxQuestion.Visible = false;
                         pictureBoxUser.Visible = false;
+                        pictureBoxUsers.Visible = false;
                         pictureBoxCustom.Visible = false;
                     }
                 }
@@ -730,6 +746,7 @@ namespace MeshAssistant
                     pictureBoxYellow.Visible = false;
                     pictureBoxQuestion.Visible = true;
                     pictureBoxUser.Visible = false;
+                    pictureBoxUsers.Visible = false;
                     pictureBoxCustom.Visible = false;
                 }
             }

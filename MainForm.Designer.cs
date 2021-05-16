@@ -59,6 +59,7 @@
             this.pictureBoxGreen = new System.Windows.Forms.PictureBox();
             this.pictureBoxYellow = new System.Windows.Forms.PictureBox();
             this.pictureBoxCustom = new System.Windows.Forms.PictureBox();
+            this.pictureBoxUsers = new System.Windows.Forms.PictureBox();
             this.mainContextMenuStrip.SuspendLayout();
             this.dialogContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUser)).BeginInit();
@@ -67,6 +68,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGreen)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxYellow)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCustom)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUsers)).BeginInit();
             this.SuspendLayout();
             // 
             // stateLabel
@@ -332,13 +334,24 @@
             this.pictureBoxCustom.TabIndex = 13;
             this.pictureBoxCustom.TabStop = false;
             // 
+            // pictureBoxUsers
+            // 
+            this.pictureBoxUsers.ContextMenuStrip = this.dialogContextMenuStrip;
+            this.pictureBoxUsers.Image = global::MeshAssistant.Properties.Resources.users;
+            this.pictureBoxUsers.Location = new System.Drawing.Point(12, 23);
+            this.pictureBoxUsers.Name = "pictureBoxUsers";
+            this.pictureBoxUsers.Size = new System.Drawing.Size(178, 136);
+            this.pictureBoxUsers.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBoxUsers.TabIndex = 14;
+            this.pictureBoxUsers.TabStop = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
             this.ClientSize = new System.Drawing.Size(200, 225);
-            this.Controls.Add(this.pictureBoxCustom);
+            this.Controls.Add(this.pictureBoxUsers);
             this.Controls.Add(this.remoteSessionsLabel);
             this.Controls.Add(this.requestHelpButton);
             this.Controls.Add(this.stateLabel);
@@ -347,6 +360,7 @@
             this.Controls.Add(this.pictureBoxQuestion);
             this.Controls.Add(this.pictureBoxGreen);
             this.Controls.Add(this.pictureBoxYellow);
+            this.Controls.Add(this.pictureBoxCustom);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -365,6 +379,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGreen)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxYellow)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCustom)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUsers)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -400,6 +415,7 @@
         private System.Windows.Forms.ToolStripMenuItem agentSelectToolStripMenuItem;
         private System.Windows.Forms.PictureBox pictureBoxUser;
         private System.Windows.Forms.PictureBox pictureBoxCustom;
+        private System.Windows.Forms.PictureBox pictureBoxUsers;
     }
 }
 

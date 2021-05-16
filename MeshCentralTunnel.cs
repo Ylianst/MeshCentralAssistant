@@ -103,20 +103,27 @@ namespace MeshAssistant
             {
                 if (protocol == 2)
                 {
-                    if (parent.DesktopSessions.ContainsKey(sessionUserName))
+                    if (parent.DesktopSessions != null)
                     {
-                        parent.DesktopSessions[sessionUserName] = (int)parent.DesktopSessions[sessionUserName] - 1;
-                        if ((int)parent.DesktopSessions[sessionUserName] == 0) { parent.DesktopSessions = null; }
+                        if (parent.DesktopSessions.ContainsKey(sessionUserName))
+                        {
+                            parent.DesktopSessions[sessionUserName] = (int)parent.DesktopSessions[sessionUserName] - 1;
+                            if ((int)parent.DesktopSessions[sessionUserName] == 0) { parent.DesktopSessions.Remove(sessionUserName); }
+                        }
+                        parent.fireSessionChanged(2);
                     }
-                    parent.fireSessionChanged(2);
                 }
                 if (protocol == 5)
                 {
-                    if (parent.FilesSessions.ContainsKey(sessionUserName)) {
-                        parent.FilesSessions[sessionUserName] = (int)parent.FilesSessions[sessionUserName] - 1;
-                        if ((int)parent.FilesSessions[sessionUserName] == 0) { parent.FilesSessions = null; }
+                    if (parent.FilesSessions != null)
+                    {
+                        if (parent.FilesSessions.ContainsKey(sessionUserName))
+                        {
+                            parent.FilesSessions[sessionUserName] = (int)parent.FilesSessions[sessionUserName] - 1;
+                            if ((int)parent.FilesSessions[sessionUserName] == 0) { parent.FilesSessions.Remove(sessionUserName); }
+                        }
+                        parent.fireSessionChanged(5);
                     }
-                    parent.fireSessionChanged(5);
                 }
                 sessionUserName = null;
             }
