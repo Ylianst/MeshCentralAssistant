@@ -455,8 +455,8 @@ namespace MeshAssistant
                                     if ((userid != null) && (!userimages.ContainsKey(userid))) { getUserImage(userid); }
                                     if ((jsonAction.ContainsKey("title")) && (jsonAction["title"].GetType() == typeof(string)) && (jsonAction.ContainsKey("msg")) && (jsonAction["msg"].GetType() == typeof(string)))
                                     {
-                                        string title = jsonAction["title"].ToString();
-                                        string message = jsonAction["msg"].ToString();
+                                        string title = (string)jsonAction["title"];
+                                        string message = (string)jsonAction["msg"];
                                         notify(userid, title, message);
                                     }
                                     break;
@@ -473,7 +473,7 @@ namespace MeshAssistant
                                         {
                                             string url = jsonAction["value"].ToString();
                                             string hash = null;
-                                            if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = jsonAction["servertlshash"].ToString(); }
+                                            if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = (string)jsonAction["servertlshash"]; }
                                             if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
                                             MeshCentralTunnel tunnel = new MeshCentralTunnel(this, new Uri(url), hash, jsonAction);
                                             tunnels.Add(tunnel);
@@ -484,6 +484,25 @@ namespace MeshAssistant
                                 }
                             case "getclip": { GetClipboard(jsonAction); break; }
                             case "setclip": { SetClipboard(jsonAction); break; }
+                            case "ps": {
+                                    string sessionid = null;
+                                    if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string))) { sessionid = (string)jsonAction["sessionid"]; }
+                                    string ps = getAllProcesses();
+                                    WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"ps\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"value\":\"" + escapeJsonString(ps) + "\"}"));
+                                    break;
+                                }
+                            case "pskill":
+                                {
+                                    int pid = 0;
+                                    if ((jsonAction.ContainsKey("value")) && (jsonAction["value"].GetType() == typeof(System.Int32))) { pid = (int)jsonAction["value"]; }
+                                    if (pid > 0) { try { Process p = Process.GetProcessById(pid); if (p != null) { p.Kill(); } } catch (Exception) { } }
+                                    break;
+                                }
+                            case "services":
+                                {
+                                    // TODO: List system services
+                                    break;
+                                }
                             default:
                                 {
                                     debugMsg("Unprocessed event type: " + eventType);
@@ -498,6 +517,24 @@ namespace MeshAssistant
                         break;
                     }
             }
+        }
+
+        private string getAllProcesses()
+        {
+            string r = "{";
+            try
+            {
+                bool first = true;
+                Process[] allProcessesOnLocalMachine = Process.GetProcesses();
+                foreach (Process process in allProcessesOnLocalMachine)
+                {
+                    if (process.Id == 0) continue;
+                    if (first) { first = false; } else { r += ","; }
+                    r += "\"" + process.Id + "\":{\"pid\":" + process.Id + ",\"cmd\":\"" + escapeJsonString(process.ProcessName) + "\"}";
+                }
+            }
+            catch (Exception) { }
+            return r + "}";
         }
 
         private delegate void ClipboardHandler(Dictionary<string, object> jsonAction);
