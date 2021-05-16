@@ -601,39 +601,57 @@ namespace MeshAssistant
                     // Compute all tile CRC's
                     computeAllCRCs(scaledCaptureBitmap);
 
-                    /*
-                    // Send all changed tiles
-                    // This version has no optimizations, each time change is one JPEG
-                    for (int i = 0; i < tilesHigh; i++) {
-                        for (int j = 0; j < tilesWide; j++) {
-                            int tileNumber = (i * tilesWide) + j;
-                            if (oldcrcs[tileNumber] != newcrcs[tileNumber]) {
-                                // Check if tiles on the right are also invalid
-                                oldcrcs[tileNumber] = newcrcs[tileNumber];
-                                SendSubBitmap(scaledCaptureBitmap, (j * 64), (i * 64), 64, 64);
+                    // Compute how many tiles have changed
+                    int changedTiles = 0;
+                    for (var i = 0; i < tilesCount; i++) { if (oldcrcs[i] != newcrcs[i]) { changedTiles++; } }
+
+                    // If 85% of the all tiles have changed, send the entire screen
+                    if ((changedTiles * 100) >= (tilesCount * 85))
+                    {
+                        SendBitmap(0, 0, scaledCaptureBitmap);
+                        for (var i = 0; i < tilesCount; i++) { oldcrcs[i] = newcrcs[i]; }
+                    }
+                    else
+                    {
+                        /*
+                        // Send all changed tiles
+                        // This version has no optimizations, each time change is one JPEG
+                        for (int i = 0; i < tilesHigh; i++) {
+                            for (int j = 0; j < tilesWide; j++) {
+                                int tileNumber = (i * tilesWide) + j;
+                                if (oldcrcs[tileNumber] != newcrcs[tileNumber]) {
+                                    // Check if tiles on the right are also invalid
+                                    oldcrcs[tileNumber] = newcrcs[tileNumber];
+                                    SendSubBitmap(scaledCaptureBitmap, (j * 64), (i * 64), 64, 64);
+                                }
                             }
                         }
-                    }
-                    */
+                        */
 
-                    //  Send all changed tiles
-                    // This version has horizontal optimization, JPEG as wide as possible
-                    int sendx = -1;
-                    int sendy = 0;
-                    int sendw = 0;
-                    for (int i = 0; i < tilesHigh; i++) {
-                        for (int j = 0; j < tilesWide; j++) {
-                            int tileNumber = (i * tilesWide) + j;
-                            if (oldcrcs[tileNumber] != newcrcs[tileNumber]) {
-                                oldcrcs[tileNumber] = newcrcs[tileNumber];
-                                if (sendx == -1) { sendx = (j * 64); sendy = (i * 64); sendw = 64; } else { sendw += 64; }
-                            } else {
-                                if (sendx != -1) { SendSubBitmap(scaledCaptureBitmap, sendx, sendy, sendw, 64); sendx = -1; }
+                        // Send all changed tiles
+                        // This version has horizontal optimization, JPEG as wide as possible
+                        int sendx = -1;
+                        int sendy = 0;
+                        int sendw = 0;
+                        for (int i = 0; i < tilesHigh; i++)
+                        {
+                            for (int j = 0; j < tilesWide; j++)
+                            {
+                                int tileNumber = (i * tilesWide) + j;
+                                if (oldcrcs[tileNumber] != newcrcs[tileNumber])
+                                {
+                                    oldcrcs[tileNumber] = newcrcs[tileNumber];
+                                    if (sendx == -1) { sendx = (j * 64); sendy = (i * 64); sendw = 64; } else { sendw += 64; }
+                                }
+                                else
+                                {
+                                    if (sendx != -1) { SendSubBitmap(scaledCaptureBitmap, sendx, sendy, sendw, 64); sendx = -1; }
+                                }
                             }
+                            if (sendx != -1) { SendSubBitmap(scaledCaptureBitmap, sendx, sendy, sendw, 64); sendx = -1; }
                         }
                         if (sendx != -1) { SendSubBitmap(scaledCaptureBitmap, sendx, sendy, sendw, 64); sendx = -1; }
                     }
-                    if (sendx != -1) { SendSubBitmap(scaledCaptureBitmap, sendx, sendy, sendw, 64); sendx = -1; }
                 }
                 catch (Exception) { }
             }
