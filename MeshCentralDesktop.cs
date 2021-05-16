@@ -239,6 +239,9 @@ namespace MeshAssistant
             // Send displays
             SendDisplays();
 
+            // Send display locations and sizes
+            SendDisplayInfo();
+
             // Start the capture thread
             mainThread = new Thread(new ThreadStart(MainDesktopLoop));
             mainThread.Start();
@@ -390,6 +393,11 @@ namespace MeshAssistant
 
                         break;
                     }
+                case 82: // Display location and size
+                    {
+                        SendDisplayInfo();
+                        break;
+                    }
                 case 85: // Unicode Key
                     {
                         if (cmdlen < 7) break;
@@ -440,6 +448,34 @@ namespace MeshAssistant
                         break;
                     }
             }
+        }
+
+        private void SendDisplayInfo()
+        {
+            Screen[] screens = Screen.AllScreens;
+            byte[] buf = new byte[4 + (screens.Length * 10)];
+            buf[1] = 82; // Display location and size
+            buf[2] = (byte)(buf.Length >> 8); // Command Length
+            buf[3] = (byte)(buf.Length & 0xFF); // Command Length
+            int ptr = 4;
+            int displayid = 1;
+            foreach (Screen screen in screens)
+            {
+                buf[ptr + 0] = (byte)(displayid >> 8); // Display ID
+                buf[ptr + 1] = (byte)(displayid & 0xFF);
+                buf[ptr + 2] = (byte)(screen.Bounds.Left >> 8); // Location X
+                buf[ptr + 3] = (byte)(screen.Bounds.Left & 0xFF);
+                buf[ptr + 4] = (byte)(screen.Bounds.Top >> 8); // Location Y
+                buf[ptr + 5] = (byte)(screen.Bounds.Top & 0xFF);
+                buf[ptr + 6] = (byte)(screen.Bounds.Width >> 8); // Width
+                buf[ptr + 7] = (byte)(screen.Bounds.Width & 0xFF);
+                buf[ptr + 8] = (byte)(screen.Bounds.Height >> 8); // Height
+                buf[ptr + 9] = (byte)(screen.Bounds.Height & 0xFF);
+                displayid++;
+                ptr += 10;
+            }
+            //string hex = BitConverter.ToString(buf).Replace("-", string.Empty);
+            parent.WebSocket.SendBinary(buf, 0, buf.Length);
         }
 
         private void SendDisplays()
