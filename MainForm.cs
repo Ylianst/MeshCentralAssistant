@@ -230,6 +230,18 @@ namespace MeshAssistant
             return (string[])r.ToArray(typeof(string));
         }
 
+        private string[] getSessionUserIdList2()
+        {
+            ArrayList r = new ArrayList();
+            if (agent.DesktopSessions != null) { foreach (string u in agent.DesktopSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (agent.TerminalSessions != null) { foreach (string u in agent.TerminalSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (agent.FilesSessions != null) { foreach (string u in agent.FilesSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (agent.TcpSessions != null) { foreach (string u in agent.TcpSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (agent.UdpSessions != null) { foreach (string u in agent.UdpSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            return (string[])r.ToArray(typeof(string));
+        }
+
+
         public Image RoundCorners(Image StartImage, int CornerRadius, Color BackgroundColor)
         {
             CornerRadius *= 2;
@@ -268,7 +280,6 @@ namespace MeshAssistant
             Agent_onSessionChanged();
             requestHelpButton.Enabled = true;
             if (mcagent.state == 0) { helpRequested = false; }
-
 
             string[] userids = getSessionUserIdList();
             if (userids.Length == 1)
@@ -340,6 +351,7 @@ namespace MeshAssistant
                 agent.onStateChanged += Agent_onStateChanged;
                 agent.onQueryResult += Agent_onQueryResult;
                 agent.onSessionChanged += Agent_onSessionChanged;
+                agent.onUserInfoChange += Agent_onUserInfoChange;
                 agent.onAmtState += Agent_onAmtState;
                 agent.onSelfUpdate += Agent_onSelfUpdate;
                 agent.onCancelHelp += Agent_onCancelHelp;
@@ -376,6 +388,12 @@ namespace MeshAssistant
                     this.Text = "MeshCentral Assistant";
                 }
             }
+            Agent_onSessionChanged();
+        }
+
+        private void Agent_onUserInfoChange(string userid, int change)
+        {
+            if (this.InvokeRequired) { this.Invoke(new MeshAgent.onUserInfoChangeHandler(Agent_onUserInfoChange), userid, change); return; }
             Agent_onSessionChanged();
         }
 
@@ -445,6 +463,50 @@ namespace MeshAssistant
                 if (count == 0) { mainNotifyIcon.BalloonTipText = "No active remote sessions."; remoteSessionsLabel.Text = "No remote sessions"; }
                 //mainNotifyIcon.ShowBalloonTip(2000);
                 if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
+
+                stateLabel.Text = "Connected to server";
+                pictureBoxGreen.Visible = true; // Green
+                pictureBoxRed.Visible = false;  // Red
+                pictureBoxYellow.Visible = false; // Yellow
+                pictureBoxQuestion.Visible = false; // Help
+                pictureBoxUser.Visible = false;
+                pictureBoxUsers.Visible = false;
+                pictureBoxCustom.Visible = false;
+
+                string[] userids = getSessionUserIdList2();
+                if (userids.Length == 1)
+                {
+                    string userid = userids[0];
+                    string realname = userid.Split('/')[2];
+                    if (agent.userrealname.ContainsKey(userid)) { realname = agent.userrealname[userid]; }
+                    stateLabel.Text = realname;
+                    pictureBoxGreen.Visible = false; // Green
+                    pictureBoxRed.Visible = false;  // Red
+                    pictureBoxYellow.Visible = false; // Gray
+                    pictureBoxQuestion.Visible = false; // Question
+                    Image userImage = null;
+                    if (agent.userimages.ContainsKey(userid) && (agent.userimages[userid] != null)) { userImage = agent.userimages[userid]; }
+                    if (userImage == null)
+                    {
+                        pictureBoxUser.Visible = true;
+                        pictureBoxCustom.Visible = false;
+                    }
+                    else
+                    {
+                        pictureBoxUser.Visible = false;
+                        pictureBoxCustom.Image = RoundCorners(userImage, 30, this.BackColor);
+                        pictureBoxCustom.Visible = true;
+                    }
+                }
+                if (userids.Length > 1)
+                {
+                    stateLabel.Text = "Multiple Users";
+                    pictureBoxGreen.Visible = false; // Green
+                    pictureBoxRed.Visible = false;  // Red
+                    pictureBoxYellow.Visible = false; // Gray
+                    pictureBoxQuestion.Visible = false; // Question
+                    pictureBoxUsers.Visible = true;
+                }
             }
         }
 

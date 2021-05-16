@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Web.Script.Serialization;
 using Microsoft.Win32;
+using System.Drawing;
 
 namespace MeshAssistant
 {
@@ -45,6 +46,8 @@ namespace MeshAssistant
         private string softwareName = null;
         private string serviceName = null;
         private string[] nodeids = null;
+        public Dictionary<string, Image> userimages = new Dictionary<string, Image>(); // UserID --> Image
+        public Dictionary<string, string> userrealname = new Dictionary<string, string>(); // UserID --> Realname
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -74,6 +77,9 @@ namespace MeshAssistant
 
         public delegate void onConsoleHandler(string str);
         public event onConsoleHandler onConsoleMessage;
+
+        public delegate void onUserInfoChangeHandler(string userid, int change); // Change: 1 = Image, 2 = Realname
+        public event onUserInfoChangeHandler onUserInfoChange;
 
         public static ServiceControllerStatus GetServiceStatus() { agentService.Refresh(); return agentService.Status; }
         public static void StartService() { try { agentService.Start(); } catch (Exception) { } }
@@ -261,6 +267,27 @@ namespace MeshAssistant
             return true;
         }
 
+        public bool SendUserImageQuery(string userid)
+        {
+            if ((pipeClient == null) || (pipeClient.IsConnected == false) || (softwareName == null) || (selfExecutableHashHex == null)) return false;
+            string data = "{\"cmd\":\"getUserImage\",\"userid\":\"" + userid + "\"}";
+            byte[] buf2 = UTF8Encoding.UTF8.GetBytes(data);
+            byte[] buf1 = BitConverter.GetBytes(buf2.Length + 4);
+            byte[] buf = new byte[4 + buf2.Length];
+            Array.Copy(buf1, 0, buf, 0, 4);
+            Array.Copy(buf2, 0, buf, 4, buf2.Length);
+            if (pipeWritePending == true)
+            {
+                pipeWrites.Add(buf);
+            }
+            else
+            {
+                pipeWritePending = true;
+                pipeClient.BeginWrite(buf, 0, buf.Length, new AsyncCallback(WritePipe), null);
+            }
+            return true;
+        }
+
         private void WritePipe(IAsyncResult r)
         {
             pipeClient.EndWrite(r);
@@ -412,6 +439,17 @@ namespace MeshAssistant
             return SendCommand("console", cmd);
         }
 
+        private string[] getSessionUserIdList()
+        {
+            ArrayList r = new ArrayList();
+            if (DesktopSessions != null) { foreach (string u in DesktopSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (TerminalSessions != null) { foreach (string u in TerminalSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (FilesSessions != null) { foreach (string u in FilesSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (TcpSessions != null) { foreach (string u in TcpSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            if (UdpSessions != null) { foreach (string u in UdpSessions.Keys) { if (!r.Contains(u)) { r.Add(u); } } }
+            return (string[])r.ToArray(typeof(string));
+        }
+
         private void ReadPipe(IAsyncResult r)
         {
             int len = pipeClient.EndRead(r);
@@ -455,6 +493,13 @@ namespace MeshAssistant
                             if (jsonSessions.ContainsKey("udp")) { UdpSessions = (Dictionary<string, object>)jsonSessions["udp"]; }
                             if (jsonSessions.ContainsKey("msg")) { MessagesSessions = (Dictionary<string, object>)jsonSessions["msg"]; }
                             if (onSessionChanged != null) { onSessionChanged(); }
+
+                            // See if we can gather data about users that have sessions
+                            string[] users = getSessionUserIdList();
+                            foreach (var userid in users) {
+                                if (!userimages.ContainsKey(userid)) { SendUserImageQuery(userid); userimages[userid] = null; }
+                            }
+
                             break;
                         }
                     case "amtstate":
@@ -475,6 +520,38 @@ namespace MeshAssistant
                             if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); } // Server url
                             if (jsonAction.ContainsKey("serverhash")) { serverhash = jsonAction["serverhash"].ToString(); } // Server TLS certificate hash
                             if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) { onSelfUpdate(name, hash, url, serverhash); }
+                            break;
+                        }
+                    case "getUserImage":
+                        {
+                            string userid = null;
+                            string realname = null;
+                            string imagestr = null;
+                            if (jsonAction.ContainsKey("userid")) { userid = jsonAction["userid"].ToString(); } // UserID
+                            if (jsonAction.ContainsKey("realname")) { realname = jsonAction["realname"].ToString(); } // User's realname
+                            if (jsonAction.ContainsKey("image")) { imagestr = jsonAction["image"].ToString(); } // User image
+
+                            if (userid != null)
+                            {
+                                int change = 0;
+
+                                // Get the real name if present
+                                if ((realname != null) && ((!userrealname.ContainsKey(userid)) || (!userrealname[userid].Equals(realname)))) {
+                                    userrealname[userid] = realname;
+                                    change += 2;
+                                }
+
+                                // Get the image
+                                Image userImage = null;
+                                if ((imagestr != null) && (imagestr.StartsWith("data:image/jpeg;base64,")))
+                                {
+                                    // Decode the image
+                                    try { userImage = Image.FromStream(new MemoryStream(Convert.FromBase64String(imagestr.Substring(23)))); } catch (Exception) { }
+                                }
+                                if (userImage != null) { userimages[userid] = userImage; change += 1; } // Send and event the user image
+
+                                if ((change > 0) && (onUserInfoChange != null)) { onUserInfoChange(userid, change); }
+                            }
                             break;
                         }
                     case "cancelhelp":
