@@ -260,6 +260,13 @@ namespace MeshAssistant
 
         private void WebSocket_onBinaryData(webSocketClient sender, byte[] data, int off, int len, int orglen)
         {
+            if (state == 1)
+            {
+                // Process connection options
+                string jsonStr = UTF8Encoding.UTF8.GetString(data, off, len);
+                WebSocket_onStringData(sender, jsonStr, jsonStr.Length);
+                return;
+            }
             if (state != 2) return;
             if (protocol == 2) // Desktop
             {

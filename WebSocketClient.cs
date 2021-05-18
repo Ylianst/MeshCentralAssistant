@@ -60,6 +60,8 @@ namespace MeshAssistant
         private bool pendingSendCall = false;
         private MemoryStream pendingSendBuffer = null;
         public long PendingSendLength { get { return (pendingSendBuffer == null)? 0 : pendingSendBuffer.Length; } }
+        private bool readPaused = false;
+        private bool shouldRead = false;
 
         // Outside variables
         public object tag = null;
@@ -338,7 +340,14 @@ namespace MeshAssistant
             }
 
             // Receive more data
-            try { wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this); } catch (Exception) { }
+            if (readPaused == false)
+            {
+                try { wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this); } catch (Exception) { }
+            }
+            else
+            {
+                shouldRead = true;
+            }
         }
         private void WriteWebSocketAsyncDone(IAsyncResult ar)
         {
@@ -686,6 +695,22 @@ namespace MeshAssistant
             } else {
                 Console.WriteLine("Error: {0}", Win32Api.GetLastError());
                 return null;
+            }
+        }
+
+        public void Pause()
+        {
+            readPaused = true;
+        }
+
+        public void Resume()
+        {
+            if (readPaused == false) return;
+            readPaused = false;
+            if (shouldRead == true)
+            {
+                shouldRead = false;
+                try { wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this); } catch (Exception) { }
             }
         }
 

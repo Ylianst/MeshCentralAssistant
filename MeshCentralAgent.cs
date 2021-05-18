@@ -33,6 +33,7 @@ namespace MeshAssistant
         public webSocketClient WebSocket = null;
         private int ConnectionState = 0;
         private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>(); // List of active tunnels
+        private List<MeshCentralTcpTunnel> tcptunnels = new List<MeshCentralTcpTunnel>(); // List of active TCP tunnels
         public Dictionary<string, Image> userimages = new Dictionary<string, Image>(); // UserID --> Image
         public Dictionary<string, string> userrealname = new Dictionary<string, string>(); // UserID --> Realname
         string softwareName = null;
@@ -228,6 +229,7 @@ namespace MeshAssistant
             ConnectionState = 0;
             changeState(0);
             foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.disconnect(); }
+            foreach (MeshCentralTcpTunnel tcptunnel in tcptunnels) { tcptunnel.disconnect(); }
         }
 
         private void serverConnected()
@@ -492,16 +494,38 @@ namespace MeshAssistant
                                     // Start the new tunnel
                                     if ((jsonAction.ContainsKey("value")) && (jsonAction["value"].GetType() == typeof(string)))
                                     {
-                                        try
+                                        if ((jsonAction.ContainsKey("tcpaddr")) && (jsonAction["tcpaddr"].GetType() == typeof(string)) && (jsonAction.ContainsKey("tcpport")) && ((jsonAction["tcpport"].GetType() == typeof(int)) || (jsonAction["tcpport"].GetType() == typeof(string))))
                                         {
-                                            string url = jsonAction["value"].ToString();
-                                            string hash = null;
-                                            if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = (string)jsonAction["servertlshash"]; }
-                                            if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
-                                            MeshCentralTunnel tunnel = new MeshCentralTunnel(this, new Uri(url), hash, jsonAction);
-                                            tunnels.Add(tunnel);
+                                            // TCP relay tunnel
+                                            try
+                                            {
+                                                string tcpaddr = (string)jsonAction["tcpaddr"];
+                                                int tcpport = 0;
+                                                if (jsonAction["tcpport"].GetType() == typeof(int)) { tcpport = (int)jsonAction["tcpport"]; }
+                                                if (jsonAction["tcpport"].GetType() == typeof(string)) { tcpport = int.Parse((string)jsonAction["tcpport"]); }
+                                                string url = (string)jsonAction["value"];
+                                                string hash = null;
+                                                if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = (string)jsonAction["servertlshash"]; }
+                                                if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
+                                                MeshCentralTcpTunnel tunnel = new MeshCentralTcpTunnel(this, new Uri(url), hash, jsonAction, tcpaddr, tcpport);
+                                                tcptunnels.Add(tunnel);
+                                            }
+                                            catch (Exception) { }
                                         }
-                                        catch (Exception) { }
+                                        else
+                                        {
+                                            // Application tunnel
+                                            try
+                                            {
+                                                string url = jsonAction["value"].ToString();
+                                                string hash = null;
+                                                if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = (string)jsonAction["servertlshash"]; }
+                                                if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
+                                                MeshCentralTunnel tunnel = new MeshCentralTunnel(this, new Uri(url), hash, jsonAction);
+                                                tunnels.Add(tunnel);
+                                            }
+                                            catch (Exception) { }
+                                        }
                                     }
                                     break;
                                 }

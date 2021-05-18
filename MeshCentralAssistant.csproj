@@ -102,6 +102,7 @@
     <Compile Include="MeshAgent.cs" />
     <Compile Include="MeshCentralAgent.cs" />
     <Compile Include="MeshCentralDesktop.cs" />
+    <Compile Include="MeshCentralTcpTunnel.cs" />
     <Compile Include="MeshCentralTunnel.cs" />
     <Compile Include="NotifyForm.cs">
       <SubType>Form</SubType>
