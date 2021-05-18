@@ -35,6 +35,8 @@ namespace MeshAssistant
         private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>(); // List of active tunnels
         public Dictionary<string, Image> userimages = new Dictionary<string, Image>(); // UserID --> Image
         public Dictionary<string, string> userrealname = new Dictionary<string, string>(); // UserID --> Realname
+        string softwareName = null;
+        string selfExecutableHashHex = null;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -46,6 +48,10 @@ namespace MeshAssistant
 
         public delegate void onUserInfoChangeHandler(string userid, int change); // Change: 1 = Image, 2 = Realname
         public event onUserInfoChangeHandler onUserInfoChange;
+        public static string getSelfFilename(string ext) { string s = Process.GetCurrentProcess().MainModule.FileName; return s.Substring(0, s.Length - 4) + ext; }
+
+        public delegate void onSelfUpdateHandler(string name, string hash, string url, string serverhash);
+        public event onSelfUpdateHandler onSelfUpdate;
 
         public delegate void onSessionChangedHandler();
         public event onSessionChangedHandler onSessionChanged;
@@ -85,9 +91,11 @@ namespace MeshAssistant
             }
         }
 
-        public MeshCentralAgent(MainForm parent)
+        public MeshCentralAgent(MainForm parent, string softwareName, string selfExecutableHashHex)
         {
             this.parent = parent;
+            this.softwareName = softwareName;
+            this.selfExecutableHashHex = selfExecutableHashHex;
 
             // Load the agent certificate and private key
             agentCert = LoadAgentCertificate();
@@ -114,21 +122,23 @@ namespace MeshAssistant
 
         private static X509Certificate2 LoadAgentCertificate()
         {
+            string p12filename = getSelfFilename(".p12");
             X509Certificate2 cert = null;
-            if (File.Exists("agentcert.pfx")) { try { cert = new X509Certificate2("agentcert.pfx", "dummy"); } catch (Exception) { } }
+            if (File.Exists(p12filename)) { try { cert = new X509Certificate2(p12filename, "dummy"); } catch (Exception) { } }
             if (cert != null) return cert;
             RSA rsa = RSA.Create(3072); // Generate asymmetric RSA key pair
             CertificateRequest req = new CertificateRequest("cn=MeshAgent", rsa, HashAlgorithmName.SHA384, RSASignaturePadding.Pkcs1);
             cert = req.CreateSelfSigned(DateTimeOffset.Now.AddDays(-10), DateTimeOffset.Now.AddYears(20));
-            File.WriteAllBytes("agentcert.pfx", cert.Export(X509ContentType.Pkcs12, "dummy"));
+            File.WriteAllBytes(p12filename, cert.Export(X509ContentType.Pkcs12, "dummy"));
             return cert;
         }
 
         private static Dictionary<string, string> LoadMshFile()
         {
-            if (!File.Exists("meshagent.msh")) return null;
+            string mshfilename = getSelfFilename(".msh");
+            if (!File.Exists(mshfilename)) return null;
             string[] lines = null;
-            try { lines = File.ReadAllLines("meshagent.msh"); } catch (Exception) { }
+            try { lines = File.ReadAllLines(mshfilename); } catch (Exception) { }
             if (lines == null) return null;
             Dictionary<string, string> vals = new Dictionary<string, string>();
             foreach (string line in lines) { int i = line.IndexOf('='); if (i > 0) { vals.Add(line.Substring(0, i), line.Substring(i + 1)); } }
@@ -169,6 +179,7 @@ namespace MeshAssistant
             WebSocket.xdebug = debug;
             WebSocket.onStateChanged += WebSocket_onStateChanged;
             WebSocket.onBinaryData += WebSocket_onBinaryData;
+            WebSocket.onStringData += WebSocket_onStringData;
             ConnectionState = 1;
             return WebSocket.Start(ServerUrl, null);
         }
@@ -233,6 +244,13 @@ namespace MeshAssistant
                 sendSessionUpdate("help", "{\"" + escapeJsonString(userName) + "\":\"" + escapeJsonString(HelpRequest) + "\"}");
                 sendHelpEventLog(userName, HelpRequest);
             }
+
+            // Send self-update query
+            if ((softwareName != null) && (selfExecutableHashHex != null))
+            {
+                sendSelfUpdateQuery(softwareName, selfExecutableHashHex);
+            }
+            
         }
 
         private void sendSessionUpdate(string type, string value)
@@ -253,6 +271,11 @@ namespace MeshAssistant
         private void sendHelpEventLog(string username, string helpstring)
         {
             WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":98,\"msgArgs\":[\"" + escapeJsonString(username) + "\",\"" + escapeJsonString(helpstring) + "\"],\"msg\":\"Help Requested, user: " + escapeJsonString(username) + ", details: " + escapeJsonString(helpstring) + "\"}"));
+        }
+
+        private void sendSelfUpdateQuery(string softwareName, string softwareHash)
+        {
+            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"meshToolInfo\",\"name\":\"" + escapeJsonString(softwareName) + "\",\"hash\":\"" + escapeJsonString(softwareHash) + "\",\"cookie\":true}"));
         }
 
         private string[] parseArgString(string cmd) {
@@ -511,6 +534,19 @@ namespace MeshAssistant
                         }
                         break;
                     }
+                case "meshToolInfo":
+                    {
+                        string name = null;
+                        string hash = null;
+                        string url = null;
+                        string serverhash = null;
+                        if (jsonAction.ContainsKey("name")) { name = jsonAction["name"].ToString(); } // Download tool name
+                        if (jsonAction.ContainsKey("hash")) { hash = jsonAction["hash"].ToString(); } // File Hash
+                        if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); } // Server url
+                        if (jsonAction.ContainsKey("serverhash")) { serverhash = jsonAction["serverhash"].ToString(); } // Server TLS certificate hash
+                        if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) { onSelfUpdate(name, hash, url, serverhash); }
+                        break;
+                    }
                 default:
                     {
                         debugMsg("Unprocessed command: " + action);
@@ -586,6 +622,12 @@ namespace MeshAssistant
             if (a.Length != b.Length) return false;
             for (var i = 0; i < a.Length; i++) { if (a[i] != b[i]) return false; }
             return true;
+        }
+
+        private void WebSocket_onStringData(webSocketClient sender, string data, int orglen)
+        {
+            // Process JSON data
+            if ((ConnectionState == 15) && (data.Length > 2) && (data[0] == '{')) { processServerJsonData(data); }
         }
 
         private void WebSocket_onBinaryData(webSocketClient sender, byte[] data, int off, int len, int orglen)

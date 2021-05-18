@@ -59,21 +59,10 @@ namespace MeshAssistant
         public string currentAgentName = null;
         public NotifyForm notifyForm = null;
         public int embeddedMshLength = 0;
+        public string selfExecutableHashHex = null;
 
         public MainForm(string[] args)
         {
-            // If there is an embedded .msh file, write it out to "meshagent.msh"
-            string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
-            if (msh != null)
-            {
-                try
-                {
-                    FileInfo f = new FileInfo(Path.Combine(new FileInfo(Process.GetCurrentProcess().MainModule.FileName).DirectoryName, "meshagent.msh"));
-                    File.WriteAllText(f.FullName, msh);
-                }
-                catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; }
-            }
-
             // Perform self update operations if any.
             this.args = args;
             bool startVisible = false;
@@ -107,6 +96,11 @@ namespace MeshAssistant
 
             if (delete != null) { try { System.Threading.Thread.Sleep(1000); File.Delete(delete); } catch (Exception) { } }
 
+            // If there is an embedded .msh file, write it out to "meshagent.msh"
+            string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
+            if (msh != null) { try { File.WriteAllText(MeshCentralAgent.getSelfFilename(".msh"), msh); } catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; } }
+            computeSelfhash();
+
             // Set TLS 1.2
             ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
 
@@ -118,9 +112,10 @@ namespace MeshAssistant
             string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
 
             if (MeshCentralAgent.checkMshFile()) {
-                mcagent = new MeshCentralAgent(this);
+                mcagent = new MeshCentralAgent(this, "MeshCentralAssistant", selfExecutableHashHex);
                 mcagent.onStateChanged += Mcagent_onStateChanged;
                 mcagent.onNotify += Mcagent_onNotify;
+                mcagent.onSelfUpdate += Agent_onSelfUpdate;
                 mcagent.onSessionChanged += Mcagent_onSessionChanged; ;
                 mcagent.onUserInfoChange += Mcagent_onUserInfoChange; ;
                 if (currentAgentSelection.Equals("~")) { currentAgentName = "~"; }
@@ -163,6 +158,45 @@ namespace MeshAssistant
             connectToAgent();
 
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
+        }
+
+        public void computeSelfhash()
+        {
+            // Hash our own executable
+            if (embeddedMshLength != 0)
+            { // Hash the entire file.
+                byte[] selfHash;
+                using (var sha384 = SHA384Managed.Create())
+                {
+                    using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location))
+                    {
+                        selfHash = sha384.ComputeHash(stream);
+                    }
+                }
+                selfExecutableHashHex = BitConverter.ToString(selfHash).Replace("-", string.Empty).ToLower();
+            }
+            else
+            { // Hash the file, but skip the last portion of it where the .msh file would be.
+                byte[] selfHash;
+                using (var sha384 = SHA384Managed.Create())
+                {
+                    sha384.Initialize();
+                    using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location))
+                    {
+                        var fileLengthToHash = stream.Length - embeddedMshLength;
+                        byte[] buf = new byte[65535];
+                        while (fileLengthToHash > 0)
+                        {
+                            int l = stream.Read(buf, 0, (int)Math.Min(fileLengthToHash, buf.Length));
+                            fileLengthToHash -= l;
+                            sha384.TransformBlock(buf, 0, l, null, 0);
+                        }
+                        sha384.TransformFinalBlock(new byte[0], 0, 0);
+                        selfHash = sha384.Hash;
+                    }
+                }
+                selfExecutableHashHex = BitConverter.ToString(selfHash).Replace("-", string.Empty).ToLower();
+            }
         }
 
         public delegate void ShowNotificationHandler(string userid, string title, string message);
@@ -356,9 +390,9 @@ namespace MeshAssistant
             else
             {
                 if (currentAgentName == null) {
-                    agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null, embeddedMshLength);
+                    agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null, selfExecutableHashHex);
                 } else {
-                    agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName], embeddedMshLength);
+                    agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName], selfExecutableHashHex);
                     Settings.SetRegValue("SelectedAgent", currentAgentName);
                 }
                 agent.onStateChanged += Agent_onStateChanged;
@@ -680,6 +714,8 @@ namespace MeshAssistant
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (agent != null) { agent.DisconnectPipe(); }
+            if (mcagent != null) { mcagent.disconnect(); }
             doclose = true;
             Application.Exit();
         }

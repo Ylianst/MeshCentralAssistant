@@ -29,7 +29,7 @@ namespace MeshAssistant
         public static string GetMshFromExecutable(string path, out int mshLength)
         {
             mshLength = 0;
-            FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read);
+            FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             if (fs.Length < 20) { fs.Close(); return null; }
             fs.Seek(-20, SeekOrigin.End);
             byte[] buf = new byte[20];

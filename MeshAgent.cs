@@ -23,7 +23,6 @@ using System.Collections;
 using System.ServiceProcess;
 using System.Security.Principal;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Web.Script.Serialization;
 using Microsoft.Win32;
 using System.Drawing;
@@ -85,52 +84,14 @@ namespace MeshAssistant
         public static void StartService() { try { agentService.Start(); } catch (Exception) { } }
         public static void StopService() { try { agentService.Stop(); } catch (Exception) { } }
 
-        public MeshAgent(string softwareName, string serviceName, string nodeids, int mshLength)
+        public MeshAgent(string softwareName, string serviceName, string nodeids, string selfExecutableHashHex)
         {
-            this.softwareName = softwareName;
-            this.serviceName = serviceName;
             this.nodeids = null;
+            this.serviceName = serviceName;
+            this.softwareName = softwareName;
+            this.selfExecutableHashHex = selfExecutableHashHex;
             if (nodeids != null) { this.nodeids = nodeids.Split(','); }
             agentService = new ServiceController(serviceName);
-
-            if (softwareName != null)
-            {
-                // Hash our own executable
-                if (mshLength != 0)
-                { // Hash the entire file.
-                    byte[] selfHash;
-                    using (var sha384 = SHA384Managed.Create())
-                    {
-                        using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location))
-                        {
-                            selfHash = sha384.ComputeHash(stream);
-                        }
-                    }
-                    selfExecutableHashHex = BitConverter.ToString(selfHash).Replace("-", string.Empty).ToLower();
-                }
-                else
-                { // Hash the file, but skip the last portion of it where the .msh file would be.
-                    byte[] selfHash;
-                    using (var sha384 = SHA384Managed.Create())
-                    {
-                        sha384.Initialize();
-                        using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location))
-                        {
-                            var fileLengthToHash = stream.Length - mshLength;
-                            byte[] buf = new byte[65535];
-                            while (fileLengthToHash > 0)
-                            {
-                                int l = stream.Read(buf, 0, (int)Math.Min(fileLengthToHash, buf.Length));
-                                fileLengthToHash -= l;
-                                sha384.TransformBlock(buf, 0, l, null, 0);
-                            }
-                            sha384.TransformFinalBlock(new byte[0], 0, 0);
-                            selfHash = sha384.Hash;
-                        }
-                    }
-                    selfExecutableHashHex = BitConverter.ToString(selfHash).Replace("-", string.Empty).ToLower();
-                }
-            }
         }
 
         /// <summary>
