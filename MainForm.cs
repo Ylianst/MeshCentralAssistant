@@ -58,9 +58,22 @@ namespace MeshAssistant
         public string selectedAgentName = null;
         public string currentAgentName = null;
         public NotifyForm notifyForm = null;
+        public int embeddedMshLength = 0;
 
         public MainForm(string[] args)
         {
+            // If there is an embedded .msh file, write it out to "meshagent.msh"
+            string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
+            if (msh != null)
+            {
+                try
+                {
+                    FileInfo f = new FileInfo(Path.Combine(new FileInfo(Process.GetCurrentProcess().MainModule.FileName).DirectoryName, "meshagent.msh"));
+                    File.WriteAllText(f.FullName, msh);
+                }
+                catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; }
+            }
+
             // Perform self update operations if any.
             this.args = args;
             bool startVisible = false;
@@ -343,9 +356,9 @@ namespace MeshAssistant
             else
             {
                 if (currentAgentName == null) {
-                    agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null);
+                    agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null, embeddedMshLength);
                 } else {
-                    agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName]);
+                    agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName], embeddedMshLength);
                     Settings.SetRegValue("SelectedAgent", currentAgentName);
                 }
                 agent.onStateChanged += Agent_onStateChanged;
@@ -622,7 +635,7 @@ namespace MeshAssistant
                             pictureBoxUser.Visible = false;
                             pictureBoxUsers.Visible = false;
                             pictureBoxCustom.Visible = false;
-                            stateLabel.Text = "Agent is active";
+                            stateLabel.Text = "Agent is disconnected";
                             requestHelpToolStripMenuItem.Enabled = false;
                             requestHelpToolStripMenuItem.Visible = true;
                             cancelHelpRequestToolStripMenuItem.Visible = false;
