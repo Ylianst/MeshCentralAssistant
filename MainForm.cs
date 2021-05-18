@@ -893,14 +893,17 @@ namespace MeshAssistant
 
         private void DownloadUpdate(string hash, string url, string serverHash)
         {
-            seflUpdateDownloadHash = hash;
-            serverTlsCertHash = serverHash;
-            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
-            Uri x = webRequest.RequestUri;
-            webRequest.Method = "GET";
-            webRequest.Timeout = 10000;
-            webRequest.BeginGetResponse(new AsyncCallback(DownloadUpdateRespone), webRequest);
-            webRequest.ServerCertificateValidationCallback += RemoteCertificateValidationCallback;
+            if (new UpdateForm().ShowDialog(this) == DialogResult.OK)
+            {
+                seflUpdateDownloadHash = hash;
+                serverTlsCertHash = serverHash;
+                HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
+                Uri x = webRequest.RequestUri;
+                webRequest.Method = "GET";
+                webRequest.Timeout = 10000;
+                webRequest.BeginGetResponse(new AsyncCallback(DownloadUpdateRespone), webRequest);
+                webRequest.ServerCertificateValidationCallback += RemoteCertificateValidationCallback;
+            }
         }
 
         public bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
