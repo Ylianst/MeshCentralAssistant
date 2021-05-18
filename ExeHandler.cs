@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Globalization;
+using System.Security.Cryptography;
 
 namespace MeshAssistant
 {
@@ -14,7 +15,7 @@ namespace MeshAssistant
 
         public static int GetMshLengthFromExecutable(string path)
         {
-            FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read);
+            FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             if (fs.Length < 20) { fs.Close(); return 0; }
             fs.Seek(-20, SeekOrigin.End);
             byte[] buf = new byte[20];
@@ -68,7 +69,7 @@ namespace MeshAssistant
         {
             WindowsBinaryData r = new WindowsBinaryData();
 
-            FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read);
+            FileStream fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             if (fs.Length < 64) { fs.Close(); return null; } // File too short
             fs.Seek(0, SeekOrigin.Begin);
 
@@ -110,6 +111,17 @@ namespace MeshAssistant
                         r.CertificateTableSize = BitConverter.ToInt32(optHeader, 132);
                         r.CertificateTableSizePos = r.optionalHeaderSizeAddress + 132;
                         r.rvaStartAddress = r.optionalHeaderSizeAddress + 96;
+                        /*
+					        if (ILibMemory_AllocateA_Size(optHeader) >= 132)
+					        {
+						        if (((unsigned int*)(optHeader + 128))[0] != 0)
+						        {
+							        endIndex = ((unsigned int*)(optHeader + 128))[0];
+						        }
+						        tableIndex = NTHeaderIndex + 24 + 128;
+						        retVal = 0;
+					        }
+                        */
                         break;
                     }
                 case 0x020B: // 64bit
@@ -140,6 +152,64 @@ namespace MeshAssistant
             }
 
             return r;
+        }
+
+
+        public static string HashExecutable(string path)
+        {
+            WindowsBinaryData r = ExecutableParser(path);
+
+            byte[] selfHash;
+            int checkSumIndex = r.checkSumPos;
+            int tableIndex = r.CertificateTableSizePos - 4;
+            int endIndex = 0;
+            if (r.CertificateTableAddress != 0) { endIndex = r.CertificateTableAddress; }
+
+            if (endIndex == 0)
+            {
+                // Hash the entire file except the .msh at the end if .msh is present
+                int mshLen = GetMshLengthFromExecutable(path);
+                if (mshLen > 0) { mshLen += 20; }
+                using (SHA384 sha384 = SHA384Managed.Create())
+                {
+                    sha384.Initialize();
+                    using (FileStream stream = File.OpenRead(path))
+                    {
+                        hashPortionOfStream(sha384, stream, 0, (int)stream.Length - mshLen); // Start --> end - (mshLen + 20)
+                        sha384.TransformFinalBlock(new byte[0], 0, 0);
+                        selfHash = sha384.Hash;
+                    }
+                }
+                return BitConverter.ToString(selfHash).Replace("-", string.Empty).ToLower();
+            }
+
+            using (SHA384 sha384 = SHA384Managed.Create())
+            {
+                sha384.Initialize();
+                using (FileStream stream = File.OpenRead(path))
+                {
+                    hashPortionOfStream(sha384, stream, 0, checkSumIndex); // Start --> checkSumIndex
+                    sha384.TransformBlock(new byte[4], 0, 4, null, 0); // 4 zero bytes
+                    hashPortionOfStream(sha384, stream, checkSumIndex + 4, tableIndex); // checkSumIndex + 4 --> tableIndex
+                    sha384.TransformBlock(new byte[8], 0, 8, null, 0); // 8 zero bytes
+                    hashPortionOfStream(sha384, stream, tableIndex + 8, endIndex); // tableIndex + 8 --> endIndex
+                    sha384.TransformFinalBlock(new byte[0], 0, 0);
+                    selfHash = sha384.Hash;
+                }
+            }
+            return BitConverter.ToString(selfHash).Replace("-", string.Empty).ToLower();
+        }
+
+        private static void hashPortionOfStream(SHA384 sha384, FileStream stream, int start, int end)
+        {
+            stream.Seek(start, SeekOrigin.Begin);
+            int fileLengthToHash = (end - start);
+            byte[] buf = new byte[65535];
+            while (fileLengthToHash > 0) {
+                int l = stream.Read(buf, 0, (int)Math.Min(fileLengthToHash, buf.Length));
+                fileLengthToHash -= l;
+                sha384.TransformBlock(buf, 0, l, null, 0);
+            }
         }
 
         public static byte[] ConvertHexStringToByteArray(string hexString)

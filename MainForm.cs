@@ -68,7 +68,7 @@ namespace MeshAssistant
             bool startVisible = false;
             string update = null;
             string delete = null;
-            foreach (string arg in this.args)
+            foreach (string arg in this.args) 
             {
                 if ((arg.Length == 8) && (arg.ToLower() == "-visible")) { startVisible = true; }
                 if ((arg.Length == 9) && (arg.ToLower() == "-noupdate")) { noUpdate = true; }
@@ -99,10 +99,10 @@ namespace MeshAssistant
             // If there is an embedded .msh file, write it out to "meshagent.msh"
             string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
             if (msh != null) { try { File.WriteAllText(MeshCentralAgent.getSelfFilename(".msh"), msh); } catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; } }
-            computeSelfhash();
+            selfExecutableHashHex = ExeHandler.HashExecutable(Assembly.GetEntryAssembly().Location);
 
             // Set TLS 1.2
-            ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             InitializeComponent();
 
@@ -158,45 +158,6 @@ namespace MeshAssistant
             connectToAgent();
 
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
-        }
-
-        public void computeSelfhash()
-        {
-            // Hash our own executable
-            if (embeddedMshLength != 0)
-            { // Hash the entire file.
-                byte[] selfHash;
-                using (var sha384 = SHA384Managed.Create())
-                {
-                    using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location))
-                    {
-                        selfHash = sha384.ComputeHash(stream);
-                    }
-                }
-                selfExecutableHashHex = BitConverter.ToString(selfHash).Replace("-", string.Empty).ToLower();
-            }
-            else
-            { // Hash the file, but skip the last portion of it where the .msh file would be.
-                byte[] selfHash;
-                using (var sha384 = SHA384Managed.Create())
-                {
-                    sha384.Initialize();
-                    using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location))
-                    {
-                        var fileLengthToHash = stream.Length - embeddedMshLength;
-                        byte[] buf = new byte[65535];
-                        while (fileLengthToHash > 0)
-                        {
-                            int l = stream.Read(buf, 0, (int)Math.Min(fileLengthToHash, buf.Length));
-                            fileLengthToHash -= l;
-                            sha384.TransformBlock(buf, 0, l, null, 0);
-                        }
-                        sha384.TransformFinalBlock(new byte[0], 0, 0);
-                        selfHash = sha384.Hash;
-                    }
-                }
-                selfExecutableHashHex = BitConverter.ToString(selfHash).Replace("-", string.Empty).ToLower();
-            }
         }
 
         public delegate void ShowNotificationHandler(string userid, string title, string message);
