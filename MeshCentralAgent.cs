@@ -54,6 +54,20 @@ namespace MeshAssistant
         public delegate void onSelfUpdateHandler(string name, string hash, string url, string serverhash);
         public event onSelfUpdateHandler onSelfUpdate;
 
+        public delegate void onRequestConsentHandler(MeshCentralTunnel tunnel, string msg, int protocol, string userid);
+        public event onRequestConsentHandler onRequestConsent;
+
+        public void askForConsent(MeshCentralTunnel tunnel, string msg, int protocol, string userid)
+        {
+            if (onRequestConsent != null) { onRequestConsent(tunnel, msg, protocol, userid); }
+        }
+
+        public bool doesUserHaveSession(string userid, int protocol)
+        {
+            lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { if ((tunnel.protocol == protocol) && (tunnel.sessionUserName == userid) && (tunnel.consentRequested == false)) return true; } }
+            return false;
+        }
+
         public delegate void onSessionChangedHandler();
         public event onSessionChangedHandler onSessionChanged;
         public void fireSessionChanged(int protocol) {
@@ -529,8 +543,18 @@ namespace MeshAssistant
                                     }
                                     break;
                                 }
-                            case "getclip": { GetClipboard(jsonAction); break; }
-                            case "setclip": { SetClipboard(jsonAction); break; }
+                            case "getclip": {
+                                    // Require that the user have an active remote desktop session to perform this operation.
+                                    if ((userid == null) || (doesUserHaveSession(userid, 2) == false)) return;
+                                    GetClipboard(jsonAction);
+                                    break;
+                                }
+                            case "setclip": {
+                                    // Require that the user have an active remote desktop session to perform this operation.
+                                    if ((userid == null) || (doesUserHaveSession(userid, 2) == false)) return;
+                                    SetClipboard(jsonAction);
+                                    break;
+                                }
                             case "ps": {
                                     string sessionid = null;
                                     if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string))) { sessionid = (string)jsonAction["sessionid"]; }

@@ -12,7 +12,7 @@ namespace MeshAssistant
     {
         private Dictionary<string, object> creationArgs = null;
         private int state = 0; // 0 = Waitting for "c" or "cr", 1 = Waitting for protocol number, 2 = Running
-        private int protocol = 0; // 1 = Terminal, 2 = Desktop, 5 = Files, 10 = File Transfer
+        public int protocol = 0; // 1 = Terminal, 2 = Desktop, 5 = Files, 10 = File Transfer
         //private bool serverRecording = false;
         private MeshCentralAgent parent = null;
         public webSocketClient WebSocket = null;
@@ -25,7 +25,9 @@ namespace MeshAssistant
         private int fileRecvTransferSize = 0;
         private int fileRecvId = 0;
         private string extraLogStr = "";
-        private string sessionUserName = null;
+        public string sessionUserName = null;
+        public bool consentRequested = false;
+        private ArrayList commandsOnHold = null;
         public long userRights = 0;
 
         public enum MeshRights : long
@@ -97,6 +99,12 @@ namespace MeshAssistant
             if (fileRecvTransfer != null) { fileRecvTransfer.Close(); fileRecvTransfer = null; }
             if (WebSocket != null) { WebSocket.Dispose(); WebSocket = null; }
             if (Desktop != null) { Desktop.Dispose(); Desktop = null; }
+
+            // Cancel the consent request if active
+            if (consentRequested == true) {
+                parent.askForConsent(this, null, protocol, sessionUserName);
+                consentRequested = false;
+            }
 
             // Update session
             if (sessionUserName != null)
@@ -205,12 +213,36 @@ namespace MeshAssistant
                     }
                 }
 
+                int consent = 0;
+                if (creationArgs.ContainsKey("consent") && (creationArgs["consent"].GetType() == typeof(int))) { consent = (int)creationArgs["consent"]; }
+
                 if (protocol == 2)
                 {
-                    Desktop = new MeshCentralDesktop(this);
+                    if ((consent & 8) != 0) // Remote Desktop Consent Prompt
+                    {
+                        consentRequested = true;
+                        setConsoleText("Waiting for user to grant access...", 1, null, 0);
+                        parent.askForConsent(this, "User \"{0}\" is requesting remote desktop control of this computer. Click allow to grant access.", protocol, sessionUserName);
+                    }
+                    else
+                    {
+                        Desktop = new MeshCentralDesktop(this);
+                    }
+                }
+                else if (protocol == 5)
+                {
+                    if ((consent & 32) != 0) // Remote Files Consent Prompt
+                    {
+                        consentRequested = true;
+                        setConsoleText("Waiting for user to grant access...", 1, null, 0);
+                        parent.askForConsent(this, "User \"{0}\" is requesting access to all files on this computer. Click allow to grant access.", protocol, sessionUserName);
+                    }
                 }
                 else if (protocol == 10)
                 {
+                    // File transfers are only allowed if the user has an active file session. If not, must disconnect since user consent may be required.
+                    if ((sessionUserName == null) || (parent.doesUserHaveSession(sessionUserName, 5) == false)) { disconnect(); return; }
+
                     // Basic file transfer
                     if ((jsonOptions.ContainsKey("file")) && (jsonOptions["file"].GetType() == typeof(string)))
                     {
@@ -248,6 +280,33 @@ namespace MeshAssistant
             }
         }
 
+        public void ConsentAccepted()
+        {
+            if (consentRequested == false) return;
+            consentRequested = false;
+            setConsoleText(null, 0, null, 0);
+            if (protocol == 2)
+            {
+                // Start remote desktop
+                Desktop = new MeshCentralDesktop(this);
+            }
+            if (protocol == 5)
+            {
+                // Start files
+                if (commandsOnHold != null) { foreach (string cmd in commandsOnHold) { ParseFilesCommand(cmd); } }
+                commandsOnHold = null;
+            }
+        }
+
+        public void ConsentRejected()
+        {
+            if (consentRequested == false) return;
+            consentRequested = false;
+            setConsoleText("Denied", 2, null, 0);
+            disconnect();
+        }
+
+
         private void WebSocket_onSendOk(webSocketClient sender)
         {
             if (fileSendTransfer != null)
@@ -256,6 +315,16 @@ namespace MeshAssistant
                 int len = fileSendTransfer.Read(buf, 0, buf.Length);
                 if (len > 0) { WebSocket.SendBinary(buf, 0, len); } else { disconnect(); }
             }
+        }
+
+        private void setConsoleText(string msg, int msgid, string msgargs, int timeout)
+        {
+            string x = "{\"ctrlChannel\":\"102938\",\"type\":\"console\",\"msgid\":" + msgid;
+            if (msg != null) { x += ",\"msg\":\"" + escapeJsonString(msg) + "\""; } else { x += ",\"msg\":null"; }
+            if (msgargs != null) { x += ",\"msgargs\":" + msgargs; }
+            if (timeout != 0) { x += ",\"timeout\":" + timeout; }
+            x += "}";
+            WebSocket.SendString(x);
         }
 
         private void WebSocket_onBinaryData(webSocketClient sender, byte[] data, int off, int len, int orglen)
@@ -309,6 +378,13 @@ namespace MeshAssistant
 
         private void ParseFilesCommand(string data)
         {
+            // If we are asking for consent, hold file commands.
+            if (consentRequested) {
+                if (commandsOnHold == null) { commandsOnHold = new ArrayList(); }
+                commandsOnHold.Add(data);
+                return;
+            }
+
             // Parse the received JSON
             Dictionary<string, object> jsonCommand = new Dictionary<string, object>();
             try { jsonCommand = JSON.Deserialize<Dictionary<string, object>>(data); } catch (Exception) { return; }

@@ -58,8 +58,12 @@ namespace MeshAssistant
         public string selectedAgentName = null;
         public string currentAgentName = null;
         public NotifyForm notifyForm = null;
+        public ConsentForm consentForm = null;
         public int embeddedMshLength = 0;
         public string selfExecutableHashHex = null;
+        public string updateHash;
+        public string updateUrl;
+        public string updateServerHash;
 
         public MainForm(string[] args)
         {
@@ -118,6 +122,7 @@ namespace MeshAssistant
                 mcagent.onSelfUpdate += Agent_onSelfUpdate;
                 mcagent.onSessionChanged += Mcagent_onSessionChanged; ;
                 mcagent.onUserInfoChange += Mcagent_onUserInfoChange; ;
+                mcagent.onRequestConsent += Mcagent_onRequestConsent;
                 if (currentAgentSelection.Equals("~")) { currentAgentName = "~"; }
                 if (autoConnect == true) { currentAgentName = "~"; }
                 ToolStripMenuItem m = new ToolStripMenuItem();
@@ -160,11 +165,36 @@ namespace MeshAssistant
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
         }
 
+        private void Mcagent_onRequestConsent(MeshCentralTunnel tunnel, string msg, int protocol, string userid)
+        {
+            if (this.InvokeRequired) { this.Invoke(new MeshCentralAgent.onRequestConsentHandler(Mcagent_onRequestConsent), tunnel, msg, protocol, userid); return; }
+            if ((msg == null) && (consentForm != null) && (consentForm.tunnel == tunnel))
+            {
+                consentForm.Close();
+                consentForm = null;
+            }
+            else if ((consentForm == null) && (msg != null))
+            {
+                string realname = userid.Split('/')[2];
+                if (mcagent.userrealname.ContainsKey(userid)) { realname = mcagent.userrealname[userid]; }
+                Image userImage = null;
+                if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
+                consentForm = new ConsentForm(this);
+                consentForm.userid = userid;
+                consentForm.tunnel = tunnel;
+                consentForm.Message = msg;
+                consentForm.UserName = realname;
+                consentForm.UserImage = userImage;
+                consentForm.Show(this);
+                consentForm.Focus();
+            }
+        }
+
         public delegate void ShowNotificationHandler(string userid, string title, string message);
 
         public void ShowNotification(string userid, string title, string message)
         {
-            if (this.InvokeRequired) { this.Invoke(new ShowNotificationHandler(ShowNotification), userid, title, message); }
+            if (this.InvokeRequired) { this.Invoke(new ShowNotificationHandler(ShowNotification), userid, title, message); return; }
             string realname = userid.Split('/')[2];
             if (mcagent.userrealname.ContainsKey(userid)) { realname = mcagent.userrealname[userid]; }
             Image userImage = null;
@@ -189,11 +219,16 @@ namespace MeshAssistant
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onUserInfoChangeHandler(Mcagent_onUserInfoChange), userid, change); return; }
             updateBuiltinAgentStatus();
 
-            // If the notification dialog is showing, check if we can update the real name and/or image
+            // If the notification or consent dialog is showing, check if we can update the real name and/or image
             if ((notifyForm != null) && (notifyForm.userid == userid))
             {
                 if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { notifyForm.UserImage = mcagent.userimages[userid]; }
                 if (mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { notifyForm.UserName = mcagent.userrealname[userid]; }
+            }
+            if ((consentForm != null) && (consentForm.userid == userid))
+            {
+                if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { consentForm.UserImage = mcagent.userimages[userid]; }
+                if (mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { consentForm.UserName = mcagent.userrealname[userid]; }
             }
         }
 
@@ -451,8 +486,8 @@ namespace MeshAssistant
                 if (mcagent.FilesSessions != null) { count += CountSessions(mcagent.FilesSessions); }
                 if (mcagent.TcpSessions != null) { count += CountSessions(mcagent.TcpSessions); }
                 if (mcagent.UdpSessions != null) { count += CountSessions(mcagent.UdpSessions); }
-                if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); }
-                if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; }
+                if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); this.Visible = true; }
+                if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; this.Visible = true; }
                 if (count == 0) { mainNotifyIcon.BalloonTipText = "No active remote sessions."; remoteSessionsLabel.Text = "No remote sessions"; }
                 //mainNotifyIcon.ShowBalloonTip(2000);
                 if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
@@ -466,8 +501,8 @@ namespace MeshAssistant
                 if (agent.FilesSessions != null) { count += CountSessions(agent.FilesSessions); }
                 if (agent.TcpSessions != null) { count += CountSessions(agent.TcpSessions); }
                 if (agent.UdpSessions != null) { count += CountSessions(agent.UdpSessions); }
-                if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); }
-                if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; }
+                if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); this.Visible = true; }
+                if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; this.Visible = true; }
                 if (count == 0) { mainNotifyIcon.BalloonTipText = "No active remote sessions."; remoteSessionsLabel.Text = "No remote sessions"; }
                 //mainNotifyIcon.ShowBalloonTip(2000);
                 if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
@@ -895,6 +930,7 @@ namespace MeshAssistant
         {
             if (new UpdateForm().ShowDialog(this) == DialogResult.OK)
             {
+                updateSoftwareToolStripMenuItem.Visible = false;
                 seflUpdateDownloadHash = hash;
                 serverTlsCertHash = serverHash;
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
@@ -903,6 +939,11 @@ namespace MeshAssistant
                 webRequest.Timeout = 10000;
                 webRequest.BeginGetResponse(new AsyncCallback(DownloadUpdateRespone), webRequest);
                 webRequest.ServerCertificateValidationCallback += RemoteCertificateValidationCallback;
+            } else {
+                updateHash = hash;
+                updateUrl = url;
+                updateServerHash = serverHash;
+                updateSoftwareToolStripMenuItem.Visible = true;
             }
         }
 
@@ -981,5 +1022,10 @@ namespace MeshAssistant
             return Result.ToString();
         }
 
+        private void updateSoftwareToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if ((updateHash == null) || (updateUrl == null) || (updateServerHash == null)) return;
+            DownloadUpdate(updateHash, updateUrl, updateServerHash);
+        }
     }
 }

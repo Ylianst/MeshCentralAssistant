@@ -104,6 +104,12 @@
     <Compile Include="MeshCentralDesktop.cs" />
     <Compile Include="MeshCentralTcpTunnel.cs" />
     <Compile Include="MeshCentralTunnel.cs" />
+    <Compile Include="ConsentForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConsentForm.Designer.cs">
+      <DependentUpon>ConsentForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="NotifyForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -147,6 +153,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MeInfoForm.resx">
       <DependentUpon>MeInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConsentForm.resx">
+      <DependentUpon>ConsentForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="NotifyForm.resx">
       <DependentUpon>NotifyForm.cs</DependentUpon>

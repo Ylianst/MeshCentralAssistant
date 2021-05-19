@@ -60,6 +60,7 @@
             this.pictureBoxYellow = new System.Windows.Forms.PictureBox();
             this.pictureBoxCustom = new System.Windows.Forms.PictureBox();
             this.pictureBoxUsers = new System.Windows.Forms.PictureBox();
+            this.updateSoftwareToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainContextMenuStrip.SuspendLayout();
             this.dialogContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUser)).BeginInit();
@@ -103,6 +104,7 @@
             this.openSiteToolStripMenuItem,
             this.showSessionsToolStripMenuItem,
             this.intelMEStateToolStripMenuItem,
+            this.updateSoftwareToolStripMenuItem,
             this.agentSelectToolStripMenuItem,
             this.toolStripMenuItem1,
             this.startAgentToolStripMenuItem,
@@ -110,7 +112,7 @@
             this.toolStripMenuItem2,
             this.exitToolStripMenuItem});
             this.mainContextMenuStrip.Name = "mainContextMenuStrip";
-            this.mainContextMenuStrip.Size = new System.Drawing.Size(167, 214);
+            this.mainContextMenuStrip.Size = new System.Drawing.Size(167, 258);
             // 
             // openToolStripMenuItem
             // 
@@ -345,6 +347,14 @@
             this.pictureBoxUsers.TabIndex = 14;
             this.pictureBoxUsers.TabStop = false;
             // 
+            // updateSoftwareToolStripMenuItem
+            // 
+            this.updateSoftwareToolStripMenuItem.Name = "updateSoftwareToolStripMenuItem";
+            this.updateSoftwareToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.updateSoftwareToolStripMenuItem.Text = "&Update Software";
+            this.updateSoftwareToolStripMenuItem.Visible = false;
+            this.updateSoftwareToolStripMenuItem.Click += new System.EventHandler(this.updateSoftwareToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -416,6 +426,7 @@
         private System.Windows.Forms.PictureBox pictureBoxUser;
         private System.Windows.Forms.PictureBox pictureBoxCustom;
         private System.Windows.Forms.PictureBox pictureBoxUsers;
+        private System.Windows.Forms.ToolStripMenuItem updateSoftwareToolStripMenuItem;
     }
 }
 

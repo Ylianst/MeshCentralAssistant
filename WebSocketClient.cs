@@ -353,6 +353,7 @@ namespace MeshAssistant
         {
             if ((wsstream == null) || (pendingSendBuffer == null)) return;
             try { wsstream.EndWrite(ar); } catch (Exception) { }
+            if (pendingSendBuffer == null) return;
             lock (pendingSendBuffer)
             {
                 if (pendingSendBuffer == null) return;
