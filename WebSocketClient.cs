@@ -342,7 +342,10 @@ namespace MeshAssistant
             // Receive more data
             if (readPaused == false)
             {
-                try { wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this); } catch (Exception) { }
+                if (wsstream != null)
+                {
+                    try { wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this); } catch (Exception) { }
+                }
             }
             else
             {

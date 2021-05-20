@@ -50,6 +50,7 @@ namespace MeshAssistant
         public SessionsForm sessionsForm = null;
         public MeInfoForm meInfoForm = null;
         public ConsoleForm consoleForm = null;
+        public PrivacyBarForm privacyBar = null;
         public bool isAdministrator = false;
         public bool forceExit = false;
         public bool noUpdate = false;
@@ -64,6 +65,7 @@ namespace MeshAssistant
         public string updateHash;
         public string updateUrl;
         public string updateServerHash;
+        public List<PrivacyBarForm> privacyBars = null;
 
         public MainForm(string[] args)
         {
@@ -163,6 +165,9 @@ namespace MeshAssistant
             connectToAgent();
 
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
+
+
+            PrivacyBarShow("This is a test");
         }
 
         private void Mcagent_onRequestConsent(MeshCentralTunnel tunnel, string msg, int protocol, string userid)
@@ -244,6 +249,7 @@ namespace MeshAssistant
         private void Mcagent_onStateChanged(int state)
         {
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onStateChangedHandler(Mcagent_onStateChanged), state); return; }
+            if (state == 0) { PrivacyBarClose(); }
             updateBuiltinAgentStatus();
         }
 
@@ -472,6 +478,33 @@ namespace MeshAssistant
             lock (sessions) { foreach (string key in sessions.Keys) { count += (int)sessions[key]; } }
             return count;
         }
+        
+        private string[] UserIdToAccountNames(string[] userids)
+        {
+            string[] r = new string[userids.Length];
+            for (var i = 0; i < userids.Length; i++) {
+                string u = userids[i];
+                string[] uu = u.Split('/');
+                r[i] = ((uu.Length == 3) ? uu[2] : u);
+            }
+            return r;
+        }
+
+        private string[] UserIdToRealnames(string[] userids)
+        {
+            string[] r = new string[userids.Length];
+            for (var i = 0; i < userids.Length; i++) {
+                string u = userids[i];
+                if ((mcagent.userrealname != null) && (mcagent.userrealname[u] != null)) {
+                    r[i] = mcagent.userrealname[u];
+                } else {
+                    string[] uu = u.Split('/');
+                    r[i] = ((uu.Length == 3) ? uu[2] : u);
+                }
+            }
+            return r;
+        }
+
 
         private void Agent_onSessionChanged()
         {
@@ -489,6 +522,16 @@ namespace MeshAssistant
                 if (count > 1) { mainNotifyIcon.BalloonTipText = count + " remote sessions are active."; remoteSessionsLabel.Text = (count + " remote sessions"); this.Visible = true; }
                 if (count == 1) { mainNotifyIcon.BalloonTipText = "1 remote session is active."; remoteSessionsLabel.Text = "1 remote session"; this.Visible = true; }
                 if (count == 0) { mainNotifyIcon.BalloonTipText = "No active remote sessions."; remoteSessionsLabel.Text = "No remote sessions"; }
+                if (count > 0) {
+                    // {0} = Realname, {1} = Username
+                    string privacyBarText = (mcagent.privacyBarText != null) ? mcagent.privacyBarText : "Remote Sessions: {0}";
+                    string[] userids = getSessionUserIdList();
+                    string[] accountNames = UserIdToAccountNames(userids);
+                    string[] realnames = UserIdToRealnames(userids);
+                    PrivacyBarShow(privacyBarText.Replace("{1}", string.Join(", ", accountNames)).Replace("{0}", string.Join(", ", realnames)));
+                } else {
+                    PrivacyBarClose();
+                }
                 //mainNotifyIcon.ShowBalloonTip(2000);
                 if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
             }
@@ -916,6 +959,44 @@ namespace MeshAssistant
                 meInfoForm = new MeInfoForm(this);
                 meInfoForm.Show(this);
             }
+        }
+
+
+        //
+        // Private bar section
+        //
+
+        public void PrivacyBarShow(string msg)
+        {
+            if (privacyBars != null)
+            {
+                // Update all privacy bar text
+                foreach (PrivacyBarForm f in privacyBars) { f.privacyText = msg; }
+            }
+            else
+            {
+                // Show all privacy bars
+                privacyBars = new List<PrivacyBarForm>();
+                foreach (Screen s in Screen.AllScreens)
+                {
+                    PrivacyBarForm f = new PrivacyBarForm(this, s);
+                    f.privacyText = msg;
+                    f.Show(this);
+                    privacyBars.Add(f);
+                }
+            }
+        }
+
+        public void PrivacyBarClose()
+        {
+            // Close all privacy bars
+            if (privacyBars == null) return;
+            foreach (PrivacyBarForm f in privacyBars) { f.Close(); }
+            privacyBars.Clear();
+            privacyBars = null;
+
+            // Drop all mcagent sessions
+            if (mcagent != null) { mcagent.disconnectAllTunnels(); }
         }
 
 

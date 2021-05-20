@@ -215,6 +215,9 @@ namespace MeshAssistant
 
                 int consent = 0;
                 if (creationArgs.ContainsKey("consent") && (creationArgs["consent"].GetType() == typeof(int))) { consent = (int)creationArgs["consent"]; }
+                if (creationArgs.ContainsKey("privacybartext") && (creationArgs["privacybartext"].GetType() == typeof(string))) {
+                    if (parent.privacyBarText != (string)creationArgs["privacybartext"]) { parent.privacyBarText = (string)creationArgs["privacybartext"]; parent.PrivacyTextChanged(); }
+                }
 
                 if (protocol == 2)
                 {

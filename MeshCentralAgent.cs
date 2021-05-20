@@ -36,8 +36,9 @@ namespace MeshAssistant
         private List<MeshCentralTcpTunnel> tcptunnels = new List<MeshCentralTcpTunnel>(); // List of active TCP tunnels
         public Dictionary<string, Image> userimages = new Dictionary<string, Image>(); // UserID --> Image
         public Dictionary<string, string> userrealname = new Dictionary<string, string>(); // UserID --> Realname
-        string softwareName = null;
-        string selfExecutableHashHex = null;
+        private string softwareName = null;
+        private string selfExecutableHashHex = null;
+        public string privacyBarText = null;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -47,7 +48,7 @@ namespace MeshAssistant
         public Dictionary<string, object> UdpSessions = null;
         public Dictionary<string, object> MessagesSessions = null;
 
-        public delegate void onUserInfoChangeHandler(string userid, int change); // Change: 1 = Image, 2 = Realname
+        public delegate void onUserInfoChangeHandler(string userid, int change); // Change: 1 = Image, 2 = Realname, 3 = PrivacyText
         public event onUserInfoChangeHandler onUserInfoChange;
         public static string getSelfFilename(string ext) { string s = Process.GetCurrentProcess().MainModule.FileName; return s.Substring(0, s.Length - 4) + ext; }
 
@@ -246,6 +247,11 @@ namespace MeshAssistant
             foreach (MeshCentralTcpTunnel tcptunnel in tcptunnels) { tcptunnel.disconnect(); }
         }
 
+        public void disconnectAllTunnels()
+        {
+            foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.disconnect(); }
+        }
+
         private void serverConnected()
         {
             debugMsg("Server Connected");
@@ -415,6 +421,11 @@ namespace MeshAssistant
             if (response != null) {
                 WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"console\",\"value\":\"" + escapeJsonString(response) + "\",\"sessionid\":\"" + sessionid + "\"}"));
             }
+        }
+
+        public void PrivacyTextChanged()
+        {
+            if (onUserInfoChange != null) { onUserInfoChange(null, 3); } // Event the privacy text change
         }
 
         public void processServerJsonData(string data)

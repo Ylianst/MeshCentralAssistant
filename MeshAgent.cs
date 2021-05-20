@@ -122,7 +122,7 @@ namespace MeshAssistant
                         try
                         {
                             RegistryKey localKey2 = localKey.OpenSubKey(subKey);
-                            if (localKey2.GetValueKind("NodeId") == RegistryValueKind.String)
+                            if ((localKey2.GetValue("NodeId") != null) && (localKey2.GetValueKind("NodeId") == RegistryValueKind.String))
                             {
                                 string nodeid = localKey2.GetValue("NodeId").ToString().Replace('@', '+').Replace('$', '/');
                                 if (connections.ContainsKey(subKey))
