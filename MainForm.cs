@@ -36,6 +36,7 @@ namespace MeshAssistant
 {
     public partial class MainForm : Form
     {
+        public bool debug = false;
         public string[] args;
         public int timerSlowDown = 0;
         public bool allowShowDisplay = false;
@@ -67,6 +68,10 @@ namespace MeshAssistant
         public string updateServerHash;
         public List<PrivacyBarForm> privacyBars = null;
 
+        public void Log(string msg) {
+            if (debug) { try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff: ") + msg + "\r\n"); } catch (Exception) { } }
+        }
+
         public MainForm(string[] args)
         {
             // Perform self update operations if any.
@@ -76,6 +81,7 @@ namespace MeshAssistant
             string delete = null;
             foreach (string arg in this.args) 
             {
+                if (arg.ToLower() == "-debug") { debug = true; }
                 if ((arg.Length == 8) && (arg.ToLower() == "-visible")) { startVisible = true; }
                 if ((arg.Length == 9) && (arg.ToLower() == "-noupdate")) { noUpdate = true; }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }
@@ -83,9 +89,13 @@ namespace MeshAssistant
                 if (arg.Length > 11 && arg.Substring(0, 11).ToLower() == "-agentname:") { selectedAgentName = arg.Substring(11); }
                 if ((arg.Length == 12) && (arg.ToLower() == "-autoconnect")) { autoConnect = true; }
             }
+            try { File.AppendAllText("debug.log", "\r\n\r\n"); } catch (Exception) { }
+            Log("***** Starting MeshCentral Assistant *****");
 
             if (update != null)
             {
+                Log("Performing update");
+
                 // New args
                 ArrayList args2 = new ArrayList();
                 foreach (string a in args) { if (a.StartsWith("-update:") == false) { args2.Add(a); } }
@@ -100,7 +110,10 @@ namespace MeshAssistant
                 return;
             }
 
-            if (delete != null) { try { System.Threading.Thread.Sleep(1000); File.Delete(delete); } catch (Exception) { } }
+            if (delete != null) {
+                Log("Performing update delete");
+                try { System.Threading.Thread.Sleep(1000); File.Delete(delete); } catch (Exception) { }
+            }
 
             // If there is an embedded .msh file, write it out to "meshagent.msh"
             string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
@@ -118,12 +131,13 @@ namespace MeshAssistant
             string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
 
             if (MeshCentralAgent.checkMshFile()) {
-                mcagent = new MeshCentralAgent(this, "MeshCentralAssistant", selfExecutableHashHex);
+                Log("Starting built-in agent");
+                mcagent = new MeshCentralAgent(this, "MeshCentralAssistant", selfExecutableHashHex, debug);
                 mcagent.onStateChanged += Mcagent_onStateChanged;
                 mcagent.onNotify += Mcagent_onNotify;
                 mcagent.onSelfUpdate += Agent_onSelfUpdate;
-                mcagent.onSessionChanged += Mcagent_onSessionChanged; ;
-                mcagent.onUserInfoChange += Mcagent_onUserInfoChange; ;
+                mcagent.onSessionChanged += Mcagent_onSessionChanged;
+                mcagent.onUserInfoChange += Mcagent_onUserInfoChange;
                 mcagent.onRequestConsent += Mcagent_onRequestConsent;
                 if (currentAgentSelection.Equals("~")) { currentAgentName = "~"; }
                 if (autoConnect == true) { currentAgentName = "~"; }
@@ -140,6 +154,7 @@ namespace MeshAssistant
             agents = MeshAgent.GetAgentInfo(selectedAgentName);
             string[] agentNames = agents.Keys.ToArray();
             if (agents.Count > 0) {
+                Log(string.Format("Found {0} background agent(s)", agents.Count));
                 if ((currentAgentName == null) || (currentAgentName != "~"))
                 {
                     currentAgentName = agentNames[0]; // Default
@@ -165,9 +180,6 @@ namespace MeshAssistant
             connectToAgent();
 
             if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
-
-
-            PrivacyBarShow("This is a test");
         }
 
         private void Mcagent_onRequestConsent(MeshCentralTunnel tunnel, string msg, int protocol, string userid)
@@ -175,11 +187,13 @@ namespace MeshAssistant
             if (this.InvokeRequired) { this.Invoke(new MeshCentralAgent.onRequestConsentHandler(Mcagent_onRequestConsent), tunnel, msg, protocol, userid); return; }
             if ((msg == null) && (consentForm != null) && (consentForm.tunnel == tunnel))
             {
+                Log("Closing consent form");
                 consentForm.Close();
                 consentForm = null;
             }
             else if ((consentForm == null) && (msg != null))
             {
+                Log("Opening consent form");
                 string realname = userid.Split('/')[2];
                 if (mcagent.userrealname.ContainsKey(userid)) { realname = mcagent.userrealname[userid]; }
                 Image userImage = null;
@@ -200,6 +214,7 @@ namespace MeshAssistant
         public void ShowNotification(string userid, string title, string message)
         {
             if (this.InvokeRequired) { this.Invoke(new ShowNotificationHandler(ShowNotification), userid, title, message); return; }
+            Log("Show notification");
             string realname = userid.Split('/')[2];
             if (mcagent.userrealname.ContainsKey(userid)) { realname = mcagent.userrealname[userid]; }
             Image userImage = null;
@@ -216,12 +231,14 @@ namespace MeshAssistant
         private void Mcagent_onSessionChanged()
         {
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onSessionChangedHandler(Mcagent_onSessionChanged)); return; }
+            Log("onSessionChanged");
             updateBuiltinAgentStatus();
         }
 
         private void Mcagent_onUserInfoChange(string userid, int change)
         {
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onUserInfoChangeHandler(Mcagent_onUserInfoChange), userid, change); return; }
+            Log(string.Format("onUserInfoChange {0}, {1}", userid, change));
             updateBuiltinAgentStatus();
 
             // If the notification or consent dialog is showing, check if we can update the real name and/or image
@@ -249,6 +266,7 @@ namespace MeshAssistant
         private void Mcagent_onStateChanged(int state)
         {
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onStateChangedHandler(Mcagent_onStateChanged), state); return; }
+            Log(string.Format("Mcagent_onStateChanged {0}", state));
             if (state == 0) { PrivacyBarClose(); }
             updateBuiltinAgentStatus();
         }
@@ -265,6 +283,7 @@ namespace MeshAssistant
                     submenu.Checked = (submenu.Name.Substring(14) == currentAgentName);
                 }
             }
+            Log(string.Format("agentSelection_Click {0}", currentAgentName));
             connectToAgent();
         }
 
@@ -368,6 +387,8 @@ namespace MeshAssistant
 
         private void connectToAgent()
         {
+            Log(string.Format("connectToAgent {0}", currentAgentName));
+
             if (agent != null) { agent.DisconnectPipe(); agent = null; }
             if ((mcagent != null) && (mcagent.state != 0)) { mcagent.disconnect(); }
             if ((currentAgentName != null) && (currentAgentName.Equals("~")))
@@ -392,9 +413,9 @@ namespace MeshAssistant
             else
             {
                 if (currentAgentName == null) {
-                    agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null, selfExecutableHashHex);
+                    agent = new MeshAgent("MeshCentralAssistant", "Mesh Agent", null, selfExecutableHashHex, debug);
                 } else {
-                    agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName], selfExecutableHashHex);
+                    agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName], selfExecutableHashHex, debug);
                     Settings.SetRegValue("SelectedAgent", currentAgentName);
                 }
                 agent.onStateChanged += Agent_onStateChanged;
@@ -659,6 +680,8 @@ namespace MeshAssistant
                 return;
             }
 
+            Log(string.Format("Agent_onStateChanged {0}, {1}, {2}", state, serverState, currentAgentName));
+
             if (currentAgentName.Equals("~")) {
                 intelMEStateToolStripMenuItem.Visible = false;
                 intelAMTStateToolStripMenuItem.Visible = false;
@@ -847,6 +870,7 @@ namespace MeshAssistant
 
         private void requestHelpButton_Click(object sender, EventArgs e)
         {
+            Log(string.Format("requestHelpButton_Click {0}", currentAgentName));
             if (currentAgentName.Equals("~"))
             {
                 if (mcagent.state == 0)
@@ -904,6 +928,7 @@ namespace MeshAssistant
 
         public void RequestHelp(string details)
         {
+            Log(string.Format("RequestHelp {0}, \"{1}\"", currentAgentName, details));
             if (currentAgentName.Equals("~"))
             {
                 if (details.Length > 0) { mcagent.HelpRequest = details; } else { mcagent.HelpRequest = null; }
@@ -971,11 +996,13 @@ namespace MeshAssistant
             if (privacyBars != null)
             {
                 // Update all privacy bar text
+                Log(string.Format("PrivacyBarShow Update:\"{0}\"", msg));
                 foreach (PrivacyBarForm f in privacyBars) { f.privacyText = msg; }
             }
             else
             {
                 // Show all privacy bars
+                Log(string.Format("PrivacyBarShow Show:\"{0}\"", msg));
                 privacyBars = new List<PrivacyBarForm>();
                 foreach (Screen s in Screen.AllScreens)
                 {
@@ -991,6 +1018,7 @@ namespace MeshAssistant
         {
             // Close all privacy bars
             if (privacyBars == null) return;
+            Log("PrivacyBarClose");
             foreach (PrivacyBarForm f in privacyBars) { f.Close(); }
             privacyBars.Clear();
             privacyBars = null;
@@ -1009,6 +1037,7 @@ namespace MeshAssistant
 
         private void DownloadUpdate(string hash, string url, string serverHash)
         {
+            Log(string.Format("DownloadUpdate \"{0}\", \"{1}\", \"{2}\"", hash, url, serverHash));
             if (new UpdateForm().ShowDialog(this) == DialogResult.OK)
             {
                 updateSoftwareToolStripMenuItem.Visible = false;
@@ -1031,7 +1060,12 @@ namespace MeshAssistant
         public bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             // Check MeshCentral server's TLS certificate. This is our first security layer.
-            if ((serverTlsCertHash != null) && (serverTlsCertHash != certificate.GetCertHashString().ToLower()) && (serverTlsCertHash != GetMeshKeyHash(certificate).ToLower()) && (serverTlsCertHash != GetMeshCertHash(certificate).ToLower())) return false;
+            if ((serverTlsCertHash != null) && (serverTlsCertHash != certificate.GetCertHashString().ToLower()) && (serverTlsCertHash != GetMeshKeyHash(certificate).ToLower()) && (serverTlsCertHash != GetMeshCertHash(certificate).ToLower()))
+            {
+                Log("RemoteCertificateValidationCallback - Invalid");
+                return false;
+            }
+            Log("RemoteCertificateValidationCallback - OK");
             return true;
         }
 
@@ -1065,11 +1099,13 @@ namespace MeshAssistant
                     string downloadHashHex = BitConverter.ToString(downloadHash).Replace("-", string.Empty).ToLower();
                     if (downloadHashHex != seflUpdateDownloadHash)
                     {
+                        Log("DownloadUpdateRespone - Invalid hash");
                         System.Threading.Thread.Sleep(500);
                         File.Delete(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe");
                     }
                     else
                     {
+                        Log("DownloadUpdateRespone - OK");
                         doclose = true;
                         forceExit = true;
                         System.Threading.Thread.Sleep(500);

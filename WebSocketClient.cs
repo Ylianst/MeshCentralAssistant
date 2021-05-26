@@ -45,7 +45,7 @@ namespace MeshAssistant
         private bool proxyInUse = false;
         private string tlsCertFingerprint = null;
         //private ConnectionErrors lastError = ConnectionErrors.NoError;
-        public bool xdebug = false;
+        public bool debug = false;
         public bool xignoreCert = false;
         public string extraHeaders = null;
         private MemoryStream inflateMemory;
@@ -114,7 +114,11 @@ namespace MeshAssistant
             SetState(ConnectionStates.Disconnected);
         }
 
-        public void Debug(string msg) { if (onDebugMessage != null) { onDebugMessage(this, msg); } if (xdebug) { try { File.AppendAllText("debug.log", "Debug-" + msg + "\r\n"); } catch (Exception) { } } }
+        public void Log(string msg)
+        {
+            if (onDebugMessage != null) { onDebugMessage(this, msg); }
+            if (debug) { try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff") + ": WebSocket: " + msg + "\r\n"); } catch (Exception) { } }
+        }
 
         public bool Start(Uri url, string tlsCertFingerprint)
         {
@@ -124,7 +128,7 @@ namespace MeshAssistant
             if (tlsCertFingerprint != null) { this.tlsCertFingerprint = tlsCertFingerprint.ToUpper(); }
             Uri proxyUri = null;
 
-            Debug("Websocket Start, URL=" + url.ToString());
+            Log("Websocket Start, URL=" + url.ToString());
 
             // Check if we need to use a HTTP proxy (Auto-proxy way)
             try
@@ -150,7 +154,7 @@ namespace MeshAssistant
             if (proxyUri != null)
             {
                 // Proxy in use
-                Debug("Websocket proxyUri: " + proxyUri.ToString());
+                Log("Websocket proxyUri: " + proxyUri.ToString());
                 proxyInUse = true;
                 wsclient = new TcpClient();
                 wsclient.BeginConnect(proxyUri.Host, proxyUri.Port, new AsyncCallback(OnConnectSink), this);
@@ -158,7 +162,7 @@ namespace MeshAssistant
             else
             {
                 // No proxy in use
-                Debug("Websocket noProxy");
+                Log("Websocket noProxy");
                 proxyInUse = false;
                 wsclient = new TcpClient();
                 wsclient.BeginConnect(url.Host, url.Port, new AsyncCallback(OnConnectSink), this);
@@ -178,7 +182,7 @@ namespace MeshAssistant
             }
             catch (Exception ex)
             {
-                Debug("Websocket TCP failed to connect: " + ex.ToString());
+                Log("Websocket TCP failed to connect: " + ex.ToString());
                 Dispose();
                 return;
             }
@@ -194,7 +198,7 @@ namespace MeshAssistant
             else
             {
                 // Start TLS connection
-                Debug("Websocket TCP connected, doing TLS...");
+                Log("Websocket TCP connected, doing TLS...");
                 wsstream = new SslStream(wsclient.GetStream(), false, VerifyServerCertificate, null);
                 wsstream.BeginAuthenticateAsClient(url.Host, null, System.Security.Authentication.SslProtocols.Tls12, false, new AsyncCallback(OnTlsSetupSink), this);
             }
@@ -209,7 +213,7 @@ namespace MeshAssistant
             if (len == 0)
             {
                 // Disconnect
-                Debug("Websocket proxy disconnected, length = 0.");
+                Log("Websocket proxy disconnected, length = 0.");
                 Dispose();
                 return;
             }
@@ -223,14 +227,14 @@ namespace MeshAssistant
                 {
                     // All good, start TLS setup.
                     readBufferLen = 0;
-                    Debug("Websocket TCP connected, doing TLS...");
+                    Log("Websocket TCP connected, doing TLS...");
                     wsstream = new SslStream(wsrawstream, false, VerifyServerCertificate, null);
                     wsstream.BeginAuthenticateAsClient(url.Host, null, System.Security.Authentication.SslProtocols.Tls12, false, new AsyncCallback(OnTlsSetupSink), this);
                 }
                 else
                 {
                     // Invalid response
-                    Debug("Proxy connection failed: " + proxyResponse);
+                    Log("Proxy connection failed: " + proxyResponse);
                     Dispose();
                 }
             }
@@ -239,7 +243,7 @@ namespace MeshAssistant
                 if (readBufferLen == readBuffer.Length)
                 {
                     // Buffer overflow
-                    Debug("Proxy connection failed");
+                    Log("Proxy connection failed");
                     Dispose();
                 }
                 else
@@ -274,7 +278,7 @@ namespace MeshAssistant
             catch (Exception ex)
             {
                 // Disconnect
-                Debug("Websocket TLS failed: " + ex.ToString());
+                Log("Websocket TLS failed: " + ex.ToString());
                 Dispose();
                 return;
             }
@@ -283,7 +287,7 @@ namespace MeshAssistant
             pendingSendCall = false;
 
             // Send the HTTP headers
-            Debug("Websocket TLS setup, sending HTTP header...");
+            Log("Websocket TLS setup, sending HTTP header...");
             string header;
             if (AllowCompression) {
                 header = "GET " + url.PathAndQuery + " HTTP/1.1\r\nHost: " + url.Host + "\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Extensions: permessage-deflate; client_no_context_takeover\r\n" + extraHeaders + "\r\n";
@@ -305,7 +309,7 @@ namespace MeshAssistant
             if (len == 0)
             {
                 // Disconnect
-                Debug("Websocket disconnected, length = 0.");
+                Log("Websocket disconnected, length = 0.");
                 Dispose();
                 return;
             }
@@ -333,7 +337,7 @@ namespace MeshAssistant
             // If the buffer is too small, double the size here.
             if (readBuffer.Length - readBufferLen == 0)
             {
-                Debug("Increasing the read buffer size from " + readBuffer.Length + " to " + (readBuffer.Length * 2) + ".");
+                Log("Increasing the read buffer size from " + readBuffer.Length + " to " + (readBuffer.Length * 2) + ".");
                 byte[] readBuffer2 = new byte[readBuffer.Length * 2];
                 Array.Copy(readBuffer, 0, readBuffer2, 0, readBuffer.Length);
                 readBuffer = readBuffer2;
@@ -389,8 +393,8 @@ namespace MeshAssistant
                 int i = header.IndexOf("\r\n\r\n");
                 if (i == -1) return 0;
                 Dictionary<string, string> parsedHeader = ParseHttpHeader(header.Substring(0, i));
-                if ((parsedHeader == null) || (parsedHeader["_Path"] != "101")) { Debug("Websocket bad header."); return -1; } // Bad header, close the connection
-                Debug("Websocket got setup upgrade header.");
+                if ((parsedHeader == null) || (parsedHeader["_Path"] != "101")) { Log("Websocket bad header."); return -1; } // Bad header, close the connection
+                Log("Websocket got setup upgrade header.");
                 SetState(ConnectionStates.Connected);
 
                 if (parsedHeader.ContainsKey("sec-websocket-extensions") && (parsedHeader["sec-websocket-extensions"].IndexOf("permessage-deflate") >= 0))
@@ -421,7 +425,7 @@ namespace MeshAssistant
                     if ((accopcodes & 0x0F) == 8)
                     {
                         // Close the websocket
-                        Debug("Websocket got closed fragment.");
+                        Log("Websocket got closed fragment.");
                         return -1;
                     }
 
@@ -439,7 +443,7 @@ namespace MeshAssistant
                         if (len < 10) return 0;
                         headsize = 10;
                         acclen = (buffer[offset + 6] << 24) + (buffer[offset + 7] << 16) + (buffer[offset + 8] << 8) + (buffer[offset + 9]);
-                        Debug("Websocket receive large fragment: " + acclen);
+                        Log("Websocket receive large fragment: " + acclen);
                     }
                     if (accmask == true)
                     {
@@ -485,13 +489,13 @@ namespace MeshAssistant
             {
                 case 0x01: // This is a text frame
                     {
-                        Debug("Websocket got string data, len = " + len);
+                        Log("Websocket got string data, len = " + len);
                         if (onStringData != null) { onStringData(this, UTF8Encoding.UTF8.GetString(data, offset, len), orglen); }
                         break;
                     }
                 case 0x02: // This is a birnay frame
                     {
-                        Debug("Websocket got binary data, len = " + len);
+                        Log("Websocket got binary data, len = " + len);
                         if (onBinaryData != null) { onBinaryData(this, data, offset, len, orglen); }
                         break;
                     }
@@ -557,40 +561,40 @@ namespace MeshAssistant
 
             string hash1 = GetMeshCertHash(certificate);
             string hash2 = certificate.GetCertHashString();
-            Debug("VerifyServerCertificate: tlsCertFingerprint = " + tlsCertFingerprint);
-            Debug("VerifyServerCertificate: Hash1 = " + hash1);
-            Debug("VerifyServerCertificate: Hash2 = " + hash2);
+            Log("VerifyServerCertificate: tlsCertFingerprint = " + tlsCertFingerprint);
+            Log("VerifyServerCertificate: Hash1 = " + hash1);
+            Log("VerifyServerCertificate: Hash2 = " + hash2);
             return ((tlsCertFingerprint == GetMeshKeyHash(certificate)) || (tlsCertFingerprint == certificate.GetCertHashString()));
         }
 
         public int SendString(string data)
         {
             if (state != ConnectionStates.Connected) return 0;
-            Debug("WebSocketClient-SEND-String: " + data);
+            Log("WebSocketClient-SEND-String: " + data);
             byte[] buf = UTF8Encoding.UTF8.GetBytes(data);
             return SendFragment(buf, 0, buf.Length, 129);
         }
 
         public int SendBinary(byte[] data)
         {
-            Debug("WebSocketClient-SEND-Binary-Len:" + data.Length);
+            Log("WebSocketClient-SEND-Binary-Len:" + data.Length);
             return SendFragment(data, 0, data.Length, 130);
         }
 
         public int SendBinary(byte[] data, int offset, int len) {
-            Debug("WebSocketClient-SEND-Binary-Len:" + len);
+            Log("WebSocketClient-SEND-Binary-Len:" + len);
             return SendFragment(data, offset, len, 130);
         }
 
         public int SendPing(byte[] data, int offset, int len)
         {
-            Debug("WebSocketClient-SEND-Ping");
+            Log("WebSocketClient-SEND-Ping");
             return SendFragment(null, 0, 0, 137);
         }
 
         public int SendPong(byte[] data, int offset, int len)
         {
-            Debug("WebSocketClient-SEND-Pong");
+            Log("WebSocketClient-SEND-Pong");
             return SendFragment(null, 0, 0, 138);
         }
 

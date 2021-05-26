@@ -107,8 +107,9 @@ namespace MeshAssistant
             }
         }
 
-        public MeshCentralAgent(MainForm parent, string softwareName, string selfExecutableHashHex)
+        public MeshCentralAgent(MainForm parent, string softwareName, string selfExecutableHashHex, bool debug)
         {
+            this.debug = debug;
             this.parent = parent;
             this.softwareName = softwareName;
             this.selfExecutableHashHex = selfExecutableHashHex;
@@ -123,6 +124,9 @@ namespace MeshAssistant
             if (msh.ContainsKey("MeshID")) { string m = msh["MeshID"]; if (m.StartsWith("0x")) { m = m.Substring(2); } MeshId = StringToByteArray(m); }
             if (msh.ContainsKey("ServerID")) { ServerId = msh["ServerID"]; }
             if (msh.ContainsKey("MeshServer")) { try { ServerUrl = new Uri(msh["MeshServer"]); } catch (Exception) { } }
+            Log("MSH MeshID: " + msh["MeshID"]);
+            Log("MSH ServerID: " + ServerId);
+            Log("MSH MeshServer: " + ServerUrl);
         }
 
         public static bool checkMshFile()
@@ -136,16 +140,18 @@ namespace MeshAssistant
             return true;
         }
 
-        private static X509Certificate2 LoadAgentCertificate()
+        private X509Certificate2 LoadAgentCertificate()
         {
             string p12filename = getSelfFilename(".p12");
             X509Certificate2 cert = null;
             if (File.Exists(p12filename)) { try { cert = new X509Certificate2(p12filename, "dummy"); } catch (Exception) { } }
-            if (cert != null) return cert;
+            if (cert != null) { Log("LoadAgentCertificate() - Loaded existing certificate."); return cert; }
+            Log("LoadAgentCertificate() - Creating new certificate...");
             RSA rsa = RSA.Create(3072); // Generate asymmetric RSA key pair
             CertificateRequest req = new CertificateRequest("cn=MeshAgent", rsa, HashAlgorithmName.SHA384, RSASignaturePadding.Pkcs1);
             cert = req.CreateSelfSigned(DateTimeOffset.Now.AddDays(-10), DateTimeOffset.Now.AddYears(20));
             File.WriteAllBytes(p12filename, cert.Export(X509ContentType.Pkcs12, "dummy"));
+            Log("LoadAgentCertificate() - Certificate created");
             return cert;
         }
 
@@ -165,10 +171,6 @@ namespace MeshAssistant
         public event onNotifyHandler onNotify;
         public void notify(string userid, string title, string msg) { if (onNotify != null) { onNotify(userid, title, msg); } }
 
-        public delegate void onDebugHandler(string msg);
-        public event onDebugHandler onDebug;
-        public void debugMsg(string msg) { if (onDebug != null) { onDebug(msg); } }
-
         public delegate void onStateChangedHandler(int state);
         public event onStateChangedHandler onStateChanged;
         public void changeState(int newState) { if (state != newState) { state = newState; if (onStateChanged != null) { onStateChanged(state); } } }
@@ -181,18 +183,23 @@ namespace MeshAssistant
             return randomBytes;
         }
 
+        public void Log(string msg)
+        {
+            if (debug) { try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff") + ": MCAgent: " + msg + "\r\n"); } catch (Exception) { } }
+        }
+
         public static byte[] StringToByteArray(string hex) { return Enumerable.Range(0, hex.Length).Where(x => x % 2 == 0).Select(x => Convert.ToByte(hex.Substring(x, 2), 16)).ToArray(); }
 
         public bool connect()
         {
             if ((MeshId == null) || (MeshId.Length != 48)) return false;
             if (WebSocket != null) return false;
-            if (debug) { try { File.AppendAllText("debug.log", "Connect to " + ServerUrl + "\r\n"); } catch (Exception) { } }
+            Log(string.Format("Connecting to {0}", ServerUrl));
             userimages = new Dictionary<string, Image>(); // UserID --> Image
             userrealname = new Dictionary<string, string>(); // UserID --> Realname
             WebSocket = new webSocketClient();
             WebSocket.pongTimeSeconds = 120; // Send a websocket pong every 2 minutes.
-            WebSocket.xdebug = debug;
+            WebSocket.debug = debug;
             WebSocket.onStateChanged += WebSocket_onStateChanged;
             WebSocket.onBinaryData += WebSocket_onBinaryData;
             WebSocket.onStringData += WebSocket_onStringData;
@@ -223,7 +230,7 @@ namespace MeshAssistant
                     for (int i = 0; i < bytes.Length; i++) { builder.Append(bytes[i].ToString("x2")); }
                     ServerTlsHashStr = builder.ToString().ToUpper();
                 }
-                //Debug("Websocket TLS hash: " + ServerTlsHash);
+                Log(string.Format("Websocket TLS hash: {0}", ServerTlsHashStr));
 
                 // Send command 1, hash + nonce
                 Nonce = GenerateCryptographicRandom(48);
@@ -238,7 +245,7 @@ namespace MeshAssistant
         public void disconnect()
         {
             if (WebSocket == null) return;
-            if (debug) { try { File.AppendAllText("debug.log", "Disconnect\r\n"); } catch (Exception) { } }
+            Log("Disconnect");
             WebSocket.Dispose();
             WebSocket = null;
             ConnectionState = 0;
@@ -254,7 +261,7 @@ namespace MeshAssistant
 
         private void serverConnected()
         {
-            debugMsg("Server Connected");
+            Log("Server Connected");
 
             // Update network information
             sendNetworkInfo();
@@ -272,31 +279,35 @@ namespace MeshAssistant
             {
                 sendSelfUpdateQuery(softwareName, selfExecutableHashHex);
             }
-            
         }
 
         private void sendSessionUpdate(string type, string value)
         {
+            Log(string.Format("sendSessionUpdate {0}, {1}", type, value));
             WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"sessions\",\"type\":\"" + type + "\",\"value\":" + value + "}"));
         }
 
         private void sendConsoleEventLog(string cmd)
         {
+            Log(string.Format("sendConsoleEventLog {0}", cmd));
             WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":17,\"msgArgs\":[\"" + escapeJsonString(cmd) + "\"],\"msg\":\"Processing console command: " + escapeJsonString(cmd) + "\"}"));
         }
 
         private void sendOpenUrlEventLog(string url)
         {
+            Log(string.Format("sendOpenUrlEventLog {0}", url));
             WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":20,\"msgArgs\":[\"" + escapeJsonString(url) + "\"],\"msg\":\"Opening: " + escapeJsonString(url) + "\"}"));
         }
 
         private void sendHelpEventLog(string username, string helpstring)
         {
+            Log(string.Format("sendHelpEventLog {0}, {1}", username, helpstring));
             WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":98,\"msgArgs\":[\"" + escapeJsonString(username) + "\",\"" + escapeJsonString(helpstring) + "\"],\"msg\":\"Help Requested, user: " + escapeJsonString(username) + ", details: " + escapeJsonString(helpstring) + "\"}"));
         }
 
         private void sendSelfUpdateQuery(string softwareName, string softwareHash)
         {
+            Log(string.Format("sendSelfUpdateQuery {0}, {1}", softwareName, softwareHash));
             WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"meshToolInfo\",\"name\":\"" + escapeJsonString(softwareName) + "\",\"hash\":\"" + escapeJsonString(softwareHash) + "\",\"cookie\":true}"));
         }
 
@@ -331,53 +342,56 @@ namespace MeshAssistant
 
         private void sendNetworkInfo()
         {
+            Log("sendNetworkInfo");
             WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"netinfo\",\"netif2\":" + getNetworkInfo() + "}"));
         }
 
         private void getUserImage(string userid)
         {
+            Log(string.Format("getUserImage {0}", userid));
             WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"getUserImage\",\"userid\":\"" + escapeJsonString(userid) + "\"}"));
         }
 
         private string getNetworkInfo()
         {
             NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-            string response = "{\r\n";
+            string response = "{";
             bool firstItem1 = true;
             foreach (NetworkInterface adapter in adapters)
             {
-                if (firstItem1 == false) { response += ",\r\n"; }
-                response += "  \"" + escapeJsonString(adapter.Name) + "\": [\r\n";
+                if (firstItem1 == false) { response += ","; }
+                response += "\"" + escapeJsonString(adapter.Name) + "\":[";
                 IPInterfaceProperties properties = adapter.GetIPProperties();
                 int i = 0;
                 bool firstItem2 = true;
                 foreach (UnicastIPAddressInformation addr in properties.UnicastAddresses)
                 {
-                    if (firstItem2 == false) { response += ",\r\n"; }
-                    response += "    {\r\n";
-                    response += "      \"address\": \"" + addr.Address.ToString() + "\",\r\n";
-                    response += "      \"fqdn\": \"" + properties.DnsSuffix + "\",\r\n";
-                    if (addr.Address.AddressFamily == AddressFamily.InterNetwork) { response += "      \"family\": \"IPv4\",\r\n"; }
-                    if (addr.Address.AddressFamily == AddressFamily.InterNetworkV6) { response += "      \"family\": \"IPv6\",\r\n"; }
-                    response += "      \"mac\": \"" + fixMacAddress(adapter.GetPhysicalAddress().ToString()) + "\",\r\n";
-                    response += "      \"index\": \"" + adapter.GetIPProperties().GetIPv6Properties().Index + "\",\r\n";
-                    response += "      \"type\": \"" + adapter.NetworkInterfaceType.ToString().ToLower() + "\",\r\n";
-                    response += "      \"status\": \"" + adapter.OperationalStatus.ToString().ToLower() + "\"\r\n";
-                    response += "    }";
+                    if (firstItem2 == false) { response += ","; }
+                    response += "{";
+                    response += "\"address\":\"" + addr.Address.ToString() + "\",";
+                    response += "\"fqdn\":\"" + properties.DnsSuffix + "\",";
+                    if (addr.Address.AddressFamily == AddressFamily.InterNetwork) { response += "\"family\":\"IPv4\","; }
+                    if (addr.Address.AddressFamily == AddressFamily.InterNetworkV6) { response += "\"family\":\"IPv6\","; }
+                    response += "\"mac\":\"" + fixMacAddress(adapter.GetPhysicalAddress().ToString()) + "\",";
+                    response += "\"index\":\"" + adapter.GetIPProperties().GetIPv6Properties().Index + "\",";
+                    response += "\"type\":\"" + adapter.NetworkInterfaceType.ToString().ToLower() + "\",";
+                    response += "\"status\":\"" + adapter.OperationalStatus.ToString().ToLower() + "\"";
+                    response += "}";
                     firstItem2 = false;
                     i++;
                 }
-                if (!firstItem2) { response += "\r\n"; }
-                response += "  ]";
+                response += "]";
                 firstItem1 = false;
             }
-            if (!firstItem1) { response += "\r\n"; }
             response += "}";
+            Log("getNetworkInfo: " + response);
             return response;
         }
 
         public void processConsoleCommand(string rawcmd, string sessionid, string userid)
         {
+            Log(string.Format("processConsoleCommand, cmd=\"{0}\", sessionid=\"{1}\", userid=\"{2}\"", rawcmd, sessionid, userid));
+
             string response = null;
             string[] cmd = parseArgString(rawcmd);
             if (cmd.Length == 0) return;
@@ -425,12 +439,13 @@ namespace MeshAssistant
 
         public void PrivacyTextChanged()
         {
+            Log("PrivacyTextChanged");
             if (onUserInfoChange != null) { onUserInfoChange(null, 3); } // Event the privacy text change
         }
 
         public void processServerJsonData(string data)
         {
-            debugMsg("JSON: " + data);
+            Log("processServerJsonData: " + data);
 
             // Parse the received JSON
             Dictionary<string, object> jsonAction = new Dictionary<string, object>();
@@ -587,7 +602,7 @@ namespace MeshAssistant
                                 }
                             default:
                                 {
-                                    debugMsg("Unprocessed event type: " + eventType);
+                                    Log("Unprocessed event type: " + eventType);
                                     break;
                                 }
                         }
@@ -608,7 +623,7 @@ namespace MeshAssistant
                     }
                 default:
                     {
-                        debugMsg("Unprocessed command: " + action);
+                        Log("Unprocessed command: " + action);
                         break;
                     }
             }
@@ -616,6 +631,7 @@ namespace MeshAssistant
 
         private string getAllProcesses()
         {
+            Log("getAllProcesses()");
             string r = "{";
             try
             {
@@ -636,6 +652,8 @@ namespace MeshAssistant
 
         private void GetClipboard(Dictionary<string, object> jsonAction)
         {
+            Log("GetClipboard()");
+
             // Clipboard can only be fetched from the main thread
             if (parent.InvokeRequired) { parent.Invoke(new ClipboardHandler(GetClipboard), jsonAction); return; }
             if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string)) && (jsonAction.ContainsKey("tag")) && (jsonAction["tag"].GetType() == typeof(System.Int32)))
@@ -659,6 +677,8 @@ namespace MeshAssistant
 
         private void SetClipboard(Dictionary<string, object> jsonAction)
         {
+            Log("SetClipboard()");
+
             // Clipboard can only be set from the main thread
             if (parent.InvokeRequired) { parent.Invoke(new ClipboardHandler(SetClipboard), jsonAction); return; }
             if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string)) && (jsonAction.ContainsKey("data")) && (jsonAction["data"].GetType() == typeof(string)))
@@ -701,6 +721,7 @@ namespace MeshAssistant
             }
 
             int cmd = ((data[off] << 8) + data[off + 1]);
+            Log(string.Format("Binary command: cmd={0}, len={1}", cmd, len));
             switch (cmd) {
                 case 1:
                     {
@@ -783,7 +804,7 @@ namespace MeshAssistant
                     }
                 default:
                     {
-                        debugMsg("Unprocessed command: #" + cmd);
+                        Log("Unprocessed command: #" + cmd);
                         break;
                     }
             }

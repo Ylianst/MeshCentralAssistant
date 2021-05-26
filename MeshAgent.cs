@@ -31,6 +31,7 @@ namespace MeshAssistant
 {
     public class MeshAgent
     {
+        public bool debug = false;
         private static ServiceController agentService = null;
         private byte[] pipeBuffer = new byte[65535];
         private bool pipeWritePending = false;
@@ -84,8 +85,15 @@ namespace MeshAssistant
         public static void StartService() { try { agentService.Start(); } catch (Exception) { } }
         public static void StopService() { try { agentService.Stop(); } catch (Exception) { } }
 
-        public MeshAgent(string softwareName, string serviceName, string nodeids, string selfExecutableHashHex)
+        public void Log(string msg)
         {
+            if (debug) { try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff") + ": Agent: " + msg + "\r\n"); } catch (Exception) { } }
+        }
+
+        public MeshAgent(string softwareName, string serviceName, string nodeids, string selfExecutableHashHex, bool debug)
+        {
+            Log(string.Format("MeshAgent Constructor {0}, {1}, {2}, {3}", softwareName, serviceName, nodeids, selfExecutableHashHex));
+            this.debug = debug;
             this.nodeids = null;
             this.serviceName = serviceName;
             this.softwareName = softwareName;
@@ -223,6 +231,7 @@ namespace MeshAssistant
         public bool SendCommand(string cmd, string value)
         {
             if ((pipeClient == null) || (pipeClient.IsConnected == false)) return false;
+            Log(string.Format("SendCommand cmd=\"{0}\", value=\"{1}\"", cmd, value));
             string data = "{\"cmd\":\"" + cmd + "\",\"value\":\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"}";
             byte[] buf2 = UTF8Encoding.UTF8.GetBytes(data);
             byte[] buf1 = BitConverter.GetBytes(buf2.Length + 4);
@@ -241,6 +250,7 @@ namespace MeshAssistant
         public bool SendSelfUpdateQuery()
         {
             if ((pipeClient == null) || (pipeClient.IsConnected == false) || (softwareName == null) || (selfExecutableHashHex == null)) return false;
+            Log("SendSelfUpdateQuery");
             string data = "{\"cmd\":\"meshToolInfo\",\"name\":\"" + softwareName + "\",\"hash\":\"" + selfExecutableHashHex + "\",\"cookie\":true}";
             byte[] buf2 = UTF8Encoding.UTF8.GetBytes(data);
             byte[] buf1 = BitConverter.GetBytes(buf2.Length + 4);
@@ -262,6 +272,7 @@ namespace MeshAssistant
         public bool SendUserImageQuery(string userid)
         {
             if ((pipeClient == null) || (pipeClient.IsConnected == false) || (softwareName == null) || (selfExecutableHashHex == null)) return false;
+            Log(string.Format("SendUserImageQuery userid=\"{0}\"", userid));
             string data = "{\"cmd\":\"getUserImage\",\"userid\":\"" + userid + "\"}";
             byte[] buf2 = UTF8Encoding.UTF8.GetBytes(data);
             byte[] buf1 = BitConverter.GetBytes(buf2.Length + 4);
@@ -299,6 +310,7 @@ namespace MeshAssistant
         {
             string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
             if (pipeClient != null) return true;
+            Log("ConnectPipe()");
 
             if (nodeids != null)
             {
@@ -313,6 +325,7 @@ namespace MeshAssistant
                         SendCommand("register", userName);
                         SendCommand("sessions", "");
                         pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        Log("ConnectPipe() - BeginRead");
                         return true;
                     }
                 }
@@ -332,6 +345,7 @@ namespace MeshAssistant
                         SendCommand("register", userName);
                         SendCommand("sessions", "");
                         pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        Log("ConnectPipe() - BeginRead");
                         return true;
                     }
                     pipeClient = null;
@@ -349,6 +363,7 @@ namespace MeshAssistant
                         SendCommand("register", userName);
                         SendCommand("sessions", "");
                         pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        Log("ConnectPipe() - BeginRead");
                         return true;
                     }
                     pipeClient = null;
@@ -366,6 +381,7 @@ namespace MeshAssistant
                         SendCommand("register", userName);
                         SendCommand("sessions", "");
                         pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        Log("ConnectPipe() - BeginRead");
                         return true;
                     }
                     pipeClient = null;
@@ -383,16 +399,19 @@ namespace MeshAssistant
                         SendCommand("register", userName);
                         SendCommand("sessions", "");
                         pipeClient.BeginRead(pipeBuffer, 0, pipeBuffer.Length, new AsyncCallback(ReadPipe), null);
+                        Log("ConnectPipe() - BeginRead");
                         return true;
                     }
                     pipeClient = null;
                 }
             }
+            Log("ConnectPipe() - failed");
             return false;
         }
 
         public void DisconnectPipe()
         {
+            Log("DisconnectPipe()");
             if (pipeClient != null) { pipeClient.Close(); }
             ServerState = 0;
             ServerUri = null;
@@ -452,6 +471,7 @@ namespace MeshAssistant
             string data = UTF8Encoding.UTF8.GetString(pipeBuffer, 4, chunklen - 4);
 
             // Parse the received JSON
+            Log("ReadPipe: " + data);
             Dictionary<string, object> jsonAction = new Dictionary<string, object>();
             jsonAction = new JavaScriptSerializer().Deserialize<Dictionary<string, object>>(data);
             if (jsonAction.ContainsKey("cmd") == false) return;
