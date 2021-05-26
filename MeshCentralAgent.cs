@@ -12,6 +12,7 @@ using System.Net.NetworkInformation;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Runtime;
 
 namespace MeshAssistant
 {
@@ -19,6 +20,9 @@ namespace MeshAssistant
     {
         private MainForm parent;
         public bool debug = false;
+        public bool autoConnect = false; // Agent is in auto-connection mode. When enabled, user consent is mandatory.
+        public int autoConnectTime = 5; // Number of seconds to next connection attempt.
+        private System.Threading.Timer autoConnectTimer = null;
         public int state = 0;
         public string HelpRequest = null;
         private byte[] MeshId = null;
@@ -39,6 +43,7 @@ namespace MeshAssistant
         private string softwareName = null;
         private string selfExecutableHashHex = null;
         public string privacyBarText = null;
+        private Random rand = new Random();
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -185,16 +190,27 @@ namespace MeshAssistant
 
         public void Log(string msg)
         {
-            if (debug) { try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff") + ": MCAgent: " + msg + "\r\n"); } catch (Exception) { } }
+            if (debug) {
+                //Console.WriteLine(msg);
+                try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff") + ": MCAgent: " + msg + "\r\n"); } catch (Exception) { }
+            }
         }
 
         public static byte[] StringToByteArray(string hex) { return Enumerable.Range(0, hex.Length).Where(x => x % 2 == 0).Select(x => Convert.ToByte(hex.Substring(x, 2), 16)).ToArray(); }
 
         public bool connect()
         {
+            Log("connect()");
+            autoConnectTime = 5;
+            if (autoConnectTimer != null) { autoConnectTimer.Dispose(); autoConnectTimer = null; }
+            return connectex();
+        }
+
+        private bool connectex()
+        {
             if ((MeshId == null) || (MeshId.Length != 48)) return false;
             if (WebSocket != null) return false;
-            Log(string.Format("Connecting to {0}", ServerUrl));
+            Log(string.Format("Attempting connection to {0}", ServerUrl));
             userimages = new Dictionary<string, Image>(); // UserID --> Image
             userrealname = new Dictionary<string, string>(); // UserID --> Realname
             WebSocket = new webSocketClient();
@@ -211,7 +227,7 @@ namespace MeshAssistant
         {
             if (state == webSocketClient.ConnectionStates.Disconnected)
             {
-                disconnect();
+                disconnectex();
             }
             else if (state == webSocketClient.ConnectionStates.Connecting)
             {
@@ -244,14 +260,37 @@ namespace MeshAssistant
 
         public void disconnect()
         {
+            autoConnect = false;
+            autoConnectTime = 5;
+            if (autoConnectTimer != null) { autoConnectTimer.Dispose(); autoConnectTimer = null; }
+            disconnectex();
+        }
+
+        private void disconnectex()
+        {
             if (WebSocket == null) return;
-            Log("Disconnect");
+            Log("DisconnectEx");
             WebSocket.Dispose();
             WebSocket = null;
             ConnectionState = 0;
             changeState(0);
             foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.disconnect(); }
             foreach (MeshCentralTcpTunnel tcptunnel in tcptunnels) { tcptunnel.disconnect(); }
+
+            // Setup auto-reconnect timer if needed
+            if (parent.autoConnect) {
+                Log(string.Format("Setting connect retry timer to {0} seconds", autoConnectTime));
+                autoConnectTimer = new System.Threading.Timer(new System.Threading.TimerCallback(reconnectAttempt), null, autoConnectTime * 1000, autoConnectTime * 1000);
+            }
+        }
+
+        private void reconnectAttempt(object state)
+        {
+            Log("ReconnectAttempt");
+            if (autoConnectTimer != null) { autoConnectTimer.Dispose(); autoConnectTimer = null; }
+            autoConnectTime = autoConnectTime + rand.Next(4, autoConnectTime);
+            if (autoConnectTime > 1200) { autoConnectTime = 1200; }
+            connectex();
         }
 
         public void disconnectAllTunnels()
@@ -262,6 +301,7 @@ namespace MeshAssistant
         private void serverConnected()
         {
             Log("Server Connected");
+            autoConnectTime = 5;
 
             // Update network information
             sendNetworkInfo();
@@ -278,6 +318,21 @@ namespace MeshAssistant
             if ((softwareName != null) && (selfExecutableHashHex != null))
             {
                 sendSelfUpdateQuery(softwareName, selfExecutableHashHex);
+            }
+        }
+
+        public void RequestHelp(string HelpRequest)
+        {
+            if (this.HelpRequest == HelpRequest) return;
+            this.HelpRequest = HelpRequest;
+            if (HelpRequest != null) {
+                // Send help request
+                string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+                sendSessionUpdate("help", "{\"" + escapeJsonString(userName) + "\":\"" + escapeJsonString(HelpRequest) + "\"}");
+                sendHelpEventLog(userName, HelpRequest);
+            } else {
+                // Clear help request
+                sendSessionUpdate("help", "{}");
             }
         }
 
@@ -509,7 +564,9 @@ namespace MeshAssistant
                                         if (localappvalue["cmd"].GetType() == typeof(string))
                                         {
                                             string cmdvalue = localappvalue["cmd"].ToString();
-                                            if (cmdvalue == "cancelhelp") { disconnect(); }
+                                            if (cmdvalue == "cancelhelp") {
+                                                if (parent.autoConnect == false) { disconnect(); } // TODO
+                                            }
                                         }
                                     }
                                     break;
@@ -731,7 +788,7 @@ namespace MeshAssistant
                         Array.Copy(data, off + 2, tlsHash, 0, 48);
                         ServerNonce = new byte[48];
                         Array.Copy(data, off + 50, ServerNonce, 0, 48);
-                        if (ByteArrayCompare(tlsHash, ServerTlsHash) == false) { disconnect(); return; }
+                        if (ByteArrayCompare(tlsHash, ServerTlsHash) == false) { disconnectex(); return; }
 
                         // Use our agent root private key to sign the ServerHash + ServerNonce + AgentNonce
                         byte[] dataToSign = new byte[48 + 48 + 48];
@@ -767,7 +824,7 @@ namespace MeshAssistant
                         Array.Copy(ServerTlsHash, 0, dataToVerify, 0, 48);
                         Array.Copy(Nonce, 0, dataToVerify, 48, 48);
                         Array.Copy(ServerNonce, 0, dataToVerify, 96, 48);
-                        if (serverCert.GetRSAPublicKey().VerifyData(dataToVerify, serverSign, HashAlgorithmName.SHA384, RSASignaturePadding.Pkcs1) == false) { disconnect(); return; }
+                        if (serverCert.GetRSAPublicKey().VerifyData(dataToVerify, serverSign, HashAlgorithmName.SHA384, RSASignaturePadding.Pkcs1) == false) { disconnectex(); return; }
 
                         // Connection is a success from our side, clean up
                         ServerTlsHash = null;

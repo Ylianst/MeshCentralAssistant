@@ -221,7 +221,7 @@ namespace MeshAssistant
 
                 if (protocol == 2)
                 {
-                    if ((consent & 8) != 0) // Remote Desktop Consent Prompt
+                    if (((consent & 8) != 0) || parent.autoConnect) // Remote Desktop Consent Prompt
                     {
                         consentRequested = true;
                         setConsoleText("Waiting for user to grant access...", 1, null, 0);
@@ -234,7 +234,7 @@ namespace MeshAssistant
                 }
                 else if (protocol == 5)
                 {
-                    if ((consent & 32) != 0) // Remote Files Consent Prompt
+                    if (((consent & 32) != 0) || parent.autoConnect) // Remote Files Consent Prompt
                     {
                         consentRequested = true;
                         setConsoleText("Waiting for user to grant access...", 1, null, 0);

@@ -87,7 +87,7 @@ namespace MeshAssistant
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-delete:") { delete = arg.Substring(8); }
                 if (arg.Length > 11 && arg.Substring(0, 11).ToLower() == "-agentname:") { selectedAgentName = arg.Substring(11); }
-                if ((arg.Length == 12) && (arg.ToLower() == "-autoconnect")) { autoConnect = true; }
+                if ((arg.Length == 8) && (arg.ToLower() == "-connect")) { autoConnect = true; }
             }
             try { File.AppendAllText("debug.log", "\r\n\r\n"); } catch (Exception) { }
             Log("***** Starting MeshCentral Assistant *****");
@@ -133,6 +133,7 @@ namespace MeshAssistant
             if (MeshCentralAgent.checkMshFile()) {
                 Log("Starting built-in agent");
                 mcagent = new MeshCentralAgent(this, "MeshCentralAssistant", selfExecutableHashHex, debug);
+                mcagent.autoConnect = autoConnect;
                 mcagent.onStateChanged += Mcagent_onStateChanged;
                 mcagent.onNotify += Mcagent_onNotify;
                 mcagent.onSelfUpdate += Agent_onSelfUpdate;
@@ -333,21 +334,55 @@ namespace MeshAssistant
         {
             if (mcagent == null) return;
 
-            pictureBoxGreen.Visible = false; // Green
-            pictureBoxRed.Visible = (mcagent.state == 0);  // Red
-            pictureBoxYellow.Visible = (mcagent.state == 1) || (mcagent.state == 2); // Gray
-            pictureBoxQuestion.Visible = (mcagent.state == 3); // Question
-            pictureBoxUser.Visible = false;
-            pictureBoxUsers.Visible = false;
-            pictureBoxCustom.Visible = false;
-            pictureBoxUsers.Visible = false;
-            if (mcagent.state == 0) { stateLabel.Text = "Disconnected"; requestHelpButton.Text = "Request Help"; }
-            if (mcagent.state == 1) { stateLabel.Text = "Connecting"; requestHelpButton.Text = "Cancel Help Request"; }
-            if (mcagent.state == 2) { stateLabel.Text = "Authenticating"; requestHelpButton.Text = "Cancel Help Request"; }
-            if (mcagent.state == 3) { stateLabel.Text = "Help Requested"; requestHelpButton.Text = "Cancel Help Request"; }
-            Agent_onSessionChanged();
-            requestHelpButton.Enabled = true;
-            if (mcagent.state == 0) { helpRequested = false; }
+            if (mcagent.autoConnect)
+            {
+                // In auto connect mode, we can only request help when connected.
+                if (mcagent.state == 0) { stateLabel.Text = "Connecting"; requestHelpButton.Text = "Request Help"; helpRequested = false; }
+                if (mcagent.state == 1) { stateLabel.Text = "Connecting"; requestHelpButton.Text = "Request Help"; }
+                if (mcagent.state == 2) { stateLabel.Text = "Authenticating"; requestHelpButton.Text = "Request Help"; }
+                if (mcagent.state == 3) {
+                    if (helpRequested) {
+                        stateLabel.Text = "Help Requested";
+                        requestHelpButton.Text = "Cancel Help Request";
+                    } else {
+                        stateLabel.Text = "Connected";
+                        requestHelpButton.Text = "Request Help";
+                    }
+                }
+                Agent_onSessionChanged();
+                requestHelpButton.Enabled = (mcagent.state == 3);
+
+                // Update image
+                pictureBoxGreen.Visible = ((mcagent.state == 3) && (helpRequested == false)); // Green
+                pictureBoxRed.Visible = false;  // Red
+                pictureBoxYellow.Visible = (mcagent.state == 0) || (mcagent.state == 1) || (mcagent.state == 2); // Gray
+                pictureBoxQuestion.Visible = ((mcagent.state == 3) && (helpRequested == true)); // Question
+                pictureBoxUser.Visible = false;
+                pictureBoxUsers.Visible = false;
+                pictureBoxCustom.Visible = false;
+                pictureBoxUsers.Visible = false;
+            }
+            else
+            {
+                // When not in auto-connect mode, we only connect when requesting help.
+                if (mcagent.state == 0) { stateLabel.Text = "Disconnected"; requestHelpButton.Text = "Request Help"; }
+                if (mcagent.state == 1) { stateLabel.Text = "Connecting"; requestHelpButton.Text = "Cancel Help Request"; }
+                if (mcagent.state == 2) { stateLabel.Text = "Authenticating"; requestHelpButton.Text = "Cancel Help Request"; }
+                if (mcagent.state == 3) { stateLabel.Text = "Help Requested"; requestHelpButton.Text = "Cancel Help Request"; }
+                Agent_onSessionChanged();
+                requestHelpButton.Enabled = true;
+                if (mcagent.state == 0) { helpRequested = false; }
+
+                // Update image
+                pictureBoxGreen.Visible = false; // Green
+                pictureBoxRed.Visible = (mcagent.state == 0);  // Red
+                pictureBoxYellow.Visible = (mcagent.state == 1) || (mcagent.state == 2); // Gray
+                pictureBoxQuestion.Visible = (mcagent.state == 3); // Question
+                pictureBoxUser.Visible = false;
+                pictureBoxUsers.Visible = false;
+                pictureBoxCustom.Visible = false;
+                pictureBoxUsers.Visible = false;
+            }
 
             string[] userids = getSessionUserIdList();
             if (userids.Length == 1)
@@ -405,7 +440,6 @@ namespace MeshAssistant
                 // If auto-connect is specified, connect now
                 if (autoConnect)
                 {
-                    autoConnect = false;
                     mcagent.HelpRequest = null;
                     mcagent.connect();
                 }
@@ -873,22 +907,52 @@ namespace MeshAssistant
             Log(string.Format("requestHelpButton_Click {0}", currentAgentName));
             if (currentAgentName.Equals("~"))
             {
-                if (mcagent.state == 0)
+                if (autoConnect)
                 {
-                    if (requestHelpForm != null)
+                    // When in auto-connect mode, we can only request help when connected
+                    if (mcagent.state != 3) return;
+                    if (helpRequested)
                     {
-                        requestHelpForm.Focus();
+                        // Cancel help request
+                        mcagent.RequestHelp(null);
+                        helpRequested = false;
+                        updateBuiltinAgentStatus();
                     }
                     else
                     {
-                        requestHelpForm = new RequestHelpForm(this);
-                        requestHelpForm.NoHelpRequestOk = true;
-                        requestHelpForm.Show(this);
+                        // No help currently requested, request it now.
+                        if (requestHelpForm != null)
+                        {
+                            requestHelpForm.Focus();
+                        }
+                        else
+                        {
+                            requestHelpForm = new RequestHelpForm(this);
+                            requestHelpForm.NoHelpRequestOk = false;
+                            requestHelpForm.Show(this);
+                        }
                     }
                 }
                 else
                 {
-                    mcagent.disconnect();
+                    // When not in auto-connect mode, we connect when requesting help and disconnect when canceling help request.
+                    if (mcagent.state == 0)
+                    {
+                        if (requestHelpForm != null)
+                        {
+                            requestHelpForm.Focus();
+                        }
+                        else
+                        {
+                            requestHelpForm = new RequestHelpForm(this);
+                            requestHelpForm.NoHelpRequestOk = true;
+                            requestHelpForm.Show(this);
+                        }
+                    }
+                    else
+                    {
+                        mcagent.disconnect();
+                    }
                 }
             }
             else
@@ -931,8 +995,19 @@ namespace MeshAssistant
             Log(string.Format("RequestHelp {0}, \"{1}\"", currentAgentName, details));
             if (currentAgentName.Equals("~"))
             {
-                if (details.Length > 0) { mcagent.HelpRequest = details; } else { mcagent.HelpRequest = null; }
-                mcagent.connect();
+                if (autoConnect)
+                {
+                    if (mcagent.state == 3) {
+                        helpRequested = true;
+                        mcagent.RequestHelp(details);
+                        updateBuiltinAgentStatus();
+                    }
+                }
+                else
+                {
+                    if (details.Length > 0) { mcagent.HelpRequest = details; } else { mcagent.HelpRequest = null; }
+                    mcagent.connect();
+                }
             }
             else
             {
