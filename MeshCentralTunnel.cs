@@ -29,6 +29,8 @@ namespace MeshAssistant
         public bool consentRequested = false;
         private ArrayList commandsOnHold = null;
         public long userRights = 0;
+        public string userid = null;
+        public bool disconnected = false;
 
         public enum MeshRights : long
         {
@@ -69,7 +71,7 @@ namespace MeshAssistant
             // Setup extra log values
             if (creationArgs != null)
             {
-                if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { extraLogStr += ",\"userid\":\"" + escapeJsonString((string)creationArgs["userid"]) + "\""; }
+                if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { extraLogStr += ",\"userid\":\"" + escapeJsonString((string)creationArgs["userid"]) + "\""; userid = (string)creationArgs["userid"]; }
                 if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { extraLogStr += ",\"username\":\"" + escapeJsonString((string)creationArgs["username"]) + "\""; }
                 if (creationArgs.ContainsKey("remoteaddr") && (creationArgs["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)creationArgs["remoteaddr"]) + "\""; }
                 if (creationArgs.ContainsKey("sessionid") && (creationArgs["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)creationArgs["sessionid"]) + "\""; }
@@ -95,6 +97,8 @@ namespace MeshAssistant
 
         public void disconnect()
         {
+            if (disconnected == true) return;
+            disconnected = true;
             if (fileSendTransfer != null) { fileSendTransfer.Close(); fileSendTransfer = null; }
             if (fileRecvTransfer != null) { fileRecvTransfer.Close(); fileRecvTransfer = null; }
             if (WebSocket != null) { WebSocket.Dispose(); WebSocket = null; }
@@ -135,6 +139,10 @@ namespace MeshAssistant
                 }
                 sessionUserName = null;
             }
+
+            // Update event log
+            if (protocol == 2) { parent.Event(userid, "Closed desktop session"); }
+            if (protocol == 5) { parent.Event(userid, "Closed files session"); }
         }
         
         private void connectedToServer()
@@ -203,12 +211,14 @@ namespace MeshAssistant
                             if (parent.DesktopSessions == null) { parent.DesktopSessions = new Dictionary<string, object>(); }
                             if (parent.DesktopSessions.ContainsKey(sessionUserName)) { parent.DesktopSessions[sessionUserName] = (int)parent.DesktopSessions[sessionUserName] + 1; } else { parent.DesktopSessions[sessionUserName] = 1; }
                             parent.fireSessionChanged(2);
+                            parent.Event(userid, "Started desktop session");
                         }
                         if (protocol == 5) // Files
                         {
                             if (parent.FilesSessions == null) { parent.FilesSessions = new Dictionary<string, object>(); }
                             if (parent.FilesSessions.ContainsKey(sessionUserName)) { parent.FilesSessions[sessionUserName] = (int)parent.FilesSessions[sessionUserName] + 1; } else { parent.FilesSessions[sessionUserName] = 1; }
                             parent.fireSessionChanged(5);
+                            parent.Event(userid, "Started files session");
                         }
                     }
                 }
@@ -226,6 +236,7 @@ namespace MeshAssistant
                         consentRequested = true;
                         setConsoleText("Waiting for user to grant access...", 1, null, 0);
                         parent.askForConsent(this, "User \"{0}\" is requesting remote desktop control of this computer. Click allow to grant access.", protocol, sessionUserName);
+                        parent.Event(userid, "Requesting user consent for desktop session");
                     }
                     else
                     {
@@ -239,6 +250,7 @@ namespace MeshAssistant
                         consentRequested = true;
                         setConsoleText("Waiting for user to grant access...", 1, null, 0);
                         parent.askForConsent(this, "User \"{0}\" is requesting access to all files on this computer. Click allow to grant access.", protocol, sessionUserName);
+                        parent.Event(userid, "Requesting user consent for files session");
                     }
                 }
                 else if (protocol == 10)
@@ -262,6 +274,7 @@ namespace MeshAssistant
                                 if (len > 0) { WebSocket.SendBinary(buf, 0, len); } else { disconnect(); }
                                 WebSocket.SendString("{\"op\":\"ok\",\"size\":" + f.Length + "}");
                                 parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":106,\"msgArgs\":[\"" + escapeJsonString(f.FullName) + "\"," + f.Length + "],\"msg\":\"Download: " + escapeJsonString(f.FullName) + ", Size: " + f.Length + "\"" + extraLogStr + "}"));
+                                parent.Event(userid, string.Format("Downloaded file {0}", f.FullName));
                             }
                             catch (Exception)
                             {
@@ -291,11 +304,13 @@ namespace MeshAssistant
             if (protocol == 2)
             {
                 // Start remote desktop
+                parent.Event(userid, "Desktop consent approved");
                 Desktop = new MeshCentralDesktop(this);
             }
             if (protocol == 5)
             {
                 // Start files
+                parent.Event(userid, "Files consent approved");
                 if (commandsOnHold != null) { foreach (string cmd in commandsOnHold) { ParseFilesCommand(cmd); } }
                 commandsOnHold = null;
             }
@@ -307,6 +322,8 @@ namespace MeshAssistant
             consentRequested = false;
             setConsoleText("Denied", 2, null, 0);
             disconnect();
+            if (protocol == 2) { parent.Event(userid, "Desktop consent denied"); }
+            if (protocol == 5) { parent.Event(userid, "Files consent denied"); }
         }
 
 
@@ -454,6 +471,7 @@ namespace MeshAssistant
                             path = path.Replace("/", "\\");
                             Directory.CreateDirectory(path);
                             parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":44,\"msgArgs\":[\"" + escapeJsonString(path) + "\"],\"msg\":\"Create folder: " + escapeJsonString(path) + "\"" + extraLogStr + "}"));
+                            parent.Event(userid, string.Format("Created folder: {0}", path));
                         }
                         break;
                     }
@@ -473,6 +491,7 @@ namespace MeshAssistant
                                 if (o.GetType() != typeof(string)) continue;
                                 string delfile = (string)o;
                                 delfile = Path.Combine(path, delfile);
+                                parent.Event(userid, string.Format("Deleted file: {0}", delfile));
                                 bool ok = false;
                                 try { File.Delete(delfile); ok = true; } catch (Exception) { }
                                 if (ok == false) { try { Directory.Delete(delfile, rec); ok = true; } catch (Exception) { } }
@@ -497,6 +516,7 @@ namespace MeshAssistant
                         bool ok = false;
                         string xoldname = Path.Combine(path, oldname);
                         string xnewname = Path.Combine(path, newname);
+                        parent.Event(userid, string.Format("Renamed file: {0} to {1}", xoldname, newname));
                         try { File.Move(xoldname, xnewname); ok = true; } catch (Exception) { }
                         if (ok == false) { try { DirectoryInfo d = new DirectoryInfo(xoldname); d.MoveTo(xnewname); ok = true; } catch (Exception) { } }
                         if (ok) { parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":48,\"msgArgs\":[\"" + escapeJsonString(xoldname) + "\",\"" + escapeJsonString(newname) + "\"],\"msg\":\"Rename: " + escapeJsonString(xoldname) + " to " + escapeJsonString(newname) + "\"" + extraLogStr + "}")); }
@@ -518,6 +538,7 @@ namespace MeshAssistant
                             try {
                                 string sc = Path.Combine(scpath, name);
                                 string dc = Path.Combine(dspath, name);
+                                parent.Event(userid, string.Format("Copied file: {0} to {1}", sc, dc));
                                 File.Copy(sc, dc);
                                 parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":51,\"msgArgs\":[\"" + escapeJsonString(sc) + "\",\"" + escapeJsonString(dc) + "\"],\"msg\":\"Copy: " + escapeJsonString(sc) + " to " + escapeJsonString(dc) + "\"" + extraLogStr + "}"));
                             } catch (Exception) { }
@@ -540,6 +561,7 @@ namespace MeshAssistant
                             try {
                                 string sc = Path.Combine(scpath, name);
                                 string dc = Path.Combine(dspath, name);
+                                parent.Event(userid, string.Format("Moved file: {0} to {1}", sc, dc));
                                 File.Move(sc, dc);
                                 parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":52,\"msgArgs\":[\"" + escapeJsonString(sc) + "\",\"" + escapeJsonString(dc) + "\"],\"msg\":\"Move: " + escapeJsonString(sc) + " to " + escapeJsonString(dc) + "\"" + extraLogStr + "}"));
                             } catch (Exception) { }
@@ -557,6 +579,7 @@ namespace MeshAssistant
                         if (jsonCommand.ContainsKey("output") && (jsonCommand["output"].GetType() == typeof(string))) { output = (string)jsonCommand["output"]; }
                         if ((files == null) || (path == null) || (output == null)) break;
                         path = path.Replace("/", "\\");
+                        parent.Event(userid, string.Format("Zippped files from {0} to {1}", path, output));
 
                         using (FileStream zipToOpen = new FileStream(Path.Combine(path, output), FileMode.Create))
                         {
@@ -595,6 +618,7 @@ namespace MeshAssistant
                         if ((path == null) || (name == null) || (size <= 0) || !Directory.Exists(path)) { disconnect(); return; }
 
                         string fullname = Path.Combine(path, name).Replace("/", "\\");
+                        parent.Event(userid, string.Format("Uploading file {0} of size {1}", fullname, size));
                         try { fileRecvTransfer = File.OpenWrite(fullname); } catch (Exception) { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploaderror\",\"reqid\":" + reqid + "}")); break; }
                         fileRecvId = reqid;
                         fileRecvTransferPath = fullname;

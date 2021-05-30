@@ -23,6 +23,9 @@ namespace MeshAssistant
 {
     static class Program
     {
+        [ThreadStatic]
+        public static readonly bool IsMainThread = true;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

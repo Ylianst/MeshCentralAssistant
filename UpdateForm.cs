@@ -12,19 +12,22 @@ namespace MeshAssistant
 {
     public partial class UpdateForm : Form
     {
-        public UpdateForm()
+        private MainForm parent;
+
+        public UpdateForm(MainForm parent)
         {
+            this.parent = parent;
             InitializeComponent();
         }
 
         private void okButton_Click(object sender, EventArgs e)
         {
-            DialogResult = DialogResult.OK;
+            this.parent.DownloadUpdateEx(true);
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
-            DialogResult = DialogResult.Cancel;
+            this.parent.DownloadUpdateEx(false);
         }
     }
 }

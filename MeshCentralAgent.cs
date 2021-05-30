@@ -129,6 +129,7 @@ namespace MeshAssistant
             if (msh.ContainsKey("MeshID")) { string m = msh["MeshID"]; if (m.StartsWith("0x")) { m = m.Substring(2); } MeshId = StringToByteArray(m); }
             if (msh.ContainsKey("ServerID")) { ServerId = msh["ServerID"]; }
             if (msh.ContainsKey("MeshServer")) { try { ServerUrl = new Uri(msh["MeshServer"]); } catch (Exception) { } }
+            if (msh.ContainsKey("AutoConnect")) { parent.autoConnect = (msh["AutoConnect"] == "1"); }
             Log("MSH MeshID: " + msh["MeshID"]);
             Log("MSH ServerID: " + ServerId);
             Log("MSH MeshServer: " + ServerUrl);
@@ -196,6 +197,16 @@ namespace MeshAssistant
             }
         }
 
+        public delegate void onLogEventHandler(DateTime time, string userid, string msg);
+        public event onLogEventHandler onLogEvent;
+
+        public void Event(string userid, string msg)
+        {
+            DateTime now = DateTime.Now;
+            if (onLogEvent != null) { onLogEvent(now, userid, msg); }
+            try { File.AppendAllText("events.log", now.ToString("yyyy-MM-ddTHH:mm:sszzz") + ", " + userid + ", " + msg + "\r\n"); } catch (Exception) { }
+        }
+
         public static byte[] StringToByteArray(string hex) { return Enumerable.Range(0, hex.Length).Where(x => x % 2 == 0).Select(x => Convert.ToByte(hex.Substring(x, 2), 16)).ToArray(); }
 
         public bool connect()
@@ -260,6 +271,7 @@ namespace MeshAssistant
 
         public void disconnect()
         {
+            Log("Disconnect");
             autoConnect = false;
             autoConnectTime = 5;
             if (autoConnectTimer != null) { autoConnectTimer.Dispose(); autoConnectTimer = null; }
@@ -278,8 +290,9 @@ namespace MeshAssistant
             foreach (MeshCentralTcpTunnel tcptunnel in tcptunnels) { tcptunnel.disconnect(); }
 
             // Setup auto-reconnect timer if needed
-            if (parent.autoConnect) {
+            if (autoConnect) {
                 Log(string.Format("Setting connect retry timer to {0} seconds", autoConnectTime));
+                if (autoConnectTimer != null) { autoConnectTimer.Dispose(); autoConnectTimer = null; }
                 autoConnectTimer = new System.Threading.Timer(new System.Threading.TimerCallback(reconnectAttempt), null, autoConnectTime * 1000, autoConnectTime * 1000);
             }
         }
@@ -330,9 +343,11 @@ namespace MeshAssistant
                 string userName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
                 sendSessionUpdate("help", "{\"" + escapeJsonString(userName) + "\":\"" + escapeJsonString(HelpRequest) + "\"}");
                 sendHelpEventLog(userName, HelpRequest);
+                Event("local", "Requested help for \"" + HelpRequest.Replace("\r\n", " ") + "\"");
             } else {
                 // Clear help request
                 sendSessionUpdate("help", "{}");
+                Event("local", "Canceled help request");
             }
         }
 
@@ -446,6 +461,7 @@ namespace MeshAssistant
         public void processConsoleCommand(string rawcmd, string sessionid, string userid)
         {
             Log(string.Format("processConsoleCommand, cmd=\"{0}\", sessionid=\"{1}\", userid=\"{2}\"", rawcmd, sessionid, userid));
+            Event(userid, string.Format("Console command: {0}", rawcmd));
 
             string response = null;
             string[] cmd = parseArgString(rawcmd);
@@ -540,6 +556,7 @@ namespace MeshAssistant
                 case "openUrl":
                     {
                         if (!jsonAction.ContainsKey("url") || (jsonAction["url"].GetType() != typeof(string))) return;
+                        Event(userid, string.Format("Opening URL: {0}", jsonAction["url"].ToString()));
                         sendOpenUrlEventLog(jsonAction["url"].ToString());
                         Process.Start(jsonAction["url"].ToString());
                         break;
@@ -565,7 +582,13 @@ namespace MeshAssistant
                                         {
                                             string cmdvalue = localappvalue["cmd"].ToString();
                                             if (cmdvalue == "cancelhelp") {
-                                                if (parent.autoConnect == false) { disconnect(); } // TODO
+                                                if (parent.autoConnect == false) {
+                                                    disconnect();
+                                                } else {
+                                                    HelpRequest = null;
+                                                    sendSessionUpdate("help", "{}"); // Clear help request
+                                                    if (onStateChanged != null) { onStateChanged(state); }
+                                                }
                                             }
                                         }
                                     }
@@ -579,6 +602,7 @@ namespace MeshAssistant
                                     {
                                         string title = (string)jsonAction["title"];
                                         string message = (string)jsonAction["msg"];
+                                        Event(userid, string.Format("Message box: {0}, {1}", title, message));
                                         notify(userid, title, message);
                                     }
                                     break;
@@ -604,6 +628,7 @@ namespace MeshAssistant
                                                 string hash = null;
                                                 if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = (string)jsonAction["servertlshash"]; }
                                                 if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
+                                                Event(userid, string.Format("Started TCP tunnel to {0}:{1}", tcpaddr, tcpport));
                                                 MeshCentralTcpTunnel tunnel = new MeshCentralTcpTunnel(this, new Uri(url), hash, jsonAction, tcpaddr, tcpport);
                                                 tcptunnels.Add(tunnel);
                                             }
@@ -629,12 +654,14 @@ namespace MeshAssistant
                             case "getclip": {
                                     // Require that the user have an active remote desktop session to perform this operation.
                                     if ((userid == null) || (doesUserHaveSession(userid, 2) == false)) return;
+                                    Event(userid, "Requested clipboard content");
                                     GetClipboard(jsonAction);
                                     break;
                                 }
                             case "setclip": {
                                     // Require that the user have an active remote desktop session to perform this operation.
                                     if ((userid == null) || (doesUserHaveSession(userid, 2) == false)) return;
+                                    Event(userid, "Set clipboard content");
                                     SetClipboard(jsonAction);
                                     break;
                                 }
@@ -650,6 +677,7 @@ namespace MeshAssistant
                                     int pid = 0;
                                     if ((jsonAction.ContainsKey("value")) && (jsonAction["value"].GetType() == typeof(System.Int32))) { pid = (int)jsonAction["value"]; }
                                     if (pid > 0) { try { Process p = Process.GetProcessById(pid); if (p != null) { p.Kill(); } } catch (Exception) { } }
+                                    Event(userid, string.Format("Killed process {0}", pid));
                                     break;
                                 }
                             case "services":

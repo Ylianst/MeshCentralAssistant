@@ -19,6 +19,7 @@ namespace MeshAssistant
         private NetworkStream tcpstream = null;
         private byte[] tcpReadBuffer = new byte[65535];
         private bool tcpstreamShouldRead = false;
+        public string userid;
 
         public MeshCentralTcpTunnel(MeshCentralAgent parent, Uri uri, string serverHash, Dictionary<string, object> creationArgs, string tcpaddr, int tcpport)
         {
@@ -38,7 +39,7 @@ namespace MeshAssistant
             // Setup extra log values
             if (creationArgs != null)
             {
-                if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { extraLogStr += ",\"userid\":\"" + escapeJsonString((string)creationArgs["userid"]) + "\""; }
+                if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { extraLogStr += ",\"userid\":\"" + escapeJsonString((string)creationArgs["userid"]) + "\""; userid = (string)creationArgs["userid"]; }
                 if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { extraLogStr += ",\"username\":\"" + escapeJsonString((string)creationArgs["username"]) + "\""; }
                 if (creationArgs.ContainsKey("remoteaddr") && (creationArgs["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)creationArgs["remoteaddr"]) + "\""; }
                 if (creationArgs.ContainsKey("sessionid") && (creationArgs["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)creationArgs["sessionid"]) + "\""; }
@@ -82,6 +83,8 @@ namespace MeshAssistant
                 }
                 sessionUserName = null;
             }
+
+            parent.Event(userid, "Closed TCP tunnel");
         }
 
         private void connectedToServer()

@@ -39,7 +39,6 @@ namespace MeshAssistant
         public bool debug = false;
         public string[] args;
         public int timerSlowDown = 0;
-        public bool allowShowDisplay = false;
         public bool doclose = false;
         public bool helpRequested = false;
         public bool autoConnect = false;
@@ -52,6 +51,8 @@ namespace MeshAssistant
         public MeInfoForm meInfoForm = null;
         public ConsoleForm consoleForm = null;
         public PrivacyBarForm privacyBar = null;
+        public UpdateForm updateForm = null;
+        public EventsForm eventsForm = null;
         public bool isAdministrator = false;
         public bool forceExit = false;
         public bool noUpdate = false;
@@ -67,16 +68,62 @@ namespace MeshAssistant
         public string updateUrl;
         public string updateServerHash;
         public List<PrivacyBarForm> privacyBars = null;
+        private bool startVisible = false;
+        public List<LogEventStruct> userEvents = new List<LogEventStruct>();
+        
+        public struct LogEventStruct
+        {
+            public LogEventStruct(DateTime time, string userid, string msg) { this.time = time; this.userid = userid; this.msg = msg; }
+            public DateTime time;
+            public string userid;
+            public string msg;
+        }
+
+        private void LoadEventsFromFile()
+        {
+            string[] events = null;
+            try { events = File.ReadAllLines("events.log"); } catch (Exception ex) { }
+            if (events == null) return;
+            foreach (string e in events)
+            {
+                int i = e.IndexOf(", ");
+                if (i == -1) continue;
+                int j = e.IndexOf(", ", i + 2);
+                if (j == -1) continue;
+                string time = e.Substring(0, i);
+                string userid = e.Substring(i + 2, j - i - 2);
+                string msg = e.Substring(j + 2);
+                userEvents.Add(new LogEventStruct(DateTime.Parse(time), userid, msg));
+                if (userEvents.Count > 1000) { userEvents.RemoveAt(0); }
+            }
+        }
 
         public void Log(string msg) {
             if (debug) { try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff: ") + msg + "\r\n"); } catch (Exception) { } }
+        }
+
+        public void Event(string userid, string msg)
+        {
+            DateTime now = DateTime.Now;
+            LogEventStruct e = new LogEventStruct(now, userid, msg);
+            userEvents.Add(e);
+            AddEventToForm(e);
+            try { File.AppendAllText("events.log", now.ToString("yyyy-MM-ddTHH:mm:sszzz") + ", " + userid + ", " + msg + "\r\n"); } catch (Exception) { }
+        }
+
+        delegate void AddEventToFormHandler(LogEventStruct e);
+
+        public void AddEventToForm(LogEventStruct e)
+        {
+            if (eventsForm == null) return;
+            if (this.InvokeRequired) { this.Invoke(new AddEventToFormHandler(AddEventToForm), e); return; }
+            eventsForm.addEvent(e);
         }
 
         public MainForm(string[] args)
         {
             // Perform self update operations if any.
             this.args = args;
-            bool startVisible = false;
             string update = null;
             string delete = null;
             foreach (string arg in this.args) 
@@ -89,7 +136,7 @@ namespace MeshAssistant
                 if (arg.Length > 11 && arg.Substring(0, 11).ToLower() == "-agentname:") { selectedAgentName = arg.Substring(11); }
                 if ((arg.Length == 8) && (arg.ToLower() == "-connect")) { autoConnect = true; }
             }
-            try { File.AppendAllText("debug.log", "\r\n\r\n"); } catch (Exception) { }
+            if (debug) { try { File.AppendAllText("debug.log", "\r\n\r\n"); } catch (Exception) { } }
             Log("***** Starting MeshCentral Assistant *****");
 
             if (update != null)
@@ -116,16 +163,20 @@ namespace MeshAssistant
             }
 
             // If there is an embedded .msh file, write it out to "meshagent.msh"
+            Log("Checking for embedded MSH file");
             string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
             if (msh != null) { try { File.WriteAllText(MeshCentralAgent.getSelfFilename(".msh"), msh); } catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; } }
             selfExecutableHashHex = ExeHandler.HashExecutable(Assembly.GetEntryAssembly().Location);
 
             // Set TLS 1.2
+            Log("Set TLS 1.2");
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
+            Log("InitializeComponent()");
             InitializeComponent();
 
             // Check if the built-in agent will be activated
+            Log("Check for built-in agent");
             currentAgentName = null;
             List<ToolStripItem> subMenus = new List<ToolStripItem>();
             string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
@@ -140,7 +191,8 @@ namespace MeshAssistant
                 mcagent.onSessionChanged += Mcagent_onSessionChanged;
                 mcagent.onUserInfoChange += Mcagent_onUserInfoChange;
                 mcagent.onRequestConsent += Mcagent_onRequestConsent;
-                if (currentAgentSelection.Equals("~")) { currentAgentName = "~"; }
+                mcagent.onLogEvent += Mcagent_onLogEvent;
+                if ((currentAgentSelection != null) && (currentAgentSelection.Equals("~"))) { currentAgentName = "~"; }
                 if (autoConnect == true) { currentAgentName = "~"; }
                 ToolStripMenuItem m = new ToolStripMenuItem();
                 m.Name = "AgentSelector-~";
@@ -151,6 +203,7 @@ namespace MeshAssistant
             }
 
             // Get the list of agents on the system
+            Log("Get list of background agents");
             bool directConnectSeperator = false;
             agents = MeshAgent.GetAgentInfo(selectedAgentName);
             string[] agentNames = agents.Keys.ToArray();
@@ -177,10 +230,17 @@ namespace MeshAssistant
             }
             agentSelectToolStripMenuItem.DropDownItems.AddRange(subMenus.ToArray());
             agentSelectToolStripMenuItem.Visible = (subMenus.Count > 1);
+            this.Opacity = 0;
 
-            connectToAgent();
+            // Load events
+            LoadEventsFromFile();
+        }
 
-            if (startVisible) { mainNotifyIcon_MouseClick(this, null); }
+        private void Mcagent_onLogEvent(DateTime time, string userid, string msg)
+        {
+            LogEventStruct e = new LogEventStruct(time, userid, msg);
+            userEvents.Add(e);
+            AddEventToForm(e);
         }
 
         private void Mcagent_onRequestConsent(MeshCentralTunnel tunnel, string msg, int protocol, string userid)
@@ -332,7 +392,9 @@ namespace MeshAssistant
 
         private void updateBuiltinAgentStatus()
         {
-            if (mcagent == null) return;
+            if (mcagent == null) { updateSoftwareToolStripMenuItem.Visible = false; return; }
+            helpRequested = (mcagent.HelpRequest != null);
+            if (mcagent.state != 3) { updateSoftwareToolStripMenuItem.Visible = false; } // If not connected, don't offer auto-update option.
 
             if (mcagent.autoConnect)
             {
@@ -434,8 +496,6 @@ namespace MeshAssistant
                 startAgentToolStripMenuItem.Visible = false;
                 stopAgentToolStripMenuItem.Visible = false;
                 toolStripMenuItem2.Visible = false;
-                this.StartPosition = FormStartPosition.Manual;
-                this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
 
                 // If auto-connect is specified, connect now
                 if (autoConnect)
@@ -460,8 +520,6 @@ namespace MeshAssistant
                 agent.onSelfUpdate += Agent_onSelfUpdate;
                 agent.onCancelHelp += Agent_onCancelHelp;
                 agent.onConsoleMessage += Agent_onConsoleMessage;
-                this.StartPosition = FormStartPosition.Manual;
-                this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
                 agent.ConnectPipe();
                 UpdateServiceStatus();
 
@@ -517,7 +575,11 @@ namespace MeshAssistant
         private void Agent_onSelfUpdate(string name, string hash, string url, string serverhash)
         {
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSelfUpdateHandler(Agent_onSelfUpdate), name, hash, url, serverhash); return; }
-            if (noUpdate == false) DownloadUpdate(hash, url, serverhash);
+            updateHash = hash;
+            updateUrl = url;
+            updateServerHash = serverhash;
+            Log(string.Format("DownloadUpdate \"{0}\", \"{1}\", \"{2}\"", hash, url, serverhash));
+            if (noUpdate == false) DownloadUpdate();
         }
 
         private void Agent_onAmtState(System.Collections.Generic.Dictionary<string, object> state)
@@ -696,15 +758,15 @@ namespace MeshAssistant
             }
         }
 
-        protected override void SetVisibleCore(bool value)
-        {
-            base.SetVisibleCore(allowShowDisplay ? value : allowShowDisplay);
-        }
-
         private void MainForm_Load(object sender, EventArgs e)
         {
-            this.Visible = false;
-            this.WindowState = FormWindowState.Minimized;
+            Log("MainForm_Load()");
+            this.WindowState = FormWindowState.Normal;
+            this.StartPosition = FormStartPosition.Manual;
+            this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
+            this.Visible = startVisible;
+            this.Opacity = 1;
+            connectToAgent();
         }
 
         private void Agent_onStateChanged(int state, int serverState)
@@ -799,6 +861,7 @@ namespace MeshAssistant
                 if (sessionsForm != null) { sessionsForm.Close(); }
                 if (meInfoForm != null) { meInfoForm.Close(); }
                 if (consoleForm != null) { consoleForm.Close(); }
+                if (updateForm != null) { updateForm.Close(); }
             }
         }
 
@@ -839,8 +902,9 @@ namespace MeshAssistant
         private void mainNotifyIcon_MouseClick(object sender, MouseEventArgs e)
         {
             if ((e == null) || (e.Button == System.Windows.Forms.MouseButtons.Left)) {
+                this.StartPosition = FormStartPosition.Manual;
+                this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
                 this.WindowState = FormWindowState.Normal;
-                this.allowShowDisplay = true;
                 openToolStripMenuItem.Visible = this.Visible;
                 closeToolStripMenuItem.Visible = !this.Visible;
                 this.Visible = !this.Visible;
@@ -868,7 +932,6 @@ namespace MeshAssistant
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Normal;
-            this.allowShowDisplay = true;
             openToolStripMenuItem.Visible = this.Visible;
             closeToolStripMenuItem.Visible = !this.Visible;
             this.Visible = !this.Visible;
@@ -1110,24 +1173,32 @@ namespace MeshAssistant
         string seflUpdateDownloadHash = null;
         string serverTlsCertHash = null;
 
-        private void DownloadUpdate(string hash, string url, string serverHash)
+        private void DownloadUpdate()
         {
-            Log(string.Format("DownloadUpdate \"{0}\", \"{1}\", \"{2}\"", hash, url, serverHash));
-            if (new UpdateForm().ShowDialog(this) == DialogResult.OK)
+            updateForm = new UpdateForm(this);
+            updateForm.Show(this);
+        }
+
+        public void DownloadUpdateEx(bool doUpdateNow)
+        {
+            updateForm.Dispose();
+            updateForm = null;
+            if (doUpdateNow)
             {
+                Event("Local", "Approved software update");
                 updateSoftwareToolStripMenuItem.Visible = false;
-                seflUpdateDownloadHash = hash;
-                serverTlsCertHash = serverHash;
-                HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
+                seflUpdateDownloadHash = updateHash;
+                serverTlsCertHash = updateServerHash;
+                HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(updateUrl);
                 Uri x = webRequest.RequestUri;
                 webRequest.Method = "GET";
                 webRequest.Timeout = 10000;
                 webRequest.BeginGetResponse(new AsyncCallback(DownloadUpdateRespone), webRequest);
                 webRequest.ServerCertificateValidationCallback += RemoteCertificateValidationCallback;
-            } else {
-                updateHash = hash;
-                updateUrl = url;
-                updateServerHash = serverHash;
+            }
+            else
+            {
+                Event("Local", "Delayed software update");
                 updateSoftwareToolStripMenuItem.Visible = true;
             }
         }
@@ -1217,7 +1288,26 @@ namespace MeshAssistant
         private void updateSoftwareToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if ((updateHash == null) || (updateUrl == null) || (updateServerHash == null)) return;
-            DownloadUpdate(updateHash, updateUrl, updateServerHash);
+            DownloadUpdate();
+        }
+
+        private void showEventsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (eventsForm == null)
+            {
+                eventsForm = new EventsForm(this, userEvents);
+                eventsForm.Show(this);
+            }
+            else
+            {
+                eventsForm.Focus();
+            }
+        }
+
+        public void closingEventForm()
+        {
+            eventsForm.Dispose();
+            eventsForm = null;
         }
     }
 }
