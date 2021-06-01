@@ -256,9 +256,9 @@ namespace MeshAssistant
             {
                 Log("Opening consent form");
                 string realname = userid.Split('/')[2];
-                if (mcagent.userrealname.ContainsKey(userid)) { realname = mcagent.userrealname[userid]; }
+                if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
                 Image userImage = null;
-                if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
+                if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
                 consentForm = new ConsentForm(this);
                 consentForm.userid = userid;
                 consentForm.tunnel = tunnel;
@@ -277,9 +277,9 @@ namespace MeshAssistant
             if (this.InvokeRequired) { this.Invoke(new ShowNotificationHandler(ShowNotification), userid, title, message); return; }
             Log("Show notification");
             string realname = userid.Split('/')[2];
-            if (mcagent.userrealname.ContainsKey(userid)) { realname = mcagent.userrealname[userid]; }
+            if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
             Image userImage = null;
-            if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
+            if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
             if (notifyForm == null) { notifyForm = new NotifyForm(this); notifyForm.Show(this); }
             notifyForm.userid = userid;
             notifyForm.Message = message;
@@ -305,13 +305,13 @@ namespace MeshAssistant
             // If the notification or consent dialog is showing, check if we can update the real name and/or image
             if ((notifyForm != null) && (notifyForm.userid == userid))
             {
-                if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { notifyForm.UserImage = mcagent.userimages[userid]; }
-                if (mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { notifyForm.UserName = mcagent.userrealname[userid]; }
+                if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { notifyForm.UserImage = mcagent.userimages[userid]; }
+                if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { notifyForm.UserName = mcagent.userrealname[userid]; }
             }
             if ((consentForm != null) && (consentForm.userid == userid))
             {
-                if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { consentForm.UserImage = mcagent.userimages[userid]; }
-                if (mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { consentForm.UserName = mcagent.userrealname[userid]; }
+                if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { consentForm.UserImage = mcagent.userimages[userid]; }
+                if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { consentForm.UserName = mcagent.userrealname[userid]; }
             }
         }
 
@@ -451,7 +451,7 @@ namespace MeshAssistant
             {
                 string userid = userids[0];
                 string realname = userid.Split('/')[2];
-                if (mcagent.userrealname.ContainsKey(userid)) { realname = mcagent.userrealname[userid]; }
+                if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
                 stateLabel.Text = realname;
                 pictureBoxGreen.Visible = false; // Green
                 pictureBoxRed.Visible = false;  // Red
@@ -612,7 +612,7 @@ namespace MeshAssistant
             string[] r = new string[userids.Length];
             for (var i = 0; i < userids.Length; i++) {
                 string u = userids[i];
-                if ((mcagent.userrealname != null) && (mcagent.userrealname[u] != null)) {
+                if ((mcagent.userrealname != null) && (mcagent.userrealname.ContainsKey(u)) && (mcagent.userrealname[u] != null)) {
                     r[i] = mcagent.userrealname[u];
                 } else {
                     string[] uu = u.Split('/');
@@ -681,14 +681,14 @@ namespace MeshAssistant
                 {
                     string userid = userids[0];
                     string realname = userid.Split('/')[2];
-                    if (agent.userrealname.ContainsKey(userid)) { realname = agent.userrealname[userid]; }
+                    if ((agent.userrealname != null) && (agent.userrealname.ContainsKey(userid)) && (agent.userrealname[userid] != null)) { realname = agent.userrealname[userid]; }
                     stateLabel.Text = realname;
                     pictureBoxGreen.Visible = false; // Green
                     pictureBoxRed.Visible = false;  // Red
                     pictureBoxYellow.Visible = false; // Gray
                     pictureBoxQuestion.Visible = false; // Question
                     Image userImage = null;
-                    if (agent.userimages.ContainsKey(userid) && (agent.userimages[userid] != null)) { userImage = agent.userimages[userid]; }
+                    if ((agent.userimages != null) && agent.userimages.ContainsKey(userid) && (agent.userimages[userid] != null)) { userImage = agent.userimages[userid]; }
                     if (userImage == null)
                     {
                         pictureBoxUser.Visible = true;
