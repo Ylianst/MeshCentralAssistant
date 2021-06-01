@@ -25,615 +25,508 @@ namespace MeshAssistant
         // *** TRANSLATION TABLE START ***
         static private Dictionary<string, Dictionary<string, string>> translationTable = new Dictionary<string, Dictionary<string, string>>() {
         {
-            "Authenticating",
+            "MeshCentral Assistant",
             new Dictionary<string, string>() {
-                {"tr","Authentification"},
-                {"fr","Zfgsvmgrxzgrmt"}
-            }
-        },
-        {
-            "&Close",
-            new Dictionary<string, string>() {
-                {"tr","&Fermer"},
-                {"fr","&Xolhv"}
-            }
-        },
-        {
-            "Deny",
-            new Dictionary<string, string>() {
-                {"tr","Refuser"},
-                {"fr","Wvmb"}
-            }
-        },
-        {
-            "Agent is pause pending",
-            new Dictionary<string, string>() {
-                {"tr","L'agent est en attente de pause"},
-                {"fr","Ztvmg rh kzfhv kvmwrmt"}
-            }
-        },
-        {
-            "State",
-            new Dictionary<string, string>() {
-                {"tr","État"},
-                {"fr","Hgzgv"}
-            }
-        },
-        {
-            "Agent Select",
-            new Dictionary<string, string>() {
-                {"tr","Sélection d'agent"},
-                {"fr","Ztvmg Hvovxg"}
-            }
-        },
-        {
-            "Help Requested",
-            new Dictionary<string, string>() {
-                {"tr","Aide demandée"},
-                {"fr","Svok Ivjfvhgvw"}
-            }
-        },
-        {
-            "Cancel",
-            new Dictionary<string, string>() {
-                {"tr","Annuler"},
-                {"fr","Xzmxvo"}
-            }
-        },
-        {
-            "Not Activated (In)",
-            new Dictionary<string, string>() {
-                {"tr","Non activé (Entrée)"},
-                {"fr","Mlg Zxgrezgvw (Rm)"}
-            }
-        },
-        {
-            "Privacy Bar",
-            new Dictionary<string, string>() {
-                {"tr","Barre de confidentialité"},
-                {"fr","Kirezxb Yzi"}
-            }
-        },
-        {
-            "S&top Agent",
-            new Dictionary<string, string>() {
-                {"tr","Agent d'arrêt"},
-                {"fr","H&glk Ztvmg"}
-            }
-        },
-        {
-            "Agent not installed",
-            new Dictionary<string, string>() {
-                {"tr","Agent non installé"},
-                {"fr","Ztvmg mlg rmhgzoovw"}
-            }
-        },
-        {
-            "User",
-            new Dictionary<string, string>() {
-                {"tr","Utilisateur"},
-                {"fr","Fhvi"}
-            }
-        },
-        {
-            "Events",
-            new Dictionary<string, string>() {
-                {"tr","Événements"},
-                {"fr","Vevmgh"}
-            }
-        },
-        {
-            "Agent is missing",
-            new Dictionary<string, string>() {
-                {"tr","L'agent est manquant"},
-                {"fr","Ztvmg rh nrhhrmt"}
-            }
-        },
-        {
-            "{0} Assistant",
-            new Dictionary<string, string>() {
-                {"tr","{0} Assistante"},
-                {"fr","{0} Zhhrhgzmg"}
-            }
-        },
-        {
-            "PrivacyBarForm",
-            new Dictionary<string, string>() {
-                {"fr","KirezxbYziUlin"}
-            }
-        },
-        {
-            "&Open",
-            new Dictionary<string, string>() {
-                {"tr","&Ouvert"},
-                {"fr","&Lkvm"}
-            }
-        },
-        {
-            "Connected to server",
-            new Dictionary<string, string>() {
-                {"tr","Connecté au serveur"},
-                {"fr","Xlmmvxgvw gl hvievi"}
-            }
-        },
-        {
-            "Later",
-            new Dictionary<string, string>() {
-                {"tr","Plus tard"},
-                {"fr","Ozgvi"}
-            }
-        },
-        {
-            "Close",
-            new Dictionary<string, string>() {
-                {"tr","Fermer"},
-                {"fr","Xolhv"}
-            }
-        },
-        {
-            "Agent is stopped",
-            new Dictionary<string, string>() {
-                {"tr","L'agent est arrêté"},
-                {"fr","Ztvmg rh hglkkvw"}
-            }
-        },
-        {
-            "Agent Snapshot",
-            new Dictionary<string, string>() {
-                {"tr","Instantané de l'agent"},
-                {"fr","Ztvmg Hmzkhslg"}
-            }
-        },
-        {
-            "{0} remote sessions",
-            new Dictionary<string, string>() {
-                {"tr","{0} sessions à distance"},
-                {"fr","{0} ivnlgv hvhhrlmh"}
-            }
-        },
-        {
-            "Cancel Help Request",
-            new Dictionary<string, string>() {
-                {"tr","Annuler la demande d'aide"},
-                {"fr","Xzmxvo Svok Ivjfvhg"}
-            }
-        },
-        {
-            "TCP relay",
-            new Dictionary<string, string>() {
-                {"tr","Relais TCP"},
-                {"fr","GXK ivozb"}
-            }
-        },
-        {
-            "Clear",
-            new Dictionary<string, string>() {
-                {"tr","Dégager"},
-                {"fr","Xovzi"}
-            }
-        },
-        {
-            "(None)",
-            new Dictionary<string, string>() {
-                {"tr","(Rien)"},
-                {"fr","(Mlmv)"}
-            }
-        },
-        {
-            "Count",
-            new Dictionary<string, string>() {
-                {"tr","Compter"},
-                {"fr","Xlfmg"}
-            }
-        },
-        {
-            "Value",
-            new Dictionary<string, string>() {
-                {"tr","Valeur"},
-                {"fr","Ezofv"}
-            }
-        },
-        {
-            "Direct Connect",
-            new Dictionary<string, string>() {
-                {"tr","Connection directe"},
-                {"fr","Wrivxg Xlmmvxg"}
-            }
-        },
-        {
-            "Remote Sessions: {0}",
-            new Dictionary<string, string>() {
-                {"tr","Sessions à distance : {0}"},
-                {"fr","Ivnlgv Hvhhrlmh: {0}"}
-            }
-        },
-        {
-            "Agent is disconnected",
-            new Dictionary<string, string>() {
-                {"tr","L'agent est déconnecté"},
-                {"fr","Ztvmg rh wrhxlmmvxgvw"}
-            }
-        },
-        {
-            "Request Help",
-            new Dictionary<string, string>() {
-                {"tr","Demander de l'aide"},
-                {"fr","Ivjfvhg Svok"}
-            }
-        },
-        {
-            "Intel® ME State...",
-            new Dictionary<string, string>() {
-                {"tr","État Intel® ME..."},
-                {"fr","Rmgvo® NV Hgzgv..."}
-            }
-        },
-        {
-            "List of remote sessions active on this computer.",
-            new Dictionary<string, string>() {
-                {"tr","Liste des sessions distantes actives sur cet ordinateur."},
-                {"fr","Orhg lu ivnlgv hvhhrlmh zxgrev lm gsrh xlnkfgvi."}
-            }
-        },
-        {
-            "Not Activated (Pre)",
-            new Dictionary<string, string>() {
-                {"tr","Non activé (pré)"},
-                {"fr","Mlg Zxgrezgvw (Kiv)"}
-            }
-        },
-        {
-            "A new version of this software is available. Update now?",
-            new Dictionary<string, string>() {
-                {"tr","Une nouvelle version de ce logiciel est disponible. Mettez à jour maintenant?"},
-                {"fr","Z mvd evihrlm lu gsrh hlugdziv rh zezrozyov. Fkwzgv mld?"}
-            }
-        },
-        {
-            "{0} - {1}",
-            new Dictionary<string, string>() {
-
-            }
-        },
-        {
-            "User Consent",
-            new Dictionary<string, string>() {
-                {"tr","Consentement de l'utilisateur"},
-                {"fr","Fhvi Xlmhvmg"}
-            }
-        },
-        {
-            "&Update Software",
-            new Dictionary<string, string>() {
-                {"tr","&Mettre à jour le logiciel"},
-                {"fr","&Fkwzgv Hlugdziv"}
-            }
-        },
-        {
-            "Remote Sessions...",
-            new Dictionary<string, string>() {
-                {"tr","Séances à distance..."},
-                {"fr","Ivnlgv Hvhhrlmh..."}
-            }
-        },
-        {
-            "Intel® Management Engine",
-            new Dictionary<string, string>() {
-                {"tr","Moteur de gestion Intel®"},
-                {"fr","Rmgvo® Nzmztvnvmg Vmtrmv"}
-            }
-        },
-        {
-            "Send",
-            new Dictionary<string, string>() {
-                {"tr","Envoyer"},
-                {"fr","Hvmw"}
-            }
-        },
-        {
-            "Enter help request details",
-            new Dictionary<string, string>() {
-                {"tr","Entrez les détails de la demande d'aide"},
-                {"fr","Vmgvi svok ivjfvhg wvgzroh"}
-            }
-        },
-        {
-            "Terminal",
-            new Dictionary<string, string>() {
-                {"fr","Gvinrmzo"}
-            }
-        },
-        {
-            "Request Help...",
-            new Dictionary<string, string>() {
-                {"tr","Demander de l'aide..."},
-                {"fr","Ivjfvhg Svok..."}
-            }
-        },
-        {
-            "Agent is stopped pending",
-            new Dictionary<string, string>() {
-                {"tr","L'agent est arrêté en attente"},
-                {"fr","Ztvmg rh hglkkvw kvmwrmt"}
-            }
-        },
-        {
-            "Disconnected",
-            new Dictionary<string, string>() {
-                {"tr","Débranché"},
-                {"fr","Wrhxlmmvxgvw"}
-            }
-        },
-        {
-            "Remote Sessions",
-            new Dictionary<string, string>() {
-                {"tr","Séances à distance"},
-                {"fr","Ivnlgv Hvhhrlmh"}
-            }
-        },
-        {
-            "Type",
-            new Dictionary<string, string>() {
-                {"tr","Taper"},
-                {"fr","Gbkv"}
-            }
-        },
-        {
-            "1 remote session",
-            new Dictionary<string, string>() {
-                {"tr","1 séance à distance"},
-                {"fr","1 ivnlgv hvhhrlm"}
-            }
-        },
-        {
-            "Assistant Update",
-            new Dictionary<string, string>() {
-                {"tr","Mise à jour de l'assistant"},
-                {"fr","Zhhrhgzmg Fkwzgv"}
-            }
-        },
-        {
-            "Connecting",
-            new Dictionary<string, string>() {
-                {"tr","De liaison"},
-                {"fr","Xlmmvxgrmt"}
-            }
-        },
-        {
-            "Agent is start pending",
-            new Dictionary<string, string>() {
-                {"tr","L'agent est en attente de démarrage"},
-                {"fr","Ztvmg rh hgzig kvmwrmt"}
+                {"ru","MeshCentral Ассистент"},
+                {"fr","Assistant MeshCentral"},
+                {"es","Asistente MeshCentral"}
             }
         },
         {
             "Loading...",
             new Dictionary<string, string>() {
-                {"tr","Chargement..."},
-                {"fr","Olzwrmt..."}
+                {"de","Laden..."},
+                {"hi","लोड हो रहा है..."},
+                {"fr","Chargement..."},
+                {"zh-cht","載入中..."},
+                {"zh-chs","载入中..."},
+                {"fi","Ladataan..."},
+                {"tr","Yükleniyor..."},
+                {"cs","Načítání…"},
+                {"ja","読み込み中..."},
+                {"es","Cargando..."},
+                {"pt","Carregando..."},
+                {"nl","Laden..."},
+                {"ko","불러오는 중 ..."},
+                {"ru","Загрузка..."}
             }
         },
         {
-            "E&xit",
+            "User",
             new Dictionary<string, string>() {
-                {"tr","Sortir"},
-                {"fr","V&crg"}
-            }
-        },
-        {
-            "Show Sessions...",
-            new Dictionary<string, string>() {
-                {"tr","Afficher les séances..."},
-                {"fr","Hsld Hvhhrlmh..."}
-            }
-        },
-        {
-            "{0} remote sessions are active.",
-            new Dictionary<string, string>() {
-                {"tr","{0} sessions à distance sont actives."},
-                {"fr","{0} ivnlgv hvhhrlmh ziv zxgrev."}
-            }
-        },
-        {
-            "No remote sessions",
-            new Dictionary<string, string>() {
-                {"tr","Pas de sessions à distance"},
-                {"fr","Ml ivnlgv hvhhrlmh"}
-            }
-        },
-        {
-            "Agent is continue pending",
-            new Dictionary<string, string>() {
-                {"tr","L'agent est en attente de poursuite"},
-                {"fr","Ztvmg rh xlmgrmfv kvmwrmt"}
-            }
-        },
-        {
-            "Allow",
-            new Dictionary<string, string>() {
-                {"tr","Permettre"},
-                {"fr","Zoold"}
-            }
-        },
-        {
-            "1 remote session is active.",
-            new Dictionary<string, string>() {
-                {"tr","1 session à distance est active."},
-                {"fr","1 ivnlgv hvhhrlm rh zxgrev."}
+                {"de","Benutzer"},
+                {"hi","उपयोगकर्ता"},
+                {"fr","Utilisateur"},
+                {"zh-cht","用戶"},
+                {"zh-chs","用户"},
+                {"fi","Käyttäjä"},
+                {"tr","Kullanıcı"},
+                {"cs","Uživatel"},
+                {"ja","ユーザー"},
+                {"es","Usuario"},
+                {"pt","Do utilizador"},
+                {"nl","Gebruiker"},
+                {"ko","사용자"},
+                {"ru","Пользователь"}
             }
         },
         {
             "Notify",
             new Dictionary<string, string>() {
-                {"tr","Avertir"},
-                {"fr","Mlgrub"}
-            }
-        },
-        {
-            "OK",
-            new Dictionary<string, string>() {
-                {"tr","d'accord"},
-                {"fr","LP"}
-            }
-        },
-        {
-            "Agent Console",
-            new Dictionary<string, string>() {
-                {"tr","Console des agents"},
-                {"fr","Ztvmg Xlmhlov"}
-            }
-        },
-        {
-            "Files",
-            new Dictionary<string, string>() {
-                {"tr","Des dossiers"},
-                {"fr","Urovh"}
-            }
-        },
-        {
-            "Agent is running",
-            new Dictionary<string, string>() {
-                {"tr","L'agent est en cours d'exécution"},
-                {"fr","Ztvmg rh ifmmrmt"}
-            }
-        },
-        {
-            "O&pen Site...",
-            new Dictionary<string, string>() {
-                {"tr","&Ouvrir le site..."},
-                {"fr","L&kvm Hrgv..."}
+                {"de","Benachrichtigen"},
+                {"hi","सूचित करें"},
+                {"fr","Notifier"},
+                {"zh-cht","通知"},
+                {"zh-chs","通知"},
+                {"fi","Ilmoita"},
+                {"tr","Bildir"},
+                {"cs","Upozornit"},
+                {"ja","通知する"},
+                {"es","Notificar"},
+                {"pt","Notificar"},
+                {"nl","Melden"},
+                {"ko","알림"},
+                {"ru","Уведомить"}
             }
         },
         {
             "Time",
             new Dictionary<string, string>() {
-                {"tr","Temps"},
-                {"fr","Grnv"}
+                {"de","Zeit"},
+                {"hi","समय"},
+                {"fr","Temps"},
+                {"zh-cht","時間"},
+                {"zh-chs","时间"},
+                {"fi","Aika"},
+                {"tr","Zaman"},
+                {"cs","Čas"},
+                {"ja","時間"},
+                {"es","Tiempo"},
+                {"pt","Tempo"},
+                {"nl","Tijd"},
+                {"ko","시간"},
+                {"ru","Время"}
             }
         },
         {
-            "MeshCentral Assistant",
+            "Events",
             new Dictionary<string, string>() {
-                {"tr","Assistant MeshCentral"},
-                {"fr","NvhsXvmgizo Zhhrhgzmg"}
+                {"de","Ereignisse"},
+                {"hi","आयोजन"},
+                {"fr","Événements"},
+                {"zh-cht","事件"},
+                {"zh-chs","事件"},
+                {"fi","Tapahtumat"},
+                {"tr","Etkinlikler"},
+                {"cs","Události"},
+                {"ja","イベント"},
+                {"es","Eventos"},
+                {"pt","Eventos"},
+                {"nl","Gebeurtenissen"},
+                {"ko","이벤트"},
+                {"ru","События"}
             }
         },
         {
-            "Connected",
+            "Type",
             new Dictionary<string, string>() {
-                {"tr","Lié"},
-                {"fr","Xlmmvxgvw"}
+                {"de","Typ"},
+                {"hi","प्रकार"},
+                {"zh-cht","類型"},
+                {"zh-chs","类型"},
+                {"fi","Tyyppi"},
+                {"tr","tip"},
+                {"cs","Typ"},
+                {"ja","タイプ"},
+                {"es","Tipo"},
+                {"pt","Tipo"},
+                {"ko","유형"},
+                {"ru","Удаленный ввод"}
             }
         },
         {
-            "Multiple Users",
+            "Disconnected",
             new Dictionary<string, string>() {
-                {"tr","Utilisateurs multiples"},
-                {"fr","Nfogrkov Fhvih"}
+                {"de","Getrennt"},
+                {"hi","डिस्कनेक्ट किया गया"},
+                {"fr","Débranché"},
+                {"zh-cht","已斷線"},
+                {"zh-chs","已断线"},
+                {"fi","Yhteys katkaistu"},
+                {"tr","Bağlantı kesildi"},
+                {"cs","Odpojeno"},
+                {"ja","切断されました"},
+                {"es","Desconectado"},
+                {"pt","Desconectado"},
+                {"nl","Verbroken"},
+                {"ko","연결 해제"},
+                {"ru","Отключен"}
             }
         },
         {
-            "Item",
+            "State",
             new Dictionary<string, string>() {
-                {"tr","Article"},
-                {"fr","Rgvn"}
+                {"de","Zustand"},
+                {"hi","राज्य"},
+                {"fr","Etat"},
+                {"zh-cht","狀態"},
+                {"zh-chs","状况"},
+                {"fi","Tila"},
+                {"tr","Durum"},
+                {"cs","Stav"},
+                {"ja","状態"},
+                {"es","Estado"},
+                {"pt","Estado"},
+                {"nl","Status"},
+                {"ko","상태"},
+                {"ru","Состояние"}
             }
         },
         {
             "Enabled",
             new Dictionary<string, string>() {
-                {"tr","Activée"},
-                {"fr","Vmzyovw"}
+                {"de","aktiviert"},
+                {"hi","सक्रिय"},
+                {"fr","Activer"},
+                {"zh-cht","已啟用"},
+                {"zh-chs","已启用"},
+                {"fi","Käytössä"},
+                {"tr","Etkin"},
+                {"cs","Povoleno"},
+                {"ja","有効"},
+                {"es","Habilitado"},
+                {"pt","ativado"},
+                {"nl","Ingeschakeld"},
+                {"ko","활성화 됨"},
+                {"ru","Включено"}
             }
         },
         {
-            "Event",
+            "Files",
             new Dictionary<string, string>() {
-                {"tr","Événement"},
-                {"fr","Vevmg"}
+                {"de","Dateien"},
+                {"hi","फ़ाइलें"},
+                {"fr","Dossiers"},
+                {"zh-cht","檔案"},
+                {"zh-chs","档案"},
+                {"fi","Tiedostot"},
+                {"tr","Dosyalar"},
+                {"cs","Soubory"},
+                {"ja","ファイル"},
+                {"es","Archivos"},
+                {"pt","Arquivos"},
+                {"nl","Bestanden"},
+                {"ko","파일"},
+                {"ru","Файлы"}
             }
         },
         {
-            "Activated",
+            "Cancel",
             new Dictionary<string, string>() {
-                {"tr","Activé"},
-                {"fr","Zxgrezgvw"}
+                {"de","Abbrechen"},
+                {"hi","रद्द करना"},
+                {"fr","Annuler"},
+                {"zh-cht","取消"},
+                {"zh-chs","取消"},
+                {"fi","Peruuta"},
+                {"tr","İptal etmek"},
+                {"cs","Storno"},
+                {"ja","キャンセル"},
+                {"es","Cancelar"},
+                {"pt","Cancelar"},
+                {"nl","Annuleren"},
+                {"ko","취소"},
+                {"ru","Отмена"}
             }
         },
         {
-            "Show &Events...",
+            "Connected",
             new Dictionary<string, string>() {
-                {"tr","Afficher les &événements..."},
-                {"fr","Hsld &Vevmgh..."}
+                {"de","Verbunden"},
+                {"hi","जुड़े हुए"},
+                {"fr","Connecté"},
+                {"zh-cht","已連接"},
+                {"zh-chs","已连接"},
+                {"fi","Yhdistetty"},
+                {"tr","Bağlandı"},
+                {"cs","Připojeno"},
+                {"ja","接続済み"},
+                {"es","Conectado"},
+                {"pt","Conectado"},
+                {"nl","Verbonden"},
+                {"ko","연결됨"},
+                {"ru","Подключено"}
             }
         },
         {
-            "No active remote sessions.",
+            "Close",
             new Dictionary<string, string>() {
-                {"tr","Aucune session à distance active."},
-                {"fr","Ml zxgrev ivnlgv hvhhrlmh."}
-            }
-        },
-        {
-            "Desktop",
-            new Dictionary<string, string>() {
-                {"tr","Bureau"},
-                {"fr","Wvhpglk"}
-            }
-        },
-        {
-            "Versions",
-            new Dictionary<string, string>() {
-                {"fr","Evihrlmh"}
-            }
-        },
-        {
-            "Intel® Management Engine state for this computer.",
-            new Dictionary<string, string>() {
-                {"tr","État du moteur de gestion Intel® pour cet ordinateur."},
-                {"fr","Rmgvo® Nzmztvnvmg Vmtrmv hgzgv uli gsrh xlnkfgvi."}
-            }
-        },
-        {
-            "Unknown",
-            new Dictionary<string, string>() {
-                {"tr","Inconnu"},
-                {"fr","Fmpmldm"}
+                {"de","Schließen"},
+                {"hi","बंद करे"},
+                {"fr","Fermer"},
+                {"zh-cht","關"},
+                {"zh-chs","关"},
+                {"fi","Sulje"},
+                {"tr","Kapat"},
+                {"cs","Zavřít"},
+                {"ja","閉じる"},
+                {"es","Cerrar"},
+                {"pt","Fechar"},
+                {"nl","Sluiten"},
+                {"ko","닫기"},
+                {"ru","Закрыть"}
             }
         },
         {
             "Disabled",
             new Dictionary<string, string>() {
-                {"tr","Désactivée"},
-                {"fr","Wrhzyovw"}
+                {"de","Deaktiviertes"},
+                {"hi","विकलांग"},
+                {"fr","Désactivé"},
+                {"zh-cht","已禁用"},
+                {"zh-chs","已禁用"},
+                {"fi","Poistettu käytöstä"},
+                {"tr","Devre dışı"},
+                {"cs","Zakázáno"},
+                {"ja","無効"},
+                {"es","Deshabilitado"},
+                {"pt","Desativado"},
+                {"nl","Uitgeschakeld"},
+                {"ko","비활성화"},
+                {"ru","Отключено"}
             }
         },
         {
-            "UDP relay",
+            "OK",
             new Dictionary<string, string>() {
-                {"tr","relais UDP"},
-                {"fr","FWK ivozb"}
+                {"hi","ठीक"},
+                {"fr","ОК"},
+                {"tr","tamam"},
+                {"pt","Ok"},
+                {"ko","확인"},
+                {"ru","ОК"}
             }
         },
         {
-            "&Start Agent",
+            "Not Activated (In)",
             new Dictionary<string, string>() {
-                {"tr","&Démarrer l'agent"},
-                {"fr","&Hgzig Ztvmg"}
+                {"de","Nicht aktiviert (In)"},
+                {"hi","सक्रिय नहीं (में)"},
+                {"fr","Non activé (en)"},
+                {"zh-cht","未啟動（輸入）"},
+                {"zh-chs","未激活（输入）"},
+                {"fi","Ei aktivoitu (sisään)"},
+                {"tr","Etkinleştirilmedi (İçinde)"},
+                {"cs","Neaktivováno (v)"},
+                {"ja","アクティブ化されていない（イン）"},
+                {"es","No Activada (entrada)"},
+                {"pt","Não ativado (entrada)"},
+                {"nl","Niet geactiveerd (In)"},
+                {"ko","활성화되지 않음 (In)"},
+                {"ru","Не активированно (In)"}
             }
         },
         {
-            "Agent is paused",
+            "Desktop",
             new Dictionary<string, string>() {
-                {"tr","L'agent est en pause"},
-                {"fr","Ztvmg rh kzfhvw"}
+                {"hi","डेस्कटॉप"},
+                {"fr","Bureau"},
+                {"zh-cht","桌面"},
+                {"zh-chs","桌面"},
+                {"fi","Työpöytä"},
+                {"tr","Masaüstü Bilgisayar"},
+                {"cs","Plocha"},
+                {"ja","デスクトップ"},
+                {"es","Escritorio"},
+                {"pt","Área de Trabalho"},
+                {"nl","Bureaublad"},
+                {"ko","데스크탑"},
+                {"ru","Рабочий стол"}
+            }
+        },
+        {
+            "Unknown",
+            new Dictionary<string, string>() {
+                {"de","Unbekannt"},
+                {"hi","अनजान"},
+                {"fr","Inconnue"},
+                {"zh-cht","未知"},
+                {"zh-chs","未知"},
+                {"fi","Tuntematon"},
+                {"tr","Bilinmeyen"},
+                {"cs","Neznámé"},
+                {"ja","未知の"},
+                {"es","Desconocido"},
+                {"pt","Desconhecido"},
+                {"nl","Onbekend"},
+                {"ko","알 수 없는"},
+                {"ru","Неизвестно"}
+            }
+        },
+        {
+            "Activated",
+            new Dictionary<string, string>() {
+                {"de","Aktiviertes"},
+                {"hi","सक्रिय"},
+                {"fr","Activé"},
+                {"zh-cht","已啟動"},
+                {"zh-chs","已激活"},
+                {"fi","Aktivoitu"},
+                {"tr","Aktif"},
+                {"cs","Zapnuto"},
+                {"ja","有効化"},
+                {"es","Activado"},
+                {"pt","ativado"},
+                {"nl","Geactiveerd"},
+                {"ko","활성화 됨"},
+                {"ru","Активировано"}
+            }
+        },
+        {
+            "Terminal",
+            new Dictionary<string, string>() {
+                {"hi","टर्मिनल"},
+                {"zh-cht","終端機"},
+                {"zh-chs","终端"},
+                {"fi","Pääte"},
+                {"tr","terminal"},
+                {"cs","Terminál"},
+                {"ja","ターミナル"},
+                {"ko","터미널"},
+                {"ru","Терминал"}
+            }
+        },
+        {
+            "User Consent",
+            new Dictionary<string, string>() {
+                {"de","Benutzereinwilligung"},
+                {"hi","उपयोगकर्ता सहमति"},
+                {"fr","Consentement de l'utilisateur"},
+                {"zh-cht","用戶同意"},
+                {"zh-chs","用户同意"},
+                {"fi","Käyttäjän suostumus"},
+                {"tr","Kullanıcı Onayı"},
+                {"cs","Souhlas uživatele"},
+                {"ja","ユーザーの同意"},
+                {"es","Consentimiento del Usuario"},
+                {"pt","Consentimento do Usuário"},
+                {"nl","Toestemming van gebruiker"},
+                {"ko","사용자 연결 옵션"},
+                {"ru","Согласие пользователя"}
+            }
+        },
+        {
+            "Not Activated (Pre)",
+            new Dictionary<string, string>() {
+                {"de","Nicht aktiviert (Pre)"},
+                {"hi","सक्रिय नहीं (पूर्व)"},
+                {"fr","Non activé (pré)"},
+                {"zh-cht","未啟動（預）"},
+                {"zh-chs","未激活（预）"},
+                {"fi","Ei aktivoitu (ennakko)"},
+                {"tr","Etkinleştirilmedi (Ön)"},
+                {"cs","Neaktivováno (před)"},
+                {"ja","アクティブ化されていない（前）"},
+                {"es","No activada (Pre)"},
+                {"pt","Não ativado (pré)"},
+                {"nl","Niet geactiveerd (Pre)"},
+                {"ko","활성화되지 않음 (Pre)"},
+                {"ru","Не активированно (Pre)"}
+            }
+        },
+        {
+            "Send",
+            new Dictionary<string, string>() {
+                {"de","Senden"},
+                {"hi","संदेश"},
+                {"fr","Envoyer"},
+                {"zh-cht","發送"},
+                {"zh-chs","发送"},
+                {"fi","Lähetä"},
+                {"tr","Gönder"},
+                {"cs","Odeslat"},
+                {"ja","送る"},
+                {"es","Enviar"},
+                {"pt","Enviar"},
+                {"nl","Verzenden"},
+                {"ko","전송"},
+                {"ru","Отправить"}
+            }
+        },
+        {
+            "Clear",
+            new Dictionary<string, string>() {
+                {"de","Leeren"},
+                {"hi","स्पष्ट"},
+                {"fr","Nettoyer"},
+                {"zh-cht","清除"},
+                {"zh-chs","清除"},
+                {"fi","Tyhjennä"},
+                {"tr","Açık"},
+                {"cs","Vymazat"},
+                {"ja","クリア"},
+                {"es","Borrar"},
+                {"pt","Limpo"},
+                {"nl","Wissen"},
+                {"ko","지우기"},
+                {"ru","Очистить"}
+            }
+        },
+        {
+            "Privacy Bar",
+            new Dictionary<string, string>() {
+                {"de","Datenschutzleiste"},
+                {"hi","गोपनीयता बार"},
+                {"fr","Barre de confidentialité"},
+                {"zh-cht","隱私欄"},
+                {"zh-chs","隐私栏"},
+                {"fi","Tietosuojapalkki"},
+                {"tr","Gizlilik Çubuğu"},
+                {"cs","Bar ochrany osobních údajů"},
+                {"ja","プライバシーバー"},
+                {"es","Barra de Privacidad"},
+                {"pt","Barra de Privacidade"},
+                {"nl","Privacy balk"},
+                {"ko","프라이버시 바"},
+                {"ru","Панель конфиденциальности"}
             }
         },
         {
             "Update",
             new Dictionary<string, string>() {
-                {"tr","Mettre à jour"},
-                {"fr","Fkwzgv"}
+                {"de","Updates"},
+                {"hi","अपडेट करें"},
+                {"fr","Mettre à jour"},
+                {"zh-cht","更新資料"},
+                {"zh-chs","更新资料"},
+                {"fi","Päivittää"},
+                {"tr","Güncelleme"},
+                {"cs","Aktualizace"},
+                {"ja","更新"},
+                {"es","Actualizar"},
+                {"pt","Atualizar"},
+                {"nl","Bijwerken"},
+                {"ko","개조하다"},
+                {"ru","Обновить"}
+            }
+        },
+        {
+            "Agent Console",
+            new Dictionary<string, string>() {
+                {"de","Agent-Konsole"},
+                {"hi","एजेंट कंसोल"},
+                {"fr","Console d'agent"},
+                {"zh-cht","代理控制台"},
+                {"zh-chs","代理控制台"},
+                {"fi","Agentin konsoli"},
+                {"tr","Aracı Konsolu"},
+                {"cs","Konzole agenta"},
+                {"ja","エージェントコンソール"},
+                {"es","Consola de Agente"},
+                {"pt","Console do agente"},
+                {"nl","Agent console"},
+                {"ko","에이전트 콘솔"},
+                {"ru","Консоль агента"}
             }
         }
         };

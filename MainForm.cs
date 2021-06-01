@@ -424,7 +424,7 @@ namespace MeshAssistant
 
                 // Update image
                 pictureBoxGreen.Visible = ((mcagent.state == 3) && (helpRequested == false)); // Green
-                pictureBoxRed.Visible = false;  // Red
+                pictureBoxRed.Visible = false; // Red
                 pictureBoxYellow.Visible = (mcagent.state == 0) || (mcagent.state == 1) || (mcagent.state == 2); // Gray
                 pictureBoxQuestion.Visible = ((mcagent.state == 3) && (helpRequested == true)); // Question
                 pictureBoxUser.Visible = false;
@@ -450,7 +450,7 @@ namespace MeshAssistant
 
                 // Update image
                 pictureBoxGreen.Visible = false; // Green
-                pictureBoxRed.Visible = (mcagent.state == 0);  // Red
+                pictureBoxRed.Visible = (mcagent.state == 0); // Red
                 pictureBoxYellow.Visible = (mcagent.state == 1) || (mcagent.state == 2); // Gray
                 pictureBoxQuestion.Visible = (mcagent.state == 3); // Question
                 pictureBoxUser.Visible = false;
@@ -467,7 +467,7 @@ namespace MeshAssistant
                 if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
                 stateLabel.Text = realname;
                 pictureBoxGreen.Visible = false; // Green
-                pictureBoxRed.Visible = false;  // Red
+                pictureBoxRed.Visible = false; // Red
                 pictureBoxYellow.Visible = false; // Gray
                 pictureBoxQuestion.Visible = false; // Question
                 Image userImage = null;
@@ -488,7 +488,7 @@ namespace MeshAssistant
             {
                 stateLabel.Text = Translate.T(Properties.Resources.MultipleUsers);
                 pictureBoxGreen.Visible = false; // Green
-                pictureBoxRed.Visible = false;  // Red
+                pictureBoxRed.Visible = false; // Red
                 pictureBoxYellow.Visible = false; // Gray
                 pictureBoxQuestion.Visible = false; // Question
                 pictureBoxUsers.Visible = true;
