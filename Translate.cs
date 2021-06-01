@@ -25,11 +25,128 @@ namespace MeshAssistant
         // *** TRANSLATION TABLE START ***
         static private Dictionary<string, Dictionary<string, string>> translationTable = new Dictionary<string, Dictionary<string, string>>() {
         {
+            "Count",
+            new Dictionary<string, string>() {
+                {"ru","Считать"},
+                {"fi","Считать"},
+                {"fr","Compter"},
+                {"es","Contar"}
+            }
+        },
+        {
+            "Intel® ME State...",
+            new Dictionary<string, string>() {
+                {"ru","Состояние Intel® ME ..."},
+                {"fi","Состояние Intel® ME ..."},
+                {"fr","État Intel® ME..."},
+                {"es","Estado Intel® ME ..."}
+            }
+        },
+        {
+            "Remote Sessions...",
+            new Dictionary<string, string>() {
+                {"ru","Удаленные сеансы ..."},
+                {"fi","Удаленные сеансы ..."},
+                {"fr","Séances à distance..."},
+                {"es","Sesiones remotas ..."}
+            }
+        },
+        {
+            "Remote Sessions",
+            new Dictionary<string, string>() {
+                {"ru","Удаленные сеансы"},
+                {"fi","Удаленные сеансы"},
+                {"fr","Séances à distance"},
+                {"es","Sesiones remotas"}
+            }
+        },
+        {
             "MeshCentral Assistant",
             new Dictionary<string, string>() {
-                {"ru","MeshCentral Ассистент"},
                 {"fr","Assistant MeshCentral"},
-                {"es","Asistente MeshCentral"}
+                {"es","Asistente MeshCentral"},
+                {"ru","MeshCentral Ассистент"}
+            }
+        },
+        {
+            "&Start Agent",
+            new Dictionary<string, string>() {
+                {"ru","& Запустить агент"},
+                {"fi","& Запустить агент"},
+                {"fr","&Démarrer l'agent"},
+                {"es","& Iniciar agente"}
+            }
+        },
+        {
+            "Agent Select",
+            new Dictionary<string, string>() {
+                {"ru","Агент Выбрать"},
+                {"fi","Агент Выбрать"},
+                {"fr","Sélection d'agent"},
+                {"es","Seleccionar agente"}
+            }
+        },
+        {
+            "Agent is paused",
+            new Dictionary<string, string>() {
+                {"ru","Агент приостановлен"},
+                {"fi","Агент приостановлен"},
+                {"fr","L'agent est en pause"},
+                {"es","El agente está en pausa"}
+            }
+        },
+        {
+            "Agent is continue pending",
+            new Dictionary<string, string>() {
+                {"ru","Агент ожидает продолжения"},
+                {"fi","Агент ожидает продолжения"},
+                {"fr","L'agent est en attente de poursuite"},
+                {"es","El agente sigue pendiente"}
+            }
+        },
+        {
+            "Later",
+            new Dictionary<string, string>() {
+                {"ru","Позже"},
+                {"fi","Позже"},
+                {"fr","Plus tard"},
+                {"es","Mas tarde"}
+            }
+        },
+        {
+            "Agent is stopped pending",
+            new Dictionary<string, string>() {
+                {"ru","Агент остановлен в ожидании"},
+                {"fi","Агент остановлен в ожидании"},
+                {"fr","L'agent est arrêté en attente"},
+                {"es","El agente está detenido pendiente"}
+            }
+        },
+        {
+            "Agent is missing",
+            new Dictionary<string, string>() {
+                {"ru","Агент отсутствует"},
+                {"fi","Агент отсутствует"},
+                {"fr","L'agent est manquant"},
+                {"es","Falta el agente"}
+            }
+        },
+        {
+            "Intel® Management Engine state for this computer.",
+            new Dictionary<string, string>() {
+                {"ru","Состояние Intel® Management Engine для этого компьютера."},
+                {"fi","Состояние Intel® Management Engine для этого компьютера."},
+                {"fr","État du moteur de gestion Intel® pour cet ordinateur."},
+                {"es","Estado del motor de administración Intel® para este equipo."}
+            }
+        },
+        {
+            "Item",
+            new Dictionary<string, string>() {
+                {"ru","Пункт"},
+                {"fi","Пункт"},
+                {"fr","Article"},
+                {"es","Artículo"}
             }
         },
         {
@@ -52,6 +169,51 @@ namespace MeshAssistant
             }
         },
         {
+            "&Update Software",
+            new Dictionary<string, string>() {
+                {"ru","&Обновление программного обеспечения"},
+                {"fi","&Обновление программного обеспечения"},
+                {"fr","&Mettre à jour le logiciel"},
+                {"es","&Actualiza el software"}
+            }
+        },
+        {
+            "Agent is disconnected",
+            new Dictionary<string, string>() {
+                {"ru","Агент отключен"},
+                {"fi","Агент отключен"},
+                {"fr","L'agent est déconnecté"},
+                {"es","El agente está desconectado"}
+            }
+        },
+        {
+            "Request Help",
+            new Dictionary<string, string>() {
+                {"ru","Запросить помощь"},
+                {"fi","Запросить помощь"},
+                {"fr","Demander de l'aide"},
+                {"es","Solicitar ayuda"}
+            }
+        },
+        {
+            "Remote Sessions: {0}",
+            new Dictionary<string, string>() {
+                {"ru","Удаленные сеансы: {0}"},
+                {"fi","Удаленные сеансы: {0}"},
+                {"fr","Sessions à distance : {0}"},
+                {"es","Sesiones remotas: {0}"}
+            }
+        },
+        {
+            "Assistant Update",
+            new Dictionary<string, string>() {
+                {"ru","Ассистент Обновление"},
+                {"fi","Ассистент Обновление"},
+                {"fr","Mise à jour de l'assistant"},
+                {"es","Asistente de actualización"}
+            }
+        },
+        {
             "User",
             new Dictionary<string, string>() {
                 {"de","Benutzer"},
@@ -71,6 +233,15 @@ namespace MeshAssistant
             }
         },
         {
+            "{0} remote sessions",
+            new Dictionary<string, string>() {
+                {"ru","{0} удаленных сеансов"},
+                {"fi","{0} удаленных сеансов"},
+                {"fr","{0} sessions à distance"},
+                {"es","{0} sesiones remotas"}
+            }
+        },
+        {
             "Notify",
             new Dictionary<string, string>() {
                 {"de","Benachrichtigen"},
@@ -87,6 +258,51 @@ namespace MeshAssistant
                 {"nl","Melden"},
                 {"ko","알림"},
                 {"ru","Уведомить"}
+            }
+        },
+        {
+            "Enter help request details",
+            new Dictionary<string, string>() {
+                {"ru","Введите детали запроса на помощь"},
+                {"fi","Введите детали запроса на помощь"},
+                {"fr","Entrez les détails de la demande d'aide"},
+                {"es","Ingrese los detalles de la solicitud de ayuda"}
+            }
+        },
+        {
+            "{0} Assistant",
+            new Dictionary<string, string>() {
+                {"ru","{0} Ассистент"},
+                {"fi","{0} Ассистент"},
+                {"fr","{0} Assistante"},
+                {"es","{0} Asistente"}
+            }
+        },
+        {
+            "&Open",
+            new Dictionary<string, string>() {
+                {"ru","&Открыть"},
+                {"fi","&Открыть"},
+                {"fr","&Ouvert"},
+                {"es","&Abierto"}
+            }
+        },
+        {
+            "{0} remote sessions are active.",
+            new Dictionary<string, string>() {
+                {"ru","Активных удаленных сеансов: {0}."},
+                {"fi","Активных удаленных сеансов: {0}."},
+                {"fr","{0} sessions à distance sont actives."},
+                {"es","{0} sesiones remotas están activas."}
+            }
+        },
+        {
+            "E&xit",
+            new Dictionary<string, string>() {
+                {"ru","Выход"},
+                {"fi","Выход"},
+                {"fr","Sortir"},
+                {"es","Salida"}
             }
         },
         {
@@ -125,6 +341,23 @@ namespace MeshAssistant
                 {"nl","Gebeurtenissen"},
                 {"ko","이벤트"},
                 {"ru","События"}
+            }
+        },
+        {
+            "Versions",
+            new Dictionary<string, string>() {
+                {"ru","Версии "},
+                {"fi","Версии"},
+                {"es","Versiones"}
+            }
+        },
+        {
+            "Agent is start pending",
+            new Dictionary<string, string>() {
+                {"ru","Агент ожидает запуска"},
+                {"fi","Агент ожидает запуска"},
+                {"fr","L'agent est en attente de démarrage"},
+                {"es","El agente está pendiente de inicio"}
             }
         },
         {
@@ -180,6 +413,42 @@ namespace MeshAssistant
                 {"nl","Status"},
                 {"ko","상태"},
                 {"ru","Состояние"}
+            }
+        },
+        {
+            "Connected to server",
+            new Dictionary<string, string>() {
+                {"ru","Подключено к серверу"},
+                {"fi","Подключено к серверу"},
+                {"fr","Connecté au serveur"},
+                {"es","Conectado al servidor"}
+            }
+        },
+        {
+            "Value",
+            new Dictionary<string, string>() {
+                {"ru","Значение"},
+                {"fi","Значение"},
+                {"fr","Valeur"},
+                {"es","Valor"}
+            }
+        },
+        {
+            "List of remote sessions active on this computer.",
+            new Dictionary<string, string>() {
+                {"ru","Список удаленных сеансов, активных на этом компьютере."},
+                {"fi","Список удаленных сеансов, активных на этом компьютере."},
+                {"fr","Liste des sessions distantes actives sur cet ordinateur."},
+                {"es","Lista de sesiones remotas activas en esta computadora."}
+            }
+        },
+        {
+            "Help Requested",
+            new Dictionary<string, string>() {
+                {"ru","Запрошена помощь"},
+                {"fi","Запрошена помощь"},
+                {"fr","Aide demandée"},
+                {"es","Ayuda solicitada"}
             }
         },
         {
@@ -259,6 +528,127 @@ namespace MeshAssistant
             }
         },
         {
+            "Show Sessions...",
+            new Dictionary<string, string>() {
+                {"ru","Показать сеансы ..."},
+                {"fi","Показать сеансы ..."},
+                {"fr","Afficher les séances..."},
+                {"es","Mostrar sesiones ..."}
+            }
+        },
+        {
+            "PrivacyBarForm",
+            new Dictionary<string, string>() {
+                {"ru","Конфиденциальность"},
+                {"fi","Конфиденциальность"}
+            }
+        },
+        {
+            "Agent is pause pending",
+            new Dictionary<string, string>() {
+                {"ru","Агент ожидает приостановки"},
+                {"fi","Агент ожидает приостановки"},
+                {"fr","L'agent est en attente de pause"},
+                {"es","El agente está en pausa pendiente"}
+            }
+        },
+        {
+            "Agent not installed",
+            new Dictionary<string, string>() {
+                {"ru","Агент не установлен"},
+                {"fi","Агент не установлен"},
+                {"fr","Agent non installé"},
+                {"es","Agente no instalado"}
+            }
+        },
+        {
+            "No remote sessions",
+            new Dictionary<string, string>() {
+                {"ru","Нет удаленных сеансов"},
+                {"fi","Нет удаленных сеансов"},
+                {"fr","Pas de sessions à distance"},
+                {"es","Sin sesiones remotas"}
+            }
+        },
+        {
+            "No active remote sessions.",
+            new Dictionary<string, string>() {
+                {"ru","Нет активных удаленных сеансов."},
+                {"fi","Нет активных удаленных сеансов."},
+                {"fr","Aucune session à distance active."},
+                {"es","No hay sesiones remotas activas."}
+            }
+        },
+        {
+            "Connecting",
+            new Dictionary<string, string>() {
+                {"ru","Подключение"},
+                {"fi","Подключение"},
+                {"fr","De liaison"},
+                {"es","Conectando"}
+            }
+        },
+        {
+            "Allow",
+            new Dictionary<string, string>() {
+                {"ru","Позволять"},
+                {"fi","Позволять"},
+                {"fr","Permettre"},
+                {"es","Permitir"}
+            }
+        },
+        {
+            "Show &Events...",
+            new Dictionary<string, string>() {
+                {"ru","Показать и события ..."},
+                {"fi","Показать и события ..."},
+                {"fr","Afficher les &événements..."},
+                {"es","Espectáculos y eventos ..."}
+            }
+        },
+        {
+            "A new version of this software is available. Update now?",
+            new Dictionary<string, string>() {
+                {"ru","Доступна новая версия этого программного обеспечения. Обновить сейчас?"},
+                {"fi","Доступна новая версия этого программного обеспечения. Обновить сейчас?"},
+                {"fr","Une nouvelle version de ce logiciel est disponible. Mettez à jour maintenant?"},
+                {"es","Hay disponible una nueva versión de este software. ¿Actualizar ahora?"}
+            }
+        },
+        {
+            "Event",
+            new Dictionary<string, string>() {
+                {"ru","Мероприятие"},
+                {"fi","Мероприятие"},
+                {"fr","Événement"},
+                {"es","Evento"}
+            }
+        },
+        {
+            "Deny",
+            new Dictionary<string, string>() {
+                {"ru","Отрицать"},
+                {"fi","Отрицать"},
+                {"fr","Refuser"},
+                {"es","Negar"}
+            }
+        },
+        {
+            "1 remote session",
+            new Dictionary<string, string>() {
+                {"ru","1 удаленный сеанс"},
+                {"fi","1 удаленный сеанс"},
+                {"fr","1 séance à distance"},
+                {"es","1 sesión remota"}
+            }
+        },
+        {
+            "{0} - {1}",
+            new Dictionary<string, string>() {
+
+            }
+        },
+        {
             "Close",
             new Dictionary<string, string>() {
                 {"de","Schließen"},
@@ -308,6 +698,15 @@ namespace MeshAssistant
             }
         },
         {
+            "Direct Connect",
+            new Dictionary<string, string>() {
+                {"ru","Прямое соединение"},
+                {"fi","Прямое соединение"},
+                {"fr","Connection directe"},
+                {"es","Conexión directa"}
+            }
+        },
+        {
             "Not Activated (In)",
             new Dictionary<string, string>() {
                 {"de","Nicht aktiviert (In)"},
@@ -324,6 +723,24 @@ namespace MeshAssistant
                 {"nl","Niet geactiveerd (In)"},
                 {"ko","활성화되지 않음 (In)"},
                 {"ru","Не активированно (In)"}
+            }
+        },
+        {
+            "1 remote session is active.",
+            new Dictionary<string, string>() {
+                {"ru","Активен 1 удаленный сеанс."},
+                {"fi","Активен 1 удаленный сеанс."},
+                {"fr","1 session à distance est active."},
+                {"es","1 sesión remota está activa."}
+            }
+        },
+        {
+            "(None)",
+            new Dictionary<string, string>() {
+                {"ru","(Никто)"},
+                {"fi","(Никто)"},
+                {"fr","(Rien)"},
+                {"es","(Ninguno)"}
             }
         },
         {
@@ -383,6 +800,15 @@ namespace MeshAssistant
             }
         },
         {
+            "Multiple Users",
+            new Dictionary<string, string>() {
+                {"ru","Несколько пользователей"},
+                {"fi","Несколько пользователей"},
+                {"fr","Utilisateurs multiples"},
+                {"es","Múltiples usuarios"}
+            }
+        },
+        {
             "Terminal",
             new Dictionary<string, string>() {
                 {"hi","टर्मिनल"},
@@ -394,6 +820,24 @@ namespace MeshAssistant
                 {"ja","ターミナル"},
                 {"ko","터미널"},
                 {"ru","Терминал"}
+            }
+        },
+        {
+            "&Close",
+            new Dictionary<string, string>() {
+                {"ru","&Закрывать"},
+                {"fi","&Закрывать"},
+                {"fr","&Fermer"},
+                {"es","&Cerca"}
+            }
+        },
+        {
+            "Authenticating",
+            new Dictionary<string, string>() {
+                {"ru","Аутентификация"},
+                {"fi","Аутентификация"},
+                {"fr","Authentification"},
+                {"es","Autenticando"}
             }
         },
         {
@@ -435,6 +879,67 @@ namespace MeshAssistant
             }
         },
         {
+            "S&top Agent",
+            new Dictionary<string, string>() {
+                {"ru","S & главный агент"},
+                {"fi","S & главный агент"},
+                {"fr","Agent d'arrêt"},
+                {"es","Agente s & top"}
+            }
+        },
+        {
+            "UDP relay",
+            new Dictionary<string, string>() {
+                {"ru","UDP реле"},
+                {"fi","UDP реле"},
+                {"fr","Relais UDP"},
+                {"es","Relé UDP"}
+            }
+        },
+        {
+            "Agent is stopped",
+            new Dictionary<string, string>() {
+                {"ru","Агент остановлен"},
+                {"fi","Агент остановлен"},
+                {"fr","L'agent est arrêté"},
+                {"es","El agente está detenido"}
+            }
+        },
+        {
+            "Intel® Management Engine",
+            new Dictionary<string, string>() {
+                {"fr","Moteur de gestion Intel®"},
+                {"es","Motor de administración Intel®"}
+            }
+        },
+        {
+            "Agent Snapshot",
+            new Dictionary<string, string>() {
+                {"ru","Снимок агента"},
+                {"fi","Снимок агента"},
+                {"fr","Instantané de l'agent"},
+                {"es","Instantánea del agente"}
+            }
+        },
+        {
+            "Request Help...",
+            new Dictionary<string, string>() {
+                {"ru","Запросить помощь ..."},
+                {"fi","Запросить помощь ..."},
+                {"fr","Demander de l'aide..."},
+                {"es","Solicitar ayuda ..."}
+            }
+        },
+        {
+            "O&pen Site...",
+            new Dictionary<string, string>() {
+                {"ru","Открытие сайта ..."},
+                {"fi","Открытие сайта ..."},
+                {"fr","&Ouvrir le site..."},
+                {"es","Sitio de O & pen ..."}
+            }
+        },
+        {
             "Send",
             new Dictionary<string, string>() {
                 {"de","Senden"},
@@ -473,6 +978,24 @@ namespace MeshAssistant
             }
         },
         {
+            "Cancel Help Request",
+            new Dictionary<string, string>() {
+                {"ru","Отменить запрос помощи"},
+                {"fi","Отменить запрос помощи"},
+                {"fr","Annuler la demande d'aide"},
+                {"es","Cancelar solicitud de ayuda"}
+            }
+        },
+        {
+            "TCP relay",
+            new Dictionary<string, string>() {
+                {"ru","Реле TCP"},
+                {"fi","Реле TCP"},
+                {"fr","Relais TCP"},
+                {"es","Relé TCP"}
+            }
+        },
+        {
             "Privacy Bar",
             new Dictionary<string, string>() {
                 {"de","Datenschutzleiste"},
@@ -508,6 +1031,15 @@ namespace MeshAssistant
                 {"nl","Bijwerken"},
                 {"ko","개조하다"},
                 {"ru","Обновить"}
+            }
+        },
+        {
+            "Agent is running",
+            new Dictionary<string, string>() {
+                {"ru","Агент работает"},
+                {"fi","Агент работает"},
+                {"fr","L'agent est en cours d'exécution"},
+                {"es","El agente se está ejecutando"}
             }
         },
         {
