@@ -16,12 +16,6 @@ limitations under the License.
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MeshAssistant
@@ -35,6 +29,7 @@ namespace MeshAssistant
             this.parent = parent;
             InitializeComponent();
             Translate.TranslateControl(this);
+            Translate.TranslateListView(mainListView);
             mainListView.BeginUpdate();
             foreach (MainForm.LogEventStruct e in events)
             {

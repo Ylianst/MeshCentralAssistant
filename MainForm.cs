@@ -1110,7 +1110,7 @@ namespace MeshAssistant
 
         private void dialogContextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            requestHelpToolStripMenuItem.Enabled = (agent.State != 0);
+            requestHelpToolStripMenuItem.Enabled = ((mcagent != null) && (mcagent.state != 0)) || ((agent != null) && (agent.State != 0));
         }
 
         private void intelAMTStateToolStripMenuItem_Click(object sender, EventArgs e)
