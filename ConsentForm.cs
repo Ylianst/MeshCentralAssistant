@@ -21,7 +21,7 @@ namespace MeshAssistant
 
         public string Message { set { message = value; updateInfo(); } }
         public string UserName { set { nameLabel.Text = value; updateInfo(); } }
-        public string Title { set { this.Text = orgtitle + " - " + value; } }
+        public string Title { set { this.Text = string.Format(Properties.Resources.TitleMerge, orgtitle, value); } }
         public Image UserImage { set { if (value == null) { mainPictureBox.Image = mainPictureBox.InitialImage; } else { mainPictureBox.Image = value; } } }
 
         private void updateInfo()

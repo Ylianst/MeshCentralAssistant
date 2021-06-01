@@ -12,7 +12,6 @@ using System.Net.NetworkInformation;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Drawing;
-using System.Runtime;
 using CERTENROLLLib;
 
 namespace MeshAssistant

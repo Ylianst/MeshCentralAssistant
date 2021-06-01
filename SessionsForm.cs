@@ -65,7 +65,7 @@ namespace MeshAssistant
                 {
                     foreach (string user in parent.mcagent.DesktopSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), "Desktop", parent.mcagent.DesktopSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), Properties.Resources.Desktop, parent.mcagent.DesktopSessions[user].ToString() }));
                     }
                 }
                 if ((parent.mcagent.TerminalSessions != null) && (parent.mcagent.TerminalSessions.Count > 0))
@@ -73,28 +73,28 @@ namespace MeshAssistant
 
                     foreach (string user in parent.mcagent.TerminalSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), "Terminal", parent.mcagent.TerminalSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), Properties.Resources.Terminal, parent.mcagent.TerminalSessions[user].ToString() }));
                     }
                 }
                 if ((parent.mcagent.FilesSessions != null) && (parent.mcagent.FilesSessions.Count > 0))
                 {
                     foreach (string user in parent.mcagent.FilesSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), "Files", parent.mcagent.FilesSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), Properties.Resources.Files, parent.mcagent.FilesSessions[user].ToString() }));
                     }
                 }
                 if ((parent.mcagent.TcpSessions != null) && (parent.mcagent.TcpSessions.Count > 0))
                 {
                     foreach (string user in parent.mcagent.TcpSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), "TCP relay", parent.mcagent.TcpSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), Properties.Resources.TCPrelay, parent.mcagent.TcpSessions[user].ToString() }));
                     }
                 }
                 if ((parent.mcagent.UdpSessions != null) && (parent.mcagent.UdpSessions.Count > 0))
                 {
                     foreach (string user in parent.mcagent.UdpSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), "UDP relay", parent.mcagent.UdpSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName(user), Properties.Resources.UDPrelay, parent.mcagent.UdpSessions[user].ToString() }));
                     }
                 }
             }
@@ -104,7 +104,7 @@ namespace MeshAssistant
                 {
                     foreach (string user in parent.agent.DesktopSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), "Desktop", parent.agent.DesktopSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), Properties.Resources.Desktop, parent.agent.DesktopSessions[user].ToString() }));
                     }
                 }
                 if ((parent.agent.TerminalSessions != null) && (parent.agent.TerminalSessions.Count > 0))
@@ -112,35 +112,35 @@ namespace MeshAssistant
 
                     foreach (string user in parent.agent.TerminalSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), "Terminal", parent.agent.TerminalSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), Properties.Resources.Terminal, parent.agent.TerminalSessions[user].ToString() }));
                     }
                 }
                 if ((parent.agent.FilesSessions != null) && (parent.agent.FilesSessions.Count > 0))
                 {
                     foreach (string user in parent.agent.FilesSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), "Files", parent.agent.FilesSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), Properties.Resources.Files, parent.agent.FilesSessions[user].ToString() }));
                     }
                 }
                 if ((parent.agent.TcpSessions != null) && (parent.agent.TcpSessions.Count > 0))
                 {
                     foreach (string user in parent.agent.TcpSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), "TCP relay", parent.agent.TcpSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), Properties.Resources.TCPrelay, parent.agent.TcpSessions[user].ToString() }));
                     }
                 }
                 if ((parent.agent.UdpSessions != null) && (parent.agent.UdpSessions.Count > 0))
                 {
                     foreach (string user in parent.agent.UdpSessions.Keys)
                     {
-                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), "UDP relay", parent.agent.UdpSessions[user].ToString() }));
+                        mainListView.Items.Add(new ListViewItem(new string[3] { getUserName2(user), Properties.Resources.UDPrelay, parent.agent.UdpSessions[user].ToString() }));
                     }
                 }
             }
 
             if (mainListView.Items.Count == 0)
             {
-                mainListView.Items.Add(new ListViewItem(new string[3] { "(None)", "", "" }));
+                mainListView.Items.Add(new ListViewItem(new string[3] { Properties.Resources.PNoneP, "", "" }));
             }
         }
 

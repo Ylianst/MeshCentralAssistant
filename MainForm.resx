@@ -117,13 +117,147 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="stateLabel.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
+  </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="stateLabel.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Microsoft Sans Serif, 8.25pt</value>
+  </data>
+  <data name="stateLabel.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 11</value>
+  </data>
+  <data name="stateLabel.Size" type="System.Drawing.Size, System.Drawing">
+    <value>174, 13</value>
+  </data>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="stateLabel.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="stateLabel.Text" xml:space="preserve">
+    <value>Agent is missing</value>
+  </data>
+  <data name="stateLabel.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;stateLabel.Name" xml:space="preserve">
+    <value>stateLabel</value>
+  </data>
+  <data name="&gt;&gt;stateLabel.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;stateLabel.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;stateLabel.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
   <metadata name="mainNotifyIcon.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="mainNotifyIcon.BalloonTipText" xml:space="preserve">
+    <value>No remote sessions are active.</value>
+  </data>
+  <data name="mainNotifyIcon.BalloonTipTitle" xml:space="preserve">
+    <value>MeshCentral Assistant</value>
+  </data>
   <metadata name="mainContextMenuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>152, 17</value>
   </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="openToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="openToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Open</value>
+  </data>
+  <data name="closeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="closeToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Close</value>
+  </data>
+  <data name="closeToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="openSiteToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="openSiteToolStripMenuItem.Text" xml:space="preserve">
+    <value>O&amp;pen Site...</value>
+  </data>
+  <data name="openSiteToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="showSessionsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="showSessionsToolStripMenuItem.Text" xml:space="preserve">
+    <value>Show Sessions...</value>
+  </data>
+  <data name="showEventsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="showEventsToolStripMenuItem.Text" xml:space="preserve">
+    <value>Show &amp;Events...</value>
+  </data>
+  <data name="intelMEStateToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="intelMEStateToolStripMenuItem.Text" xml:space="preserve">
+    <value>Intel® ME State...</value>
+  </data>
+  <data name="intelMEStateToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="updateSoftwareToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="updateSoftwareToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Update Software</value>
+  </data>
+  <data name="updateSoftwareToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="agentSelectToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="agentSelectToolStripMenuItem.Text" xml:space="preserve">
+    <value>Agent Select</value>
+  </data>
+  <data name="toolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 6</value>
+  </data>
+  <data name="startAgentToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="startAgentToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Start Agent</value>
+  </data>
+  <data name="stopAgentToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="stopAgentToolStripMenuItem.Text" xml:space="preserve">
+    <value>S&amp;top Agent</value>
+  </data>
+  <data name="toolStripMenuItem2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 6</value>
+  </data>
+  <data name="exitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="exitToolStripMenuItem.Text" xml:space="preserve">
+    <value>E&amp;xit</value>
+  </data>
+  <data name="mainContextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>167, 258</value>
+  </data>
+  <data name="&gt;&gt;mainContextMenuStrip.Name" xml:space="preserve">
+    <value>mainContextMenuStrip</value>
+  </data>
+  <data name="&gt;&gt;mainContextMenuStrip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="mainNotifyIcon.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAA0AMDAQAAEABABoBgAA1gAAACAgEAABAAQA6AIAAD4HAAAYGBAAAQAEAOgBAAAmCgAAEBAQAAEA
@@ -1818,12 +1952,300 @@
         AADAPwAAwD8AAMA/AADAPwAA
 </value>
   </data>
+  <data name="mainNotifyIcon.Text" xml:space="preserve">
+    <value>MeshCentral Assistant</value>
+  </data>
+  <data name="mainNotifyIcon.Visible" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
   <metadata name="connectionTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>330, 17</value>
   </metadata>
+  <data name="requestHelpButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Bottom, Left, Right</value>
+  </data>
+  <data name="requestHelpButton.Enabled" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="requestHelpButton.Location" type="System.Drawing.Point, System.Drawing">
+    <value>14, 182</value>
+  </data>
+  <data name="requestHelpButton.Size" type="System.Drawing.Size, System.Drawing">
+    <value>174, 31</value>
+  </data>
+  <data name="requestHelpButton.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="requestHelpButton.Text" xml:space="preserve">
+    <value>Request Help</value>
+  </data>
+  <data name="&gt;&gt;requestHelpButton.Name" xml:space="preserve">
+    <value>requestHelpButton</value>
+  </data>
+  <data name="&gt;&gt;requestHelpButton.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;requestHelpButton.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;requestHelpButton.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="remoteSessionsLabel.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
+  </data>
+  <data name="remoteSessionsLabel.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Microsoft Sans Serif, 8.25pt</value>
+  </data>
+  <data name="remoteSessionsLabel.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 162</value>
+  </data>
+  <data name="remoteSessionsLabel.Size" type="System.Drawing.Size, System.Drawing">
+    <value>174, 13</value>
+  </data>
+  <data name="remoteSessionsLabel.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="remoteSessionsLabel.Text" xml:space="preserve">
+    <value>No remote sessions</value>
+  </data>
+  <data name="remoteSessionsLabel.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;remoteSessionsLabel.Name" xml:space="preserve">
+    <value>remoteSessionsLabel</value>
+  </data>
+  <data name="&gt;&gt;remoteSessionsLabel.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;remoteSessionsLabel.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;remoteSessionsLabel.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
   <metadata name="dialogContextMenuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>473, 17</value>
   </metadata>
+  <data name="requestHelpToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>183, 22</value>
+  </data>
+  <data name="requestHelpToolStripMenuItem.Text" xml:space="preserve">
+    <value>Request Help...</value>
+  </data>
+  <data name="cancelHelpRequestToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>183, 22</value>
+  </data>
+  <data name="cancelHelpRequestToolStripMenuItem.Text" xml:space="preserve">
+    <value>Cancel Help Request</value>
+  </data>
+  <data name="toolStripMenuItem3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>180, 6</value>
+  </data>
+  <data name="showSessionsToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>183, 22</value>
+  </data>
+  <data name="showSessionsToolStripMenuItem1.Text" xml:space="preserve">
+    <value>Remote Sessions...</value>
+  </data>
+  <data name="intelAMTStateToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>183, 22</value>
+  </data>
+  <data name="intelAMTStateToolStripMenuItem.Text" xml:space="preserve">
+    <value>Intel® ME State...</value>
+  </data>
+  <data name="intelAMTStateToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="dialogContextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
+    <value>184, 98</value>
+  </data>
+  <data name="&gt;&gt;dialogContextMenuStrip.Name" xml:space="preserve">
+    <value>dialogContextMenuStrip</value>
+  </data>
+  <data name="&gt;&gt;dialogContextMenuStrip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="pictureBoxUser.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 23</value>
+  </data>
+  <data name="pictureBoxUser.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 136</value>
+  </data>
+  <data name="pictureBoxUser.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
+    <value>AutoSize</value>
+  </data>
+  <data name="pictureBoxUser.TabIndex" type="System.Int32, mscorlib">
+    <value>12</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxUser.Name" xml:space="preserve">
+    <value>pictureBoxUser</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxUser.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxUser.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxUser.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="pictureBoxRed.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 23</value>
+  </data>
+  <data name="pictureBoxRed.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 136</value>
+  </data>
+  <data name="pictureBoxRed.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
+    <value>AutoSize</value>
+  </data>
+  <data name="pictureBoxRed.TabIndex" type="System.Int32, mscorlib">
+    <value>8</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxRed.Name" xml:space="preserve">
+    <value>pictureBoxRed</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxRed.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxRed.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxRed.ZOrder" xml:space="preserve">
+    <value>7</value>
+  </data>
+  <data name="pictureBoxQuestion.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 23</value>
+  </data>
+  <data name="pictureBoxQuestion.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 136</value>
+  </data>
+  <data name="pictureBoxQuestion.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
+    <value>AutoSize</value>
+  </data>
+  <data name="pictureBoxQuestion.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="pictureBoxQuestion.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxQuestion.Name" xml:space="preserve">
+    <value>pictureBoxQuestion</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxQuestion.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxQuestion.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxQuestion.ZOrder" xml:space="preserve">
+    <value>8</value>
+  </data>
+  <data name="pictureBoxGreen.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 23</value>
+  </data>
+  <data name="pictureBoxGreen.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 136</value>
+  </data>
+  <data name="pictureBoxGreen.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
+    <value>AutoSize</value>
+  </data>
+  <data name="pictureBoxGreen.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxGreen.Name" xml:space="preserve">
+    <value>pictureBoxGreen</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxGreen.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxGreen.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxGreen.ZOrder" xml:space="preserve">
+    <value>9</value>
+  </data>
+  <data name="pictureBoxYellow.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 23</value>
+  </data>
+  <data name="pictureBoxYellow.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 136</value>
+  </data>
+  <data name="pictureBoxYellow.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
+    <value>AutoSize</value>
+  </data>
+  <data name="pictureBoxYellow.TabIndex" type="System.Int32, mscorlib">
+    <value>9</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxYellow.Name" xml:space="preserve">
+    <value>pictureBoxYellow</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxYellow.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxYellow.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxYellow.ZOrder" xml:space="preserve">
+    <value>10</value>
+  </data>
+  <data name="pictureBoxCustom.Location" type="System.Drawing.Point, System.Drawing">
+    <value>36, 28</value>
+  </data>
+  <data name="pictureBoxCustom.Size" type="System.Drawing.Size, System.Drawing">
+    <value>130, 130</value>
+  </data>
+  <data name="pictureBoxCustom.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
+    <value>Zoom</value>
+  </data>
+  <data name="pictureBoxCustom.TabIndex" type="System.Int32, mscorlib">
+    <value>13</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxCustom.Name" xml:space="preserve">
+    <value>pictureBoxCustom</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxCustom.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxCustom.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxCustom.ZOrder" xml:space="preserve">
+    <value>11</value>
+  </data>
+  <data name="pictureBoxUsers.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 23</value>
+  </data>
+  <data name="pictureBoxUsers.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 136</value>
+  </data>
+  <data name="pictureBoxUsers.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
+    <value>AutoSize</value>
+  </data>
+  <data name="pictureBoxUsers.TabIndex" type="System.Int32, mscorlib">
+    <value>14</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxUsers.Name" xml:space="preserve">
+    <value>pictureBoxUsers</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxUsers.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxUsers.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;pictureBoxUsers.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
+    <value>6, 13</value>
+  </data>
+  <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
+    <value>200, 225</value>
+  </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAA0AMDAQAAEABABoBgAA1gAAACAgEAABAAQA6AIAAD4HAAAYGBAAAQAEAOgBAAAmCgAAEBAQAAEA
@@ -3517,5 +3939,134 @@
         AAAAAAAAAAAAAAAAAADAAQAAwAEAAMABAADAAQAAwAEAAMAzAADAMwAAwAMAAMADAADAPwAAwD8AAMA/
         AADAPwAAwD8AAMA/AADAPwAA
 </value>
+  </data>
+  <data name="$this.Text" xml:space="preserve">
+    <value>MeshCentral Assistant</value>
+  </data>
+  <data name="&gt;&gt;mainNotifyIcon.Name" xml:space="preserve">
+    <value>mainNotifyIcon</value>
+  </data>
+  <data name="&gt;&gt;mainNotifyIcon.Type" xml:space="preserve">
+    <value>System.Windows.Forms.NotifyIcon, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;openToolStripMenuItem.Name" xml:space="preserve">
+    <value>openToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;openToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;closeToolStripMenuItem.Name" xml:space="preserve">
+    <value>closeToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;closeToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;openSiteToolStripMenuItem.Name" xml:space="preserve">
+    <value>openSiteToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;openSiteToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;showSessionsToolStripMenuItem.Name" xml:space="preserve">
+    <value>showSessionsToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;showSessionsToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;showEventsToolStripMenuItem.Name" xml:space="preserve">
+    <value>showEventsToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;showEventsToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;intelMEStateToolStripMenuItem.Name" xml:space="preserve">
+    <value>intelMEStateToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;intelMEStateToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;updateSoftwareToolStripMenuItem.Name" xml:space="preserve">
+    <value>updateSoftwareToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;updateSoftwareToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;agentSelectToolStripMenuItem.Name" xml:space="preserve">
+    <value>agentSelectToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;agentSelectToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripMenuItem1.Name" xml:space="preserve">
+    <value>toolStripMenuItem1</value>
+  </data>
+  <data name="&gt;&gt;toolStripMenuItem1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;startAgentToolStripMenuItem.Name" xml:space="preserve">
+    <value>startAgentToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;startAgentToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;stopAgentToolStripMenuItem.Name" xml:space="preserve">
+    <value>stopAgentToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;stopAgentToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripMenuItem2.Name" xml:space="preserve">
+    <value>toolStripMenuItem2</value>
+  </data>
+  <data name="&gt;&gt;toolStripMenuItem2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;exitToolStripMenuItem.Name" xml:space="preserve">
+    <value>exitToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;exitToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;connectionTimer.Name" xml:space="preserve">
+    <value>connectionTimer</value>
+  </data>
+  <data name="&gt;&gt;connectionTimer.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Timer, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;requestHelpToolStripMenuItem.Name" xml:space="preserve">
+    <value>requestHelpToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;requestHelpToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cancelHelpRequestToolStripMenuItem.Name" xml:space="preserve">
+    <value>cancelHelpRequestToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;cancelHelpRequestToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;toolStripMenuItem3.Name" xml:space="preserve">
+    <value>toolStripMenuItem3</value>
+  </data>
+  <data name="&gt;&gt;toolStripMenuItem3.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;showSessionsToolStripMenuItem1.Name" xml:space="preserve">
+    <value>showSessionsToolStripMenuItem1</value>
+  </data>
+  <data name="&gt;&gt;showSessionsToolStripMenuItem1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;intelAMTStateToolStripMenuItem.Name" xml:space="preserve">
+    <value>intelAMTStateToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;intelAMTStateToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;$this.Name" xml:space="preserve">
+    <value>MainForm</value>
+  </data>
+  <data name="&gt;&gt;$this.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Form, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

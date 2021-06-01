@@ -142,4 +142,133 @@
   <data name="redx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\images\redx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Activated" xml:space="preserve">
+    <value>Activated</value>
+  </data>
+  <data name="AgentIsContinuePending" xml:space="preserve">
+    <value>Agent is continue pending</value>
+  </data>
+  <data name="AgentIsDisconnected" xml:space="preserve">
+    <value>Agent is disconnected</value>
+  </data>
+  <data name="AgentIsPaused" xml:space="preserve">
+    <value>Agent is paused</value>
+  </data>
+  <data name="AgentIsPausePending" xml:space="preserve">
+    <value>Agent is pause pending</value>
+  </data>
+  <data name="AgentIsRunning" xml:space="preserve">
+    <value>Agent is running</value>
+  </data>
+  <data name="AgentIsStartPending" xml:space="preserve">
+    <value>Agent is start pending</value>
+  </data>
+  <data name="AgentIsStopped" xml:space="preserve">
+    <value>Agent is stopped</value>
+  </data>
+  <data name="AgentIsStoppedPending" xml:space="preserve">
+    <value>Agent is stopped pending</value>
+  </data>
+  <data name="AgentNotInstalled" xml:space="preserve">
+    <value>Agent not installed</value>
+  </data>
+  <data name="Authenticating" xml:space="preserve">
+    <value>Authenticating</value>
+  </data>
+  <data name="CancelHelpRequest" xml:space="preserve">
+    <value>Cancel Help Request</value>
+  </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="ConnectedToServer" xml:space="preserve">
+    <value>Connected to server</value>
+  </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Connecting</value>
+  </data>
+  <data name="Desktop" xml:space="preserve">
+    <value>Desktop</value>
+  </data>
+  <data name="DirectConnect" xml:space="preserve">
+    <value>Direct Connect</value>
+  </data>
+  <data name="Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Disconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="Enabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="Files" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="HelpRequested" xml:space="preserve">
+    <value>Help Requested</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="MeshCentralAssistant" xml:space="preserve">
+    <value>MeshCentral Assistant</value>
+  </data>
+  <data name="MultipleUsers" xml:space="preserve">
+    <value>Multiple Users</value>
+  </data>
+  <data name="NoActiveRemoteSessions" xml:space="preserve">
+    <value>No active remote sessions.</value>
+  </data>
+  <data name="NoRemoteSessions" xml:space="preserve">
+    <value>No remote sessions</value>
+  </data>
+  <data name="NotActivatedIn" xml:space="preserve">
+    <value>Not Activated (In)</value>
+  </data>
+  <data name="NotActivatedPre" xml:space="preserve">
+    <value>Not Activated (Pre)</value>
+  </data>
+  <data name="OneRemoteSession" xml:space="preserve">
+    <value>1 remote session</value>
+  </data>
+  <data name="OneRemoteSessionIsActive" xml:space="preserve">
+    <value>1 remote session is active.</value>
+  </data>
+  <data name="PNoneP" xml:space="preserve">
+    <value>(None)</value>
+  </data>
+  <data name="RemoteSessionsX" xml:space="preserve">
+    <value>Remote Sessions: {0}</value>
+  </data>
+  <data name="RequestHelp" xml:space="preserve">
+    <value>Request Help</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="TCPrelay" xml:space="preserve">
+    <value>TCP relay</value>
+  </data>
+  <data name="Terminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="TitleMerge" xml:space="preserve">
+    <value>{0} - {1}</value>
+  </data>
+  <data name="UDPrelay" xml:space="preserve">
+    <value>UDP relay</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="XAssistant" xml:space="preserve">
+    <value>{0} Assistant</value>
+  </data>
+  <data name="XRemoteSessions" xml:space="preserve">
+    <value>{0} remote sessions</value>
+  </data>
+  <data name="XRemoteSessionsAreActive" xml:space="preserve">
+    <value>{0} remote sessions are active.</value>
+  </data>
 </root>

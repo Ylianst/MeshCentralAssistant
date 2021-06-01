@@ -37,27 +37,17 @@
             // 
             // mainTextBox
             // 
-            this.mainTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            resources.ApplyResources(this.mainTextBox, "mainTextBox");
             this.mainTextBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
             this.mainTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.mainTextBox.ForeColor = System.Drawing.Color.White;
-            this.mainTextBox.Location = new System.Drawing.Point(12, 12);
-            this.mainTextBox.Multiline = true;
             this.mainTextBox.Name = "mainTextBox";
             this.mainTextBox.ReadOnly = true;
-            this.mainTextBox.Size = new System.Drawing.Size(385, 202);
-            this.mainTextBox.TabIndex = 0;
             // 
             // closeButton
             // 
-            this.closeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.closeButton.Location = new System.Drawing.Point(322, 220);
+            resources.ApplyResources(this.closeButton, "closeButton");
             this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(75, 23);
-            this.closeButton.TabIndex = 1;
-            this.closeButton.Text = "Close";
             this.closeButton.UseVisualStyleBackColor = true;
             this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
             // 
@@ -69,17 +59,14 @@
             // 
             // SnapShotForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
-            this.ClientSize = new System.Drawing.Size(409, 255);
             this.Controls.Add(this.closeButton);
             this.Controls.Add(this.mainTextBox);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SnapShotForm";
-            this.Text = "Agent Snapshot";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SnapShotForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();

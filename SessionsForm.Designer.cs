@@ -39,32 +39,20 @@
             // 
             // label1
             // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            resources.ApplyResources(this.label1, "label1");
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(386, 18);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "List of remote sessions active on this computer.";
             // 
             // closeButton
             // 
-            this.closeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.closeButton.Location = new System.Drawing.Point(323, 221);
+            resources.ApplyResources(this.closeButton, "closeButton");
             this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(75, 23);
-            this.closeButton.TabIndex = 6;
-            this.closeButton.Text = "Close";
             this.closeButton.UseVisualStyleBackColor = true;
             this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
             // 
             // mainListView
             // 
-            this.mainListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            resources.ApplyResources(this.mainListView, "mainListView");
             this.mainListView.BackColor = System.Drawing.Color.AliceBlue;
             this.mainListView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.mainListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -74,43 +62,35 @@
             this.mainListView.ForeColor = System.Drawing.Color.Black;
             this.mainListView.FullRowSelect = true;
             this.mainListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.mainListView.Location = new System.Drawing.Point(12, 30);
             this.mainListView.Name = "mainListView";
-            this.mainListView.Size = new System.Drawing.Size(386, 185);
             this.mainListView.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.mainListView.TabIndex = 7;
             this.mainListView.UseCompatibleStateImageBehavior = false;
             this.mainListView.View = System.Windows.Forms.View.Details;
             // 
             // columnHeader1
             // 
-            this.columnHeader1.Text = "User";
-            this.columnHeader1.Width = 200;
+            resources.ApplyResources(this.columnHeader1, "columnHeader1");
             // 
             // columnHeader2
             // 
-            this.columnHeader2.Text = "Type";
-            this.columnHeader2.Width = 100;
+            resources.ApplyResources(this.columnHeader2, "columnHeader2");
             // 
             // columnHeader3
             // 
-            this.columnHeader3.Text = "Count";
+            resources.ApplyResources(this.columnHeader3, "columnHeader3");
             // 
             // SessionsForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
-            this.ClientSize = new System.Drawing.Size(410, 256);
             this.Controls.Add(this.mainListView);
             this.Controls.Add(this.closeButton);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SessionsForm";
-            this.Text = "Remote Sessions";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SessionsForm_FormClosing);
             this.ResumeLayout(false);
 

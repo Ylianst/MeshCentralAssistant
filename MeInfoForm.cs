@@ -12,8 +12,8 @@ namespace MeshAssistant
         {
             this.parent = parent;
             InitializeComponent();
-            stateListView.Items.Add(new ListViewItem("Loading..."));
-            versionsListView.Items.Add(new ListViewItem("Loading..."));
+            stateListView.Items.Add(new ListViewItem(Properties.Resources.Loading));
+            versionsListView.Items.Add(new ListViewItem(Properties.Resources.Loading));
             parent.agent.RequestIntelAmtState();
         }
 
@@ -46,17 +46,17 @@ namespace MeshAssistant
             if (state.ContainsKey("Flags")) { flags = (int)state["Flags"]; }
             if (state.ContainsKey("ProvisioningMode")) { ProvisioningMode = (int)state["ProvisioningMode"]; }
             if (state.ContainsKey("ProvisioningState")) { ProvisioningState = (int)state["ProvisioningState"]; }
-            string stateStr = "Unknown";
-            if (ProvisioningState == 0) { stateStr = "Not Activated (Pre)"; }
-            else if (ProvisioningState == 1) { stateStr = "Not Activated (In)"; }
+            string stateStr = Properties.Resources.Unknown;
+            if (ProvisioningState == 0) { stateStr = Properties.Resources.NotActivatedPre; }
+            else if (ProvisioningState == 1) { stateStr = Properties.Resources.NotActivatedIn; }
             else if (ProvisioningState == 2) {
-                stateStr = "Activated";
+                stateStr = Properties.Resources.Activated;
                 if (flags >= 0) {
                     if ((flags & 2) != 0) { stateStr += ", CCM"; }
                     if ((flags & 4) != 0) { stateStr += ", ACM"; }
                 }
             }
-            stateListView.Items.Add(new ListViewItem(new string[] { "State", stateStr }));
+            stateListView.Items.Add(new ListViewItem(new string[] { Properties.Resources.State, stateStr }));
 
             if (state.ContainsKey("UUID")) { stateListView.Items.Add(new ListViewItem(new string[] { "UUID", state["UUID"].ToString() })); }
 
@@ -66,12 +66,12 @@ namespace MeshAssistant
                 if (net.ContainsKey("enabled"))
                 {
                     int enabled = (int)net["enabled"];
-                    stateListView.Items.Add(new ListViewItem(new string[] { "net0", ((enabled != 0)?"Enabled":"Disabled") }));
+                    stateListView.Items.Add(new ListViewItem(new string[] { "net0", ((enabled != 0)?Properties.Resources.Enabled:Properties.Resources.Disabled) }));
                 }
                 if (net.ContainsKey("dhcpEnabled"))
                 {
                     int dhcpEnabled = (int)net["dhcpEnabled"];
-                    string x = ((dhcpEnabled != 0) ? "Enabled" : "Disabled");
+                    string x = ((dhcpEnabled != 0) ? Properties.Resources.Enabled : Properties.Resources.Disabled);
                     if (net.ContainsKey("dhcpMode")) { x += ", " + (string)net["dhcpMode"]; }
                     stateListView.Items.Add(new ListViewItem(new string[] { "  DHCP", x }));
                 }

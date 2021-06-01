@@ -37,6 +37,7 @@
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openSiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showEventsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.intelMEStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateSoftwareToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.agentSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,7 +62,6 @@
             this.pictureBoxYellow = new System.Windows.Forms.PictureBox();
             this.pictureBoxCustom = new System.Windows.Forms.PictureBox();
             this.pictureBoxUsers = new System.Windows.Forms.PictureBox();
-            this.showEventsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainContextMenuStrip.SuspendLayout();
             this.dialogContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUser)).BeginInit();
@@ -75,26 +75,15 @@
             // 
             // stateLabel
             // 
-            this.stateLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.stateLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            resources.ApplyResources(this.stateLabel, "stateLabel");
             this.stateLabel.ForeColor = System.Drawing.Color.White;
-            this.stateLabel.Location = new System.Drawing.Point(12, 11);
             this.stateLabel.Name = "stateLabel";
-            this.stateLabel.Size = new System.Drawing.Size(174, 13);
-            this.stateLabel.TabIndex = 4;
-            this.stateLabel.Text = "Agent is missing";
-            this.stateLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // mainNotifyIcon
             // 
             this.mainNotifyIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
-            this.mainNotifyIcon.BalloonTipText = "No remote sessions are active.";
-            this.mainNotifyIcon.BalloonTipTitle = "MeshCentral Assistant";
+            resources.ApplyResources(this.mainNotifyIcon, "mainNotifyIcon");
             this.mainNotifyIcon.ContextMenuStrip = this.mainContextMenuStrip;
-            this.mainNotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("mainNotifyIcon.Icon")));
-            this.mainNotifyIcon.Text = "MeshCentral Assistant";
-            this.mainNotifyIcon.Visible = true;
             this.mainNotifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mainNotifyIcon_MouseClick);
             // 
             // mainContextMenuStrip
@@ -114,89 +103,81 @@
             this.toolStripMenuItem2,
             this.exitToolStripMenuItem});
             this.mainContextMenuStrip.Name = "mainContextMenuStrip";
-            this.mainContextMenuStrip.Size = new System.Drawing.Size(167, 280);
+            resources.ApplyResources(this.mainContextMenuStrip, "mainContextMenuStrip");
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.openToolStripMenuItem.Text = "&Open";
+            resources.ApplyResources(this.openToolStripMenuItem, "openToolStripMenuItem");
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.closeToolStripMenuItem.Text = "&Close";
-            this.closeToolStripMenuItem.Visible = false;
+            resources.ApplyResources(this.closeToolStripMenuItem, "closeToolStripMenuItem");
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // openSiteToolStripMenuItem
             // 
             this.openSiteToolStripMenuItem.Name = "openSiteToolStripMenuItem";
-            this.openSiteToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.openSiteToolStripMenuItem.Text = "O&pen Site...";
-            this.openSiteToolStripMenuItem.Visible = false;
+            resources.ApplyResources(this.openSiteToolStripMenuItem, "openSiteToolStripMenuItem");
             this.openSiteToolStripMenuItem.Click += new System.EventHandler(this.openSiteToolStripMenuItem_Click);
             // 
             // showSessionsToolStripMenuItem
             // 
             this.showSessionsToolStripMenuItem.Name = "showSessionsToolStripMenuItem";
-            this.showSessionsToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.showSessionsToolStripMenuItem.Text = "Show Sessions...";
+            resources.ApplyResources(this.showSessionsToolStripMenuItem, "showSessionsToolStripMenuItem");
             this.showSessionsToolStripMenuItem.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
+            // 
+            // showEventsToolStripMenuItem
+            // 
+            this.showEventsToolStripMenuItem.Name = "showEventsToolStripMenuItem";
+            resources.ApplyResources(this.showEventsToolStripMenuItem, "showEventsToolStripMenuItem");
+            this.showEventsToolStripMenuItem.Click += new System.EventHandler(this.showEventsToolStripMenuItem_Click);
             // 
             // intelMEStateToolStripMenuItem
             // 
             this.intelMEStateToolStripMenuItem.Name = "intelMEStateToolStripMenuItem";
-            this.intelMEStateToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.intelMEStateToolStripMenuItem.Text = "Intel® ME State...";
-            this.intelMEStateToolStripMenuItem.Visible = false;
+            resources.ApplyResources(this.intelMEStateToolStripMenuItem, "intelMEStateToolStripMenuItem");
             this.intelMEStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
             // 
             // updateSoftwareToolStripMenuItem
             // 
             this.updateSoftwareToolStripMenuItem.Name = "updateSoftwareToolStripMenuItem";
-            this.updateSoftwareToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.updateSoftwareToolStripMenuItem.Text = "&Update Software";
-            this.updateSoftwareToolStripMenuItem.Visible = false;
+            resources.ApplyResources(this.updateSoftwareToolStripMenuItem, "updateSoftwareToolStripMenuItem");
             this.updateSoftwareToolStripMenuItem.Click += new System.EventHandler(this.updateSoftwareToolStripMenuItem_Click);
             // 
             // agentSelectToolStripMenuItem
             // 
             this.agentSelectToolStripMenuItem.Name = "agentSelectToolStripMenuItem";
-            this.agentSelectToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.agentSelectToolStripMenuItem.Text = "Agent Select";
+            resources.ApplyResources(this.agentSelectToolStripMenuItem, "agentSelectToolStripMenuItem");
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(163, 6);
+            resources.ApplyResources(this.toolStripMenuItem1, "toolStripMenuItem1");
             // 
             // startAgentToolStripMenuItem
             // 
             this.startAgentToolStripMenuItem.Name = "startAgentToolStripMenuItem";
-            this.startAgentToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.startAgentToolStripMenuItem.Text = "&Start Agent";
+            resources.ApplyResources(this.startAgentToolStripMenuItem, "startAgentToolStripMenuItem");
             this.startAgentToolStripMenuItem.Click += new System.EventHandler(this.startAgentToolStripMenuItem_Click);
             // 
             // stopAgentToolStripMenuItem
             // 
             this.stopAgentToolStripMenuItem.Name = "stopAgentToolStripMenuItem";
-            this.stopAgentToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.stopAgentToolStripMenuItem.Text = "S&top Agent";
+            resources.ApplyResources(this.stopAgentToolStripMenuItem, "stopAgentToolStripMenuItem");
             this.stopAgentToolStripMenuItem.Click += new System.EventHandler(this.stopAgentToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(163, 6);
+            resources.ApplyResources(this.toolStripMenuItem2, "toolStripMenuItem2");
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.exitToolStripMenuItem.Text = "E&xit";
+            resources.ApplyResources(this.exitToolStripMenuItem, "exitToolStripMenuItem");
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // connectionTimer
@@ -207,31 +188,18 @@
             // 
             // requestHelpButton
             // 
-            this.requestHelpButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.requestHelpButton.Enabled = false;
-            this.requestHelpButton.Location = new System.Drawing.Point(14, 182);
+            resources.ApplyResources(this.requestHelpButton, "requestHelpButton");
             this.requestHelpButton.Name = "requestHelpButton";
-            this.requestHelpButton.Size = new System.Drawing.Size(174, 31);
-            this.requestHelpButton.TabIndex = 6;
-            this.requestHelpButton.Text = "Request Help";
             this.requestHelpButton.UseVisualStyleBackColor = true;
             this.requestHelpButton.Click += new System.EventHandler(this.requestHelpButton_Click);
             this.requestHelpButton.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             // 
             // remoteSessionsLabel
             // 
-            this.remoteSessionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            resources.ApplyResources(this.remoteSessionsLabel, "remoteSessionsLabel");
             this.remoteSessionsLabel.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.remoteSessionsLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.remoteSessionsLabel.ForeColor = System.Drawing.Color.White;
-            this.remoteSessionsLabel.Location = new System.Drawing.Point(12, 162);
             this.remoteSessionsLabel.Name = "remoteSessionsLabel";
-            this.remoteSessionsLabel.Size = new System.Drawing.Size(174, 13);
-            this.remoteSessionsLabel.TabIndex = 11;
-            this.remoteSessionsLabel.Text = "No remote sessions";
-            this.remoteSessionsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.remoteSessionsLabel.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
             // 
             // dialogContextMenuStrip
@@ -243,133 +211,98 @@
             this.showSessionsToolStripMenuItem1,
             this.intelAMTStateToolStripMenuItem});
             this.dialogContextMenuStrip.Name = "dialogContextMenuStrip";
-            this.dialogContextMenuStrip.Size = new System.Drawing.Size(184, 98);
+            resources.ApplyResources(this.dialogContextMenuStrip, "dialogContextMenuStrip");
             this.dialogContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.dialogContextMenuStrip_Opening);
             // 
             // requestHelpToolStripMenuItem
             // 
             this.requestHelpToolStripMenuItem.Name = "requestHelpToolStripMenuItem";
-            this.requestHelpToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
-            this.requestHelpToolStripMenuItem.Text = "Request Help...";
+            resources.ApplyResources(this.requestHelpToolStripMenuItem, "requestHelpToolStripMenuItem");
             this.requestHelpToolStripMenuItem.Click += new System.EventHandler(this.requestHelpButton_Click);
             // 
             // cancelHelpRequestToolStripMenuItem
             // 
             this.cancelHelpRequestToolStripMenuItem.Name = "cancelHelpRequestToolStripMenuItem";
-            this.cancelHelpRequestToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
-            this.cancelHelpRequestToolStripMenuItem.Text = "Cancel Help Request";
+            resources.ApplyResources(this.cancelHelpRequestToolStripMenuItem, "cancelHelpRequestToolStripMenuItem");
             this.cancelHelpRequestToolStripMenuItem.Click += new System.EventHandler(this.requestHelpButton_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(180, 6);
+            resources.ApplyResources(this.toolStripMenuItem3, "toolStripMenuItem3");
             // 
             // showSessionsToolStripMenuItem1
             // 
             this.showSessionsToolStripMenuItem1.Name = "showSessionsToolStripMenuItem1";
-            this.showSessionsToolStripMenuItem1.Size = new System.Drawing.Size(183, 22);
-            this.showSessionsToolStripMenuItem1.Text = "Remote Sessions...";
+            resources.ApplyResources(this.showSessionsToolStripMenuItem1, "showSessionsToolStripMenuItem1");
             this.showSessionsToolStripMenuItem1.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
             // 
             // intelAMTStateToolStripMenuItem
             // 
             this.intelAMTStateToolStripMenuItem.Name = "intelAMTStateToolStripMenuItem";
-            this.intelAMTStateToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
-            this.intelAMTStateToolStripMenuItem.Text = "Intel® ME State...";
-            this.intelAMTStateToolStripMenuItem.Visible = false;
+            resources.ApplyResources(this.intelAMTStateToolStripMenuItem, "intelAMTStateToolStripMenuItem");
             this.intelAMTStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
             // 
             // pictureBoxUser
             // 
             this.pictureBoxUser.ContextMenuStrip = this.dialogContextMenuStrip;
             this.pictureBoxUser.Image = global::MeshAssistant.Properties.Resources.user;
-            this.pictureBoxUser.Location = new System.Drawing.Point(12, 23);
+            resources.ApplyResources(this.pictureBoxUser, "pictureBoxUser");
             this.pictureBoxUser.Name = "pictureBoxUser";
-            this.pictureBoxUser.Size = new System.Drawing.Size(178, 136);
-            this.pictureBoxUser.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBoxUser.TabIndex = 12;
             this.pictureBoxUser.TabStop = false;
             // 
             // pictureBoxRed
             // 
             this.pictureBoxRed.ContextMenuStrip = this.dialogContextMenuStrip;
             this.pictureBoxRed.Image = global::MeshAssistant.Properties.Resources.MeshIconRed2;
-            this.pictureBoxRed.Location = new System.Drawing.Point(12, 23);
+            resources.ApplyResources(this.pictureBoxRed, "pictureBoxRed");
             this.pictureBoxRed.Name = "pictureBoxRed";
-            this.pictureBoxRed.Size = new System.Drawing.Size(178, 136);
-            this.pictureBoxRed.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBoxRed.TabIndex = 8;
             this.pictureBoxRed.TabStop = false;
             // 
             // pictureBoxQuestion
             // 
             this.pictureBoxQuestion.ContextMenuStrip = this.dialogContextMenuStrip;
             this.pictureBoxQuestion.Image = global::MeshAssistant.Properties.Resources.MeshIconHelp2;
-            this.pictureBoxQuestion.Location = new System.Drawing.Point(12, 23);
+            resources.ApplyResources(this.pictureBoxQuestion, "pictureBoxQuestion");
             this.pictureBoxQuestion.Name = "pictureBoxQuestion";
-            this.pictureBoxQuestion.Size = new System.Drawing.Size(178, 136);
-            this.pictureBoxQuestion.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBoxQuestion.TabIndex = 10;
             this.pictureBoxQuestion.TabStop = false;
-            this.pictureBoxQuestion.Visible = false;
             // 
             // pictureBoxGreen
             // 
             this.pictureBoxGreen.ContextMenuStrip = this.dialogContextMenuStrip;
             this.pictureBoxGreen.Image = global::MeshAssistant.Properties.Resources.MeshIconGreen2;
-            this.pictureBoxGreen.Location = new System.Drawing.Point(12, 23);
+            resources.ApplyResources(this.pictureBoxGreen, "pictureBoxGreen");
             this.pictureBoxGreen.Name = "pictureBoxGreen";
-            this.pictureBoxGreen.Size = new System.Drawing.Size(178, 136);
-            this.pictureBoxGreen.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBoxGreen.TabIndex = 7;
             this.pictureBoxGreen.TabStop = false;
             // 
             // pictureBoxYellow
             // 
             this.pictureBoxYellow.ContextMenuStrip = this.dialogContextMenuStrip;
             this.pictureBoxYellow.Image = global::MeshAssistant.Properties.Resources.MeshIconGray2;
-            this.pictureBoxYellow.Location = new System.Drawing.Point(12, 23);
+            resources.ApplyResources(this.pictureBoxYellow, "pictureBoxYellow");
             this.pictureBoxYellow.Name = "pictureBoxYellow";
-            this.pictureBoxYellow.Size = new System.Drawing.Size(178, 136);
-            this.pictureBoxYellow.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBoxYellow.TabIndex = 9;
             this.pictureBoxYellow.TabStop = false;
             // 
             // pictureBoxCustom
             // 
             this.pictureBoxCustom.ContextMenuStrip = this.dialogContextMenuStrip;
-            this.pictureBoxCustom.Location = new System.Drawing.Point(36, 28);
+            resources.ApplyResources(this.pictureBoxCustom, "pictureBoxCustom");
             this.pictureBoxCustom.Name = "pictureBoxCustom";
-            this.pictureBoxCustom.Size = new System.Drawing.Size(130, 130);
-            this.pictureBoxCustom.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBoxCustom.TabIndex = 13;
             this.pictureBoxCustom.TabStop = false;
             // 
             // pictureBoxUsers
             // 
             this.pictureBoxUsers.ContextMenuStrip = this.dialogContextMenuStrip;
             this.pictureBoxUsers.Image = global::MeshAssistant.Properties.Resources.users;
-            this.pictureBoxUsers.Location = new System.Drawing.Point(12, 23);
+            resources.ApplyResources(this.pictureBoxUsers, "pictureBoxUsers");
             this.pictureBoxUsers.Name = "pictureBoxUsers";
-            this.pictureBoxUsers.Size = new System.Drawing.Size(178, 136);
-            this.pictureBoxUsers.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBoxUsers.TabIndex = 14;
             this.pictureBoxUsers.TabStop = false;
-            // 
-            // showEventsToolStripMenuItem
-            // 
-            this.showEventsToolStripMenuItem.Name = "showEventsToolStripMenuItem";
-            this.showEventsToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-            this.showEventsToolStripMenuItem.Text = "Show &Events...";
-            this.showEventsToolStripMenuItem.Click += new System.EventHandler(this.showEventsToolStripMenuItem_Click);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
-            this.ClientSize = new System.Drawing.Size(200, 225);
             this.Controls.Add(this.pictureBoxUsers);
             this.Controls.Add(this.remoteSessionsLabel);
             this.Controls.Add(this.requestHelpButton);
@@ -381,11 +314,9 @@
             this.Controls.Add(this.pictureBoxYellow);
             this.Controls.Add(this.pictureBoxCustom);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MainForm";
-            this.Text = "MeshCentral Assistant";
             this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
