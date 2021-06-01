@@ -417,6 +417,11 @@ namespace MeshAssistant
                 Agent_onSessionChanged();
                 requestHelpButton.Enabled = (mcagent.state == 3);
 
+                // Update context menu
+                requestHelpToolStripMenuItem.Enabled = true;
+                requestHelpToolStripMenuItem.Visible = (mcagent.state == 3) && !helpRequested;
+                cancelHelpRequestToolStripMenuItem.Visible = ((mcagent.state == 3) && helpRequested);
+
                 // Update image
                 pictureBoxGreen.Visible = ((mcagent.state == 3) && (helpRequested == false)); // Green
                 pictureBoxRed.Visible = false;  // Red
@@ -437,6 +442,11 @@ namespace MeshAssistant
                 Agent_onSessionChanged();
                 requestHelpButton.Enabled = true;
                 if (mcagent.state == 0) { helpRequested = false; }
+
+                // Update context menu
+                requestHelpToolStripMenuItem.Enabled = true;
+                requestHelpToolStripMenuItem.Visible = (mcagent.state == 0);
+                cancelHelpRequestToolStripMenuItem.Visible = (mcagent.state != 0);
 
                 // Update image
                 pictureBoxGreen.Visible = false; // Green
