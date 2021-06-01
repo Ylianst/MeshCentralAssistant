@@ -14,20 +14,77 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace MeshAssistant
 {
     public class Translate
     {
+        // *** TRANSLATION TABLE START ***
+        static private Dictionary<string, Dictionary<string, string>> translationTable = new Dictionary<string, Dictionary<string, string>>() {
+            {
+                "Request Help",
+                    new Dictionary<string, string>() { { "fr", "Demander de l'aide" }
+                }
+            },
+            {
+                "Update",
+                    new Dictionary<string, string>() { { "fr", "Mettre à jour" }
+                }
+            },
+            {
+                "Later",
+                    new Dictionary<string, string>() { { "fr", "Plus tard" }
+                }
+            },
+            {
+                "A new version of this software is available. Update now?",
+                    new Dictionary<string, string>() { { "fr", "Une nouvelle version de ce logiciel est disponible. Mettez à jour maintenant?" }
+                }
+            },
+            {
+                "Show Sessions...",
+                    new Dictionary<string, string>() { { "fr", "Afficher les séances..." }
+                }
+            }
+        };
+        // *** TRANSLATION TABLE END ***
 
-        static string T(string english)
+        static public string T(string english)
         {
+            string lang = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName;
+            if (lang == "en") return english;
+            if (translationTable.ContainsKey(english))
+            {
+                Dictionary<string, string> translations = translationTable[english];
+                if (translations.ContainsKey(lang)) return translations[lang];
+            }
             return english;
+        }
+
+        static public void TranslateControl(Control control)
+        {
+            control.Text = T(control.Text);
+            foreach (Control c in control.Controls) { TranslateControl(c); }
+        }
+
+        static public void TranslateContextMenu(ContextMenuStrip menu)
+        {
+            menu.Text = T(menu.Text);
+            foreach (object i in menu.Items) { if (i.GetType() == typeof(ToolStripMenuItem)) { TranslateToolStripMenuItem((ToolStripMenuItem)i); } }
+        }
+
+        static public void TranslateToolStripMenuItem(ToolStripMenuItem menu)
+        {
+            menu.Text = T(menu.Text);
+            foreach (object i in menu.DropDownItems) {
+                if (i.GetType() == typeof(ToolStripMenuItem))
+                {
+                    TranslateToolStripMenuItem((ToolStripMenuItem)i);
+                }
+            }
         }
 
     }

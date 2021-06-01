@@ -35,6 +35,7 @@ namespace MeshAssistant
         {
             this.parent = parent;
             InitializeComponent();
+            Translate.TranslateControl(this);
         }
 
         public string helpRequestText { get { return mainTextBox.Text; } }

@@ -43,6 +43,7 @@ namespace MeshAssistant
             this.parent = parent;
             displayedScreen = screen;
             InitializeComponent();
+            Translate.TranslateControl(this);
         }
 
         protected override CreateParams CreateParams

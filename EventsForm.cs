@@ -34,6 +34,7 @@ namespace MeshAssistant
         {
             this.parent = parent;
             InitializeComponent();
+            Translate.TranslateControl(this);
             mainListView.BeginUpdate();
             foreach (MainForm.LogEventStruct e in events)
             {

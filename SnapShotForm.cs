@@ -27,6 +27,7 @@ namespace MeshAssistant
         {
             this.parent = parent;
             InitializeComponent();
+            Translate.TranslateControl(this);
             if (parent.agent != null) { parent.agent.QueryDescriptors(); }
         }
 

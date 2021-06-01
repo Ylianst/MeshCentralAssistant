@@ -28,6 +28,7 @@ namespace MeshAssistant
         {
             this.parent = parent;
             InitializeComponent();
+            Translate.TranslateControl(this);
             stateListView.Items.Add(new ListViewItem(Properties.Resources.Loading));
             versionsListView.Items.Add(new ListViewItem(Properties.Resources.Loading));
             parent.agent.RequestIntelAmtState();

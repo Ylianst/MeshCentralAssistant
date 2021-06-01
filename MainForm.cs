@@ -82,7 +82,7 @@ namespace MeshAssistant
         private void LoadEventsFromFile()
         {
             string[] events = null;
-            try { events = File.ReadAllLines("events.log"); } catch (Exception ex) { }
+            try { events = File.ReadAllLines("events.log"); } catch (Exception) { }
             if (events == null) return;
             foreach (string e in events)
             {
@@ -174,6 +174,9 @@ namespace MeshAssistant
 
             Log("InitializeComponent()");
             InitializeComponent();
+            Translate.TranslateControl(this);
+            Translate.TranslateContextMenu(this.mainContextMenuStrip);
+            Translate.TranslateContextMenu(this.dialogContextMenuStrip);
 
             // Check if the built-in agent will be activated
             Log("Check for built-in agent");
@@ -196,7 +199,7 @@ namespace MeshAssistant
                 if (autoConnect == true) { currentAgentName = "~"; }
                 ToolStripMenuItem m = new ToolStripMenuItem();
                 m.Name = "AgentSelector-~";
-                m.Text = Properties.Resources.DirectConnect;
+                m.Text = Translate.T(Properties.Resources.DirectConnect);
                 m.Checked = ((currentAgentName != null) && (currentAgentName.Equals("~")));
                 m.Click += agentSelection_Click;
                 subMenus.Add(m);
@@ -399,16 +402,16 @@ namespace MeshAssistant
             if (mcagent.autoConnect)
             {
                 // In auto connect mode, we can only request help when connected.
-                if (mcagent.state == 0) { stateLabel.Text = Properties.Resources.Connecting; requestHelpButton.Text = Properties.Resources.RequestHelp; helpRequested = false; }
-                if (mcagent.state == 1) { stateLabel.Text = Properties.Resources.Connecting; requestHelpButton.Text = Properties.Resources.RequestHelp; }
-                if (mcagent.state == 2) { stateLabel.Text = Properties.Resources.Authenticating; requestHelpButton.Text = Properties.Resources.RequestHelp; }
+                if (mcagent.state == 0) { stateLabel.Text = Translate.T(Properties.Resources.Connecting); requestHelpButton.Text = Translate.T(Properties.Resources.RequestHelp); helpRequested = false; }
+                if (mcagent.state == 1) { stateLabel.Text = Translate.T(Properties.Resources.Connecting); requestHelpButton.Text = Translate.T(Properties.Resources.RequestHelp); }
+                if (mcagent.state == 2) { stateLabel.Text = Translate.T(Properties.Resources.Authenticating); requestHelpButton.Text = Translate.T(Properties.Resources.RequestHelp); }
                 if (mcagent.state == 3) {
                     if (helpRequested) {
-                        stateLabel.Text = Properties.Resources.HelpRequested;
-                        requestHelpButton.Text = Properties.Resources.CancelHelpRequest;
+                        stateLabel.Text = Translate.T(Properties.Resources.HelpRequested);
+                        requestHelpButton.Text = Translate.T(Properties.Resources.CancelHelpRequest);
                     } else {
-                        stateLabel.Text = Properties.Resources.Connected;
-                        requestHelpButton.Text = Properties.Resources.RequestHelp;
+                        stateLabel.Text = Translate.T(Properties.Resources.Connected);
+                        requestHelpButton.Text = Translate.T(Properties.Resources.RequestHelp);
                     }
                 }
                 Agent_onSessionChanged();
@@ -427,10 +430,10 @@ namespace MeshAssistant
             else
             {
                 // When not in auto-connect mode, we only connect when requesting help.
-                if (mcagent.state == 0) { stateLabel.Text = Properties.Resources.Disconnected; requestHelpButton.Text = Properties.Resources.RequestHelp; }
-                if (mcagent.state == 1) { stateLabel.Text = Properties.Resources.Connecting; requestHelpButton.Text = Properties.Resources.CancelHelpRequest; }
-                if (mcagent.state == 2) { stateLabel.Text = Properties.Resources.Authenticating; requestHelpButton.Text = Properties.Resources.CancelHelpRequest; }
-                if (mcagent.state == 3) { stateLabel.Text = Properties.Resources.HelpRequested; requestHelpButton.Text = Properties.Resources.CancelHelpRequest; }
+                if (mcagent.state == 0) { stateLabel.Text = Translate.T(Properties.Resources.Disconnected); requestHelpButton.Text = Translate.T(Properties.Resources.RequestHelp); }
+                if (mcagent.state == 1) { stateLabel.Text = Translate.T(Properties.Resources.Connecting); requestHelpButton.Text = Translate.T(Properties.Resources.CancelHelpRequest); }
+                if (mcagent.state == 2) { stateLabel.Text = Translate.T(Properties.Resources.Authenticating); requestHelpButton.Text = Translate.T(Properties.Resources.CancelHelpRequest); }
+                if (mcagent.state == 3) { stateLabel.Text = Translate.T(Properties.Resources.HelpRequested); requestHelpButton.Text = Translate.T(Properties.Resources.CancelHelpRequest); }
                 Agent_onSessionChanged();
                 requestHelpButton.Enabled = true;
                 if (mcagent.state == 0) { helpRequested = false; }
@@ -473,7 +476,7 @@ namespace MeshAssistant
             }
             if (userids.Length > 1)
             {
-                stateLabel.Text = Properties.Resources.MultipleUsers;
+                stateLabel.Text = Translate.T(Properties.Resources.MultipleUsers);
                 pictureBoxGreen.Visible = false; // Green
                 pictureBoxRed.Visible = false;  // Red
                 pictureBoxYellow.Visible = false; // Gray
@@ -490,7 +493,7 @@ namespace MeshAssistant
             if ((mcagent != null) && (mcagent.state != 0)) { mcagent.disconnect(); }
             if ((currentAgentName != null) && (currentAgentName.Equals("~")))
             {
-                this.Text = Properties.Resources.MeshCentralAssistant;
+                this.Text = Translate.T(Properties.Resources.MeshCentralAssistant);
                 Settings.SetRegValue("SelectedAgent", currentAgentName);
                 updateBuiltinAgentStatus();
                 startAgentToolStripMenuItem.Visible = false;
@@ -543,11 +546,11 @@ namespace MeshAssistant
 
                 if (currentAgentName != "Mesh Agent")
                 {
-                    this.Text = string.Format(Properties.Resources.XAssistant, currentAgentName);
+                    this.Text = string.Format(Translate.T(Properties.Resources.XAssistant), currentAgentName);
                 }
                 else
                 {
-                    this.Text = Properties.Resources.MeshCentralAssistant;
+                    this.Text = Translate.T(Properties.Resources.MeshCentralAssistant);
                 }
             }
             Agent_onSessionChanged();
@@ -636,12 +639,12 @@ namespace MeshAssistant
                 if (mcagent.FilesSessions != null) { count += CountSessions(mcagent.FilesSessions); }
                 if (mcagent.TcpSessions != null) { count += CountSessions(mcagent.TcpSessions); }
                 if (mcagent.UdpSessions != null) { count += CountSessions(mcagent.UdpSessions); }
-                if (count > 1) { mainNotifyIcon.BalloonTipText = string.Format(Properties.Resources.XRemoteSessionsAreActive, count); remoteSessionsLabel.Text = string.Format(Properties.Resources.XRemoteSessions, count); this.Visible = true; }
-                if (count == 1) { mainNotifyIcon.BalloonTipText = Properties.Resources.OneRemoteSessionIsActive; remoteSessionsLabel.Text = Properties.Resources.OneRemoteSession; this.Visible = true; }
-                if (count == 0) { mainNotifyIcon.BalloonTipText = Properties.Resources.NoActiveRemoteSessions; remoteSessionsLabel.Text = Properties.Resources.NoRemoteSessions; }
+                if (count > 1) { mainNotifyIcon.BalloonTipText = string.Format(Translate.T(Properties.Resources.XRemoteSessionsAreActive), count); remoteSessionsLabel.Text = string.Format(Translate.T(Properties.Resources.XRemoteSessions), count); this.Visible = true; }
+                if (count == 1) { mainNotifyIcon.BalloonTipText = Translate.T(Properties.Resources.OneRemoteSessionIsActive); remoteSessionsLabel.Text = Translate.T(Properties.Resources.OneRemoteSession); this.Visible = true; }
+                if (count == 0) { mainNotifyIcon.BalloonTipText = Translate.T(Properties.Resources.NoActiveRemoteSessions); remoteSessionsLabel.Text = Translate.T(Properties.Resources.NoRemoteSessions); }
                 if (count > 0) {
                     // {0} = Realname, {1} = Username
-                    string privacyBarText = (mcagent.privacyBarText != null) ? mcagent.privacyBarText : Properties.Resources.RemoteSessionsX;
+                    string privacyBarText = (mcagent.privacyBarText != null) ? mcagent.privacyBarText : Translate.T(Properties.Resources.RemoteSessionsX);
                     string[] userids = getSessionUserIdList();
                     string[] accountNames = UserIdToAccountNames(userids);
                     string[] realnames = UserIdToRealnames(userids);
@@ -661,13 +664,13 @@ namespace MeshAssistant
                 if (agent.FilesSessions != null) { count += CountSessions(agent.FilesSessions); }
                 if (agent.TcpSessions != null) { count += CountSessions(agent.TcpSessions); }
                 if (agent.UdpSessions != null) { count += CountSessions(agent.UdpSessions); }
-                if (count > 1) { mainNotifyIcon.BalloonTipText = string.Format(Properties.Resources.XRemoteSessionsAreActive, count); remoteSessionsLabel.Text = string.Format(Properties.Resources.XRemoteSessions, count); this.Visible = true; }
-                if (count == 1) { mainNotifyIcon.BalloonTipText = Properties.Resources.OneRemoteSessionIsActive; remoteSessionsLabel.Text = Properties.Resources.OneRemoteSession; this.Visible = true; }
-                if (count == 0) { mainNotifyIcon.BalloonTipText = Properties.Resources.NoActiveRemoteSessions; remoteSessionsLabel.Text = Properties.Resources.NoRemoteSessions; }
+                if (count > 1) { mainNotifyIcon.BalloonTipText = string.Format(Translate.T(Properties.Resources.XRemoteSessionsAreActive), count); remoteSessionsLabel.Text = string.Format(Translate.T(Properties.Resources.XRemoteSessions), count); this.Visible = true; }
+                if (count == 1) { mainNotifyIcon.BalloonTipText = Translate.T(Properties.Resources.OneRemoteSessionIsActive); remoteSessionsLabel.Text = Translate.T(Properties.Resources.OneRemoteSession); this.Visible = true; }
+                if (count == 0) { mainNotifyIcon.BalloonTipText = Translate.T(Properties.Resources.NoActiveRemoteSessions); remoteSessionsLabel.Text = Translate.T(Properties.Resources.NoRemoteSessions); }
                 //mainNotifyIcon.ShowBalloonTip(2000);
                 if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
 
-                stateLabel.Text = Properties.Resources.ConnectedToServer;
+                stateLabel.Text = Translate.T(Properties.Resources.ConnectedToServer);
                 pictureBoxGreen.Visible = true; // Green
                 pictureBoxRed.Visible = false;  // Red
                 pictureBoxYellow.Visible = false; // Yellow
@@ -703,7 +706,7 @@ namespace MeshAssistant
                 }
                 if (userids.Length > 1)
                 {
-                    stateLabel.Text = Properties.Resources.MultipleUsers;
+                    stateLabel.Text = Translate.T(Properties.Resources.MultipleUsers);
                     pictureBoxGreen.Visible = false; // Green
                     pictureBoxRed.Visible = false;  // Red
                     pictureBoxYellow.Visible = false; // Gray
@@ -732,20 +735,20 @@ namespace MeshAssistant
                 pictureBoxCustom.Visible = false;
                 switch (status)
                 {
-                    case ServiceControllerStatus.ContinuePending: { stateLabel.Text = Properties.Resources.AgentIsContinuePending; break; }
-                    case ServiceControllerStatus.Paused: { stateLabel.Text = Properties.Resources.AgentIsPaused; break; }
-                    case ServiceControllerStatus.PausePending: { stateLabel.Text = Properties.Resources.AgentIsPausePending; break; }
-                    case ServiceControllerStatus.Running: { stateLabel.Text = Properties.Resources.AgentIsRunning; break; }
-                    case ServiceControllerStatus.StartPending: { stateLabel.Text = Properties.Resources.AgentIsStartPending; break; }
-                    case ServiceControllerStatus.Stopped: { stateLabel.Text = Properties.Resources.AgentIsStopped; break; }
-                    case ServiceControllerStatus.StopPending: { stateLabel.Text = Properties.Resources.AgentIsStoppedPending; break; }
+                    case ServiceControllerStatus.ContinuePending: { stateLabel.Text = Translate.T(Properties.Resources.AgentIsContinuePending); break; }
+                    case ServiceControllerStatus.Paused: { stateLabel.Text = Translate.T(Properties.Resources.AgentIsPaused); break; }
+                    case ServiceControllerStatus.PausePending: { stateLabel.Text = Translate.T(Properties.Resources.AgentIsPausePending); break; }
+                    case ServiceControllerStatus.Running: { stateLabel.Text = Translate.T(Properties.Resources.AgentIsRunning); break; }
+                    case ServiceControllerStatus.StartPending: { stateLabel.Text = Translate.T(Properties.Resources.AgentIsStartPending); break; }
+                    case ServiceControllerStatus.Stopped: { stateLabel.Text = Translate.T(Properties.Resources.AgentIsStopped); break; }
+                    case ServiceControllerStatus.StopPending: { stateLabel.Text = Translate.T(Properties.Resources.AgentIsStoppedPending); break; }
                 }
             }
             catch (Exception)
             {
                 startAgentToolStripMenuItem.Enabled = false;
                 stopAgentToolStripMenuItem.Enabled = false;
-                stateLabel.Text = Properties.Resources.AgentNotInstalled;
+                stateLabel.Text = Translate.T(Properties.Resources.AgentNotInstalled);
             }
         }
 
@@ -815,7 +818,7 @@ namespace MeshAssistant
                             pictureBoxUser.Visible = false;
                             pictureBoxUsers.Visible = false;
                             pictureBoxCustom.Visible = false;
-                            stateLabel.Text = Properties.Resources.ConnectedToServer;
+                            stateLabel.Text = Translate.T(Properties.Resources.ConnectedToServer);
                             requestHelpToolStripMenuItem.Enabled = true;
                             requestHelpToolStripMenuItem.Visible = true;
                             cancelHelpRequestToolStripMenuItem.Visible = false;
@@ -827,7 +830,7 @@ namespace MeshAssistant
                             pictureBoxUser.Visible = false;
                             pictureBoxUsers.Visible = false;
                             pictureBoxCustom.Visible = false;
-                            stateLabel.Text = Properties.Resources.AgentIsDisconnected;
+                            stateLabel.Text = Translate.T(Properties.Resources.AgentIsDisconnected);
                             requestHelpToolStripMenuItem.Enabled = false;
                             requestHelpToolStripMenuItem.Visible = true;
                             cancelHelpRequestToolStripMenuItem.Visible = false;
@@ -838,7 +841,7 @@ namespace MeshAssistant
                     }
             }
             helpRequested = false;
-            requestHelpButton.Text = Properties.Resources.RequestHelp;
+            requestHelpButton.Text = Translate.T(Properties.Resources.RequestHelp);
             requestHelpButton.Enabled = ((state == 1) && (serverState == 1));
 
             if (isAdministrator && agent.ServiceAgent)
@@ -1025,8 +1028,8 @@ namespace MeshAssistant
                     if ((agent == null) || (agent.CancelHelpRequest() == true))
                     {
                         helpRequested = false;
-                        requestHelpButton.Text = Properties.Resources.RequestHelp;
-                        stateLabel.Text = Properties.Resources.ConnectedToServer;
+                        requestHelpButton.Text = Translate.T(Properties.Resources.RequestHelp);
+                        stateLabel.Text = Translate.T(Properties.Resources.ConnectedToServer);
                         requestHelpToolStripMenuItem.Visible = true;
                         cancelHelpRequestToolStripMenuItem.Visible = false;
                         pictureBoxGreen.Visible = true;
@@ -1077,8 +1080,8 @@ namespace MeshAssistant
                 if (agent.RequestHelp(details) == true)
                 {
                     helpRequested = true;
-                    requestHelpButton.Text = Properties.Resources.CancelHelpRequest;
-                    stateLabel.Text = Properties.Resources.HelpRequested;
+                    requestHelpButton.Text = Translate.T(Properties.Resources.CancelHelpRequest);
+                    stateLabel.Text = Translate.T(Properties.Resources.HelpRequested);
                     requestHelpToolStripMenuItem.Visible = false;
                     cancelHelpRequestToolStripMenuItem.Visible = true;
                     pictureBoxGreen.Visible = false;

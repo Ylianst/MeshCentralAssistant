@@ -35,6 +35,10 @@ namespace MeshAssistant
             string update = null;
             foreach (string arg in args)
             {
+                if (arg.Length > 3 && string.Compare(arg.Substring(0, 3), "-l:", true) == 0)
+                {
+                    try { Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(arg.Substring(3)); } catch (ArgumentException) { }
+                }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }
             }
 

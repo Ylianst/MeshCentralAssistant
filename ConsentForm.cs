@@ -29,6 +29,7 @@ namespace MeshAssistant
         {
             this.parent = parent;
             InitializeComponent();
+            Translate.TranslateControl(this);
             this.orgtitle = this.Text;
         }
 

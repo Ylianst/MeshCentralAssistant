@@ -28,6 +28,7 @@ namespace MeshAssistant
         {
             this.parent = parent;
             InitializeComponent();
+            Translate.TranslateControl(this);
         }
 
         private void clearButton_Click(object sender, EventArgs e)

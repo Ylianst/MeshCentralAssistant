@@ -26,6 +26,7 @@ namespace MeshAssistant
         {
             this.parent = parent;
             InitializeComponent();
+            Translate.TranslateControl(this);
             UpdateInfo();
         }
 
