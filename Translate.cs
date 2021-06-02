@@ -25,27 +25,42 @@ namespace MeshAssistant
         // *** TRANSLATION TABLE START ***
         static private Dictionary<string, Dictionary<string, string>> translationTable = new Dictionary<string, Dictionary<string, string>>() {
         {
-            "Count",
+            "Agent is paused",
             new Dictionary<string, string>() {
-                {"ko","カウント"},
-                {"fr","Compter"},
-                {"es","Contar"},
-                {"ja","カウント"},
-                {"hi","गिनती"},
-                {"zh-chs","数数"},
-                {"de","Anzahl"}
+                {"ko","エージェントは一時停止しています"},
+                {"fr","L'agent est en pause"},
+                {"zh-chs","代理已暂停"},
+                {"es","El agente está en pausa"},
+                {"hi","एजेंट रुका हुआ है"},
+                {"de","Agent ist pausiert"}
             }
         },
         {
-            "Intel® ME State...",
+            "S&top Agent",
             new Dictionary<string, string>() {
-                {"ko","インテル® ME 状態..."},
-                {"fr","État Intel® ME..."},
-                {"es","Estado Intel® ME ..."},
-                {"ja","インテル® ME 状態..."},
-                {"hi","इंटेल® एमई स्टेट..."},
-                {"zh-chs","英特尔® ME 状态..."},
-                {"de","Intel® ME-Zustand..."}
+                {"ko","トップエージェント"},
+                {"fr","Agent d'arrêt"},
+                {"zh-chs","停止代理 (&T)"},
+                {"es","Agente s & top"},
+                {"hi","शीर्ष एजेंट"},
+                {"de","Stop-Agent"}
+            }
+        },
+        {
+            "Type",
+            new Dictionary<string, string>() {
+                {"de","Typ"},
+                {"hi","प्रकार"},
+                {"zh-cht","類型"},
+                {"zh-chs","类型"},
+                {"fi","Tyyppi"},
+                {"tr","tip"},
+                {"cs","Typ"},
+                {"ja","タイプ"},
+                {"es","Tipo"},
+                {"pt","Tipo"},
+                {"ko","유형"},
+                {"ru","Удаленный ввод"}
             }
         },
         {
@@ -53,10 +68,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","リモート セッション..."},
                 {"fr","Séances à distance..."},
-                {"es","Sesiones remotas ..."},
-                {"ja","リモート セッション..."},
-                {"hi","दूरस्थ सत्र..."},
                 {"zh-chs","远程会话..."},
+                {"es","Sesiones remotas ..."},
+                {"hi","दूरस्थ सत्र..."},
                 {"de","Remote-Sitzungen..."}
             }
         },
@@ -65,10 +79,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","リモート セッション"},
                 {"fr","Séances à distance"},
-                {"es","Sesiones remotas"},
-                {"ja","リモート セッション"},
-                {"hi","दूरस्थ सत्र"},
                 {"zh-chs","远程会话"},
+                {"es","Sesiones remotas"},
+                {"hi","दूरस्थ सत्र"},
                 {"de","Remote-Sitzungen"}
             }
         },
@@ -79,58 +92,31 @@ namespace MeshAssistant
                 {"fr","Assistant MeshCentral"},
                 {"zh-chs","MeshCentral 助手"},
                 {"es","Asistente MeshCentral"},
-                {"ja","MeshCentralアシスタント"},
                 {"ru","MeshCentral Ассистент"},
                 {"hi","मेषकेंद्रीय सहायक"},
                 {"de","MeshCentral-Assistent"}
             }
         },
         {
-            "&Start Agent",
+            "Count",
             new Dictionary<string, string>() {
-                {"ko","エージェントを開始"},
-                {"fr","&Démarrer l'agent"},
-                {"es","&Iniciar agente"},
-                {"ja","エージェントを開始"},
-                {"hi","&प्रारंभ एजेंट"},
-                {"zh-chs","启动代理 (&S)"},
-                {"de","&Agent starten"}
+                {"ko","カウント"},
+                {"fr","Compter"},
+                {"zh-chs","数数"},
+                {"es","Contar"},
+                {"hi","गिनती"},
+                {"de","Anzahl"}
             }
         },
         {
-            "Agent Select",
+            "Intel® ME State...",
             new Dictionary<string, string>() {
-                {"ko","エージェントセレクト"},
-                {"fr","Sélection d'agent"},
-                {"es","Seleccionar agente"},
-                {"ja","エージェントセレクト"},
-                {"hi","एजेंट चुनें"},
-                {"zh-chs","代理选择"},
-                {"de","Agentenauswahl"}
-            }
-        },
-        {
-            "Agent is paused",
-            new Dictionary<string, string>() {
-                {"ko","エージェントは一時停止しています"},
-                {"fr","L'agent est en pause"},
-                {"es","El agente está en pausa"},
-                {"ja","エージェントは一時停止しています"},
-                {"hi","एजेंट रुका हुआ है"},
-                {"zh-chs","代理已暂停"},
-                {"de","Agent ist pausiert"}
-            }
-        },
-        {
-            "Agent is continue pending",
-            new Dictionary<string, string>() {
-                {"ko","エージェントは保留中です"},
-                {"fr","L'agent est en attente de poursuite"},
-                {"es","El agente sigue pendiente"},
-                {"ja","エージェントは保留中です"},
-                {"hi","एजेंट जारी है लंबित"},
-                {"zh-chs","代理正在继续等待"},
-                {"de","Agent ist weiterhin ausstehend"}
+                {"ko","インテル® ME 状態..."},
+                {"fr","État Intel® ME..."},
+                {"zh-chs","英特尔® ME 状态..."},
+                {"es","Estado Intel® ME ..."},
+                {"hi","इंटेल® एमई स्टेट..."},
+                {"de","Intel® ME-Zustand..."}
             }
         },
         {
@@ -138,10 +124,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","後で"},
                 {"fr","Plus tard"},
-                {"es","Mas tarde"},
-                {"ja","後で"},
-                {"hi","बाद में"},
                 {"zh-chs","之后"},
+                {"es","Mas tarde"},
+                {"hi","बाद में"},
                 {"de","Später"}
             }
         },
@@ -150,47 +135,10 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","エージェントが停止中です"},
                 {"fr","L'agent est arrêté en attente"},
-                {"es","El agente está detenido pendiente"},
-                {"ja","エージェントが停止中です"},
-                {"hi","एजेंट लंबित है"},
                 {"zh-chs","代理停止等待"},
+                {"es","El agente está detenido pendiente"},
+                {"hi","एजेंट लंबित है"},
                 {"de","Agent ist gestoppt ausstehend"}
-            }
-        },
-        {
-            "Agent is missing",
-            new Dictionary<string, string>() {
-                {"ko","エージェントが行方不明"},
-                {"fr","L'agent est manquant"},
-                {"es","Falta el agente"},
-                {"ja","エージェントが行方不明"},
-                {"hi","एजेंट गायब है"},
-                {"zh-chs","代理不见了"},
-                {"de","Agent fehlt"}
-            }
-        },
-        {
-            "Intel® Management Engine state for this computer.",
-            new Dictionary<string, string>() {
-                {"ko","このコンピューターの Intel® Management Engine の状態。"},
-                {"fr","État du moteur de gestion Intel® pour cet ordinateur."},
-                {"es","Estado del motor de administración Intel® para este equipo."},
-                {"ja","このコンピューターの Intel® Management Engine の状態。"},
-                {"hi","इस कंप्यूटर के लिए Intel® प्रबंधन इंजन स्थिति।"},
-                {"zh-chs","此计算机的英特尔® 管理引擎状态。"},
-                {"de","Status der Intel® Management Engine für diesen Computer."}
-            }
-        },
-        {
-            "Item",
-            new Dictionary<string, string>() {
-                {"ko","項目"},
-                {"fr","Article"},
-                {"es","Artículo"},
-                {"ja","項目"},
-                {"hi","मद"},
-                {"zh-chs","物品"},
-                {"de","Artikel"}
             }
         },
         {
@@ -217,47 +165,32 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","&アップデートソフトウェア"},
                 {"fr","&Mettre à jour le logiciel"},
-                {"es","&Actualiza el software"},
-                {"ja","&アップデートソフトウェア"},
-                {"hi","&सॉफ्टवेयर अद्यतन करें"},
                 {"zh-chs","更新软件 (&S)"},
+                {"es","&Actualiza el software"},
+                {"hi","&सॉफ्टवेयर अद्यतन करें"},
                 {"de","&Software aktualisieren"}
             }
         },
         {
-            "Agent is disconnected",
+            "Show &Events...",
             new Dictionary<string, string>() {
-                {"ko","エージェントが切断されました"},
-                {"fr","L'agent est déconnecté"},
-                {"es","El agente está desconectado"},
-                {"ja","エージェントが切断されました"},
-                {"hi","एजेंट डिस्कनेक्ट हो गया है"},
-                {"zh-chs","代理已断开连接"},
-                {"de","Agent ist getrennt"}
+                {"ko","イベントを表示..."},
+                {"fr","Afficher les &événements..."},
+                {"zh-chs","显示(&Events)..."},
+                {"es","Espectáculos y eventos ..."},
+                {"hi","&घटनाक्रम दिखाएं..."},
+                {"de","&Veranstaltungen anzeigen..."}
             }
         },
         {
-            "Request Help",
+            "Agent is missing",
             new Dictionary<string, string>() {
-                {"ko","助けを求める"},
-                {"fr","Demander de l'aide"},
-                {"es","Solicitar ayuda"},
-                {"ja","助けを求める"},
-                {"hi","मदद का अनुरोध करें"},
-                {"zh-chs","请求帮助"},
-                {"de","Hilfe anfordern"}
-            }
-        },
-        {
-            "Remote Sessions: {0}",
-            new Dictionary<string, string>() {
-                {"ko","リモート セッション: {0}"},
-                {"fr","Sessions à distance : {0}"},
-                {"es","Sesiones remotas: {0}"},
-                {"ja","リモート セッション: {0}"},
-                {"hi","दूरस्थ सत्र: {0}"},
-                {"zh-chs","远程会话：{0}"},
-                {"de","Remote-Sitzungen: {0}"}
+                {"ko","エージェントが行方不明"},
+                {"fr","L'agent est manquant"},
+                {"zh-chs","代理不见了"},
+                {"es","Falta el agente"},
+                {"hi","एजेंट गायब है"},
+                {"de","Agent fehlt"}
             }
         },
         {
@@ -265,10 +198,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","アシスタントアップデート"},
                 {"fr","Mise à jour de l'assistant"},
-                {"es","Asistente de actualización"},
-                {"ja","アシスタントアップデート"},
-                {"hi","सहायक अद्यतन"},
                 {"zh-chs","助理更新"},
+                {"es","Asistente de actualización"},
+                {"hi","सहायक अद्यतन"},
                 {"de","Assistant-Update"}
             }
         },
@@ -296,10 +228,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","{0} リモート セッション"},
                 {"fr","{0} sessions à distance"},
-                {"es","{0} sesiones remotas"},
-                {"ja","{0} リモート セッション"},
-                {"hi","{0} दूरस्थ सत्र"},
                 {"zh-chs","{0} 个远程会话"},
+                {"es","{0} sesiones remotas"},
+                {"hi","{0} दूरस्थ सत्र"},
                 {"de","{0} Remote-Sitzungen"}
             }
         },
@@ -323,39 +254,47 @@ namespace MeshAssistant
             }
         },
         {
-            "Enter help request details",
-            new Dictionary<string, string>() {
-                {"ko","ヘルプリクエストの詳細を入力してください"},
-                {"fr","Entrez les détails de la demande d'aide"},
-                {"es","Ingrese los detalles de la solicitud de ayuda"},
-                {"ja","ヘルプリクエストの詳細を入力してください"},
-                {"hi","सहायता अनुरोध विवरण दर्ज करें"},
-                {"zh-chs","输入帮助请求详细信息"},
-                {"de","Geben Sie die Details der Hilfeanfrage ein"}
-            }
-        },
-        {
             "{0} Assistant",
             new Dictionary<string, string>() {
                 {"ko","{0}アシスタント"},
                 {"fr","{0} Assistante"},
-                {"es","{0} Asistente"},
-                {"ja","{0}アシスタント"},
-                {"hi","{0} सहायक"},
                 {"zh-chs","{0} 助理"},
+                {"es","{0} Asistente"},
+                {"hi","{0} सहायक"},
                 {"de","{0} Assistent"}
             }
         },
         {
-            "&Open",
+            "Connected to server",
             new Dictionary<string, string>() {
-                {"ko","＆開いた"},
-                {"fr","&Ouvert"},
-                {"es","&Abierto"},
-                {"ja","＆開いた"},
-                {"hi","&खुला हुआ"},
-                {"zh-chs","＆打开"},
-                {"de","&Öffnen"}
+                {"ko","サーバーに接続しました"},
+                {"fr","Connecté au serveur"},
+                {"zh-chs","连接到服务器"},
+                {"es","Conectado al servidor"},
+                {"hi","सर्वर से जुड़ा"},
+                {"de","Mit Server verbunden"}
+            }
+        },
+        {
+            "Connecting",
+            new Dictionary<string, string>() {
+                {"ko","接続中"},
+                {"fr","De liaison"},
+                {"zh-chs","连接"},
+                {"es","Conectando"},
+                {"hi","कनेक्ट"},
+                {"de","Anschließen"}
+            }
+        },
+        {
+            "&Start Agent",
+            new Dictionary<string, string>() {
+                {"ko","エージェントを開始"},
+                {"fr","&Démarrer l'agent"},
+                {"zh-chs","启动代理 (&S)"},
+                {"es","&Iniciar agente"},
+                {"hi","&प्रारंभ एजेंट"},
+                {"de","&Agent starten"}
             }
         },
         {
@@ -363,10 +302,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","{0} 個のリモート セッションがアクティブです。"},
                 {"fr","{0} sessions à distance sont actives."},
-                {"es","{0} sesiones remotas están activas."},
-                {"ja","{0} 個のリモート セッションがアクティブです。"},
-                {"hi","{0} दूरस्थ सत्र सक्रिय हैं।"},
                 {"zh-chs","{0} 个远程会话处于活动状态。"},
+                {"es","{0} sesiones remotas están activas."},
+                {"hi","{0} दूरस्थ सत्र सक्रिय हैं।"},
                 {"de","{0} Remote-Sitzungen sind aktiv."}
             }
         },
@@ -375,11 +313,40 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","出口"},
                 {"fr","Sortir"},
-                {"es","Salida"},
-                {"ja","出口"},
-                {"hi","बाहर जाएं"},
                 {"zh-chs","出口"},
+                {"es","Salida"},
+                {"hi","बाहर जाएं"},
                 {"de","Ausgang"}
+            }
+        },
+        {
+            "Agent is running",
+            new Dictionary<string, string>() {
+                {"ko","エージェントは実行中です"},
+                {"fr","L'agent est en cours d'exécution"},
+                {"zh-chs","代理正在运行"},
+                {"es","El agente se está ejecutando"},
+                {"hi","एजेंट चल रहा है"},
+                {"de","Agent läuft"}
+            }
+        },
+        {
+            "Clear",
+            new Dictionary<string, string>() {
+                {"de","Leeren"},
+                {"hi","स्पष्ट"},
+                {"fr","Nettoyer"},
+                {"zh-cht","清除"},
+                {"zh-chs","清除"},
+                {"fi","Tyhjennä"},
+                {"tr","Açık"},
+                {"cs","Vymazat"},
+                {"ja","クリア"},
+                {"es","Borrar"},
+                {"pt","Limpo"},
+                {"nl","Wissen"},
+                {"ko","지우기"},
+                {"ru","Очистить"}
             }
         },
         {
@@ -421,14 +388,68 @@ namespace MeshAssistant
             }
         },
         {
+            "Request Help",
+            new Dictionary<string, string>() {
+                {"ko","助けを求める"},
+                {"fr","Demander de l'aide"},
+                {"zh-chs","请求帮助"},
+                {"es","Solicitar ayuda"},
+                {"hi","मदद का अनुरोध करें"},
+                {"de","Hilfe anfordern"}
+            }
+        },
+        {
             "Versions",
             new Dictionary<string, string>() {
                 {"ko","バージョン"},
-                {"es","Versiones"},
-                {"ja","バージョン"},
-                {"hi","संस्करणों"},
                 {"zh-chs","版本"},
+                {"es","Versiones"},
+                {"hi","संस्करणों"},
                 {"de","Versionen"}
+            }
+        },
+        {
+            "Agent Select",
+            new Dictionary<string, string>() {
+                {"ko","エージェントセレクト"},
+                {"fr","Sélection d'agent"},
+                {"zh-chs","代理选择"},
+                {"es","Seleccionar agente"},
+                {"hi","एजेंट चुनें"},
+                {"de","Agentenauswahl"}
+            }
+        },
+        {
+            "Value",
+            new Dictionary<string, string>() {
+                {"ko","値"},
+                {"fr","Valeur"},
+                {"zh-chs","价值"},
+                {"es","Valor"},
+                {"hi","मूल्य"},
+                {"de","Wert"}
+            }
+        },
+        {
+            "Agent is pause pending",
+            new Dictionary<string, string>() {
+                {"ko","エージェントは一時停止保留中です"},
+                {"fr","L'agent est en attente de pause"},
+                {"zh-chs","代理暂停待定"},
+                {"es","El agente está en pausa pendiente"},
+                {"hi","एजेंट रुका हुआ है"},
+                {"de","Agent ist pausiert"}
+            }
+        },
+        {
+            "Remote Sessions: {0}",
+            new Dictionary<string, string>() {
+                {"ko","リモート セッション: {0}"},
+                {"fr","Sessions à distance : {0}"},
+                {"zh-chs","远程会话：{0}"},
+                {"es","Sesiones remotas: {0}"},
+                {"hi","दूरस्थ सत्र: {0}"},
+                {"de","Remote-Sitzungen: {0}"}
             }
         },
         {
@@ -436,28 +457,21 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","エージェントは開始保留中です"},
                 {"fr","L'agent est en attente de démarrage"},
-                {"es","El agente está pendiente de inicio"},
-                {"ja","エージェントは開始保留中です"},
-                {"hi","एजेंट प्रारंभ लंबित है"},
                 {"zh-chs","代理正在启动待处理"},
+                {"es","El agente está pendiente de inicio"},
+                {"hi","एजेंट प्रारंभ लंबित है"},
                 {"de","Agent ist Start ausstehend"}
             }
         },
         {
-            "Type",
+            "Intel® Management Engine state for this computer.",
             new Dictionary<string, string>() {
-                {"de","Typ"},
-                {"hi","प्रकार"},
-                {"zh-cht","類型"},
-                {"zh-chs","类型"},
-                {"fi","Tyyppi"},
-                {"tr","tip"},
-                {"cs","Typ"},
-                {"ja","タイプ"},
-                {"es","Tipo"},
-                {"pt","Tipo"},
-                {"ko","유형"},
-                {"ru","Удаленный ввод"}
+                {"ko","このコンピューターの Intel® Management Engine の状態。"},
+                {"fr","État du moteur de gestion Intel® pour cet ordinateur."},
+                {"zh-chs","此计算机的英特尔® 管理引擎状态。"},
+                {"es","Estado del motor de administración Intel® para este equipo."},
+                {"hi","इस कंप्यूटर के लिए Intel® प्रबंधन इंजन स्थिति।"},
+                {"de","Status der Intel® Management Engine für diesen Computer."}
             }
         },
         {
@@ -499,27 +513,14 @@ namespace MeshAssistant
             }
         },
         {
-            "Connected to server",
+            "Item",
             new Dictionary<string, string>() {
-                {"ko","サーバーに接続しました"},
-                {"fr","Connecté au serveur"},
-                {"es","Conectado al servidor"},
-                {"ja","サーバーに接続しました"},
-                {"hi","सर्वर से जुड़ा"},
-                {"zh-chs","连接到服务器"},
-                {"de","Mit Server verbunden"}
-            }
-        },
-        {
-            "Value",
-            new Dictionary<string, string>() {
-                {"ko","値"},
-                {"fr","Valeur"},
-                {"es","Valor"},
-                {"ja","値"},
-                {"hi","मूल्य"},
-                {"zh-chs","价值"},
-                {"de","Wert"}
+                {"ko","項目"},
+                {"fr","Article"},
+                {"zh-chs","物品"},
+                {"es","Artículo"},
+                {"hi","मद"},
+                {"de","Artikel"}
             }
         },
         {
@@ -527,10 +528,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","このコンピュータでアクティブなリモート セッションのリスト。"},
                 {"fr","Liste des sessions distantes actives sur cet ordinateur."},
-                {"es","Lista de sesiones remotas activas en esta computadora."},
-                {"ja","このコンピュータでアクティブなリモート セッションのリスト。"},
-                {"hi","इस कंप्यूटर पर सक्रिय दूरस्थ सत्रों की सूची।"},
                 {"zh-chs","此计算机上活动的远程会话列表。"},
+                {"es","Lista de sesiones remotas activas en esta computadora."},
+                {"hi","इस कंप्यूटर पर सक्रिय दूरस्थ सत्रों की सूची।"},
                 {"de","Liste der auf diesem Computer aktiven Remotesitzungen."}
             }
         },
@@ -539,10 +539,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","リクエストされたヘルプ"},
                 {"fr","Aide demandée"},
-                {"es","Ayuda solicitada"},
-                {"ja","リクエストされたヘルプ"},
-                {"hi","सहायता मांगी गई"},
                 {"zh-chs","请求帮助"},
+                {"es","Ayuda solicitada"},
+                {"hi","सहायता मांगी गई"},
                 {"de","Hilfe angefordert"}
             }
         },
@@ -627,45 +626,10 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","セッションを表示..."},
                 {"fr","Afficher les séances..."},
-                {"es","Mostrar sesiones ..."},
-                {"ja","セッションを表示..."},
-                {"hi","सत्र दिखाएं..."},
                 {"zh-chs","显示会话..."},
+                {"es","Mostrar sesiones ..."},
+                {"hi","सत्र दिखाएं..."},
                 {"de","Sitzungen anzeigen..."}
-            }
-        },
-        {
-            "PrivacyBarForm",
-            new Dictionary<string, string>() {
-                {"ko","プライバシーバーフォーム"},
-                {"ja","プライバシーバーフォーム"},
-                {"hi","गोपनीयताबारफॉर्म"},
-                {"zh-chs","隐私栏表格"},
-                {"de","DatenschutzBarForm"}
-            }
-        },
-        {
-            "Agent is pause pending",
-            new Dictionary<string, string>() {
-                {"ko","エージェントは一時停止保留中です"},
-                {"fr","L'agent est en attente de pause"},
-                {"es","El agente está en pausa pendiente"},
-                {"ja","エージェントは一時停止保留中です"},
-                {"hi","एजेंट रुका हुआ है"},
-                {"zh-chs","代理暂停待定"},
-                {"de","Agent ist pausiert"}
-            }
-        },
-        {
-            "Agent not installed",
-            new Dictionary<string, string>() {
-                {"ko","エージェントがインストールされていません"},
-                {"fr","Agent non installé"},
-                {"es","Agente no instalado"},
-                {"ja","エージェントがインストールされていません"},
-                {"hi","एजेंट स्थापित नहीं"},
-                {"zh-chs","未安装代理"},
-                {"de","Agent nicht installiert"}
             }
         },
         {
@@ -673,11 +637,41 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","リモート セッションなし"},
                 {"fr","Pas de sessions à distance"},
-                {"es","Sin sesiones remotas"},
-                {"ja","リモート セッションなし"},
-                {"hi","कोई दूरस्थ सत्र नहीं"},
                 {"zh-chs","没有远程会话"},
+                {"es","Sin sesiones remotas"},
+                {"hi","कोई दूरस्थ सत्र नहीं"},
                 {"de","Keine Remote-Sitzungen"}
+            }
+        },
+        {
+            "PrivacyBarForm",
+            new Dictionary<string, string>() {
+                {"ko","プライバシーバーフォーム"},
+                {"zh-chs","隐私栏表格"},
+                {"hi","गोपनीयताबारफॉर्म"},
+                {"de","DatenschutzBarForm"}
+            }
+        },
+        {
+            "Agent not installed",
+            new Dictionary<string, string>() {
+                {"ko","エージェントがインストールされていません"},
+                {"fr","Agent non installé"},
+                {"zh-chs","未安装代理"},
+                {"es","Agente no instalado"},
+                {"hi","एजेंट स्थापित नहीं"},
+                {"de","Agent nicht installiert"}
+            }
+        },
+        {
+            "Enter help request details",
+            new Dictionary<string, string>() {
+                {"ko","ヘルプリクエストの詳細を入力してください"},
+                {"fr","Entrez les détails de la demande d'aide"},
+                {"zh-chs","输入帮助请求详细信息"},
+                {"es","Ingrese los detalles de la solicitud de ayuda"},
+                {"hi","सहायता अनुरोध विवरण दर्ज करें"},
+                {"de","Geben Sie die Details der Hilfeanfrage ein"}
             }
         },
         {
@@ -685,23 +679,10 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","アクティブなリモート セッションはありません。"},
                 {"fr","Aucune session à distance active."},
-                {"es","No hay sesiones remotas activas."},
-                {"ja","アクティブなリモート セッションはありません。"},
-                {"hi","कोई सक्रिय दूरस्थ सत्र नहीं।"},
                 {"zh-chs","没有活动的远程会话。"},
+                {"es","No hay sesiones remotas activas."},
+                {"hi","कोई सक्रिय दूरस्थ सत्र नहीं।"},
                 {"de","Keine aktiven Remote-Sitzungen."}
-            }
-        },
-        {
-            "Connecting",
-            new Dictionary<string, string>() {
-                {"ko","接続中"},
-                {"fr","De liaison"},
-                {"es","Conectando"},
-                {"ja","接続中"},
-                {"hi","कनेक्ट"},
-                {"zh-chs","连接"},
-                {"de","Anschließen"}
             }
         },
         {
@@ -709,35 +690,10 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","許可する"},
                 {"fr","Permettre"},
-                {"es","Permitir"},
-                {"ja","許可する"},
-                {"hi","अनुमति"},
                 {"zh-chs","允许"},
+                {"es","Permitir"},
+                {"hi","अनुमति"},
                 {"de","ermöglichen"}
-            }
-        },
-        {
-            "Show &Events...",
-            new Dictionary<string, string>() {
-                {"ko","イベントを表示..."},
-                {"fr","Afficher les &événements..."},
-                {"es","Espectáculos y eventos ..."},
-                {"ja","イベントを表示..."},
-                {"hi","&घटनाक्रम दिखाएं..."},
-                {"zh-chs","显示(&Events)..."},
-                {"de","&Veranstaltungen anzeigen..."}
-            }
-        },
-        {
-            "A new version of this software is available. Update now?",
-            new Dictionary<string, string>() {
-                {"ko","このソフトウェアの新しいバージョンが利用可能です。今すぐアップデート？"},
-                {"fr","Une nouvelle version de ce logiciel est disponible. Mettez à jour maintenant?"},
-                {"es","Hay disponible una nueva versión de este software. ¿Actualizar ahora?"},
-                {"ja","このソフトウェアの新しいバージョンが利用可能です。今すぐアップデート？"},
-                {"hi","इस सॉफ़्टवेयर का एक नया संस्करण उपलब्ध है। अभी अद्यतन करें?"},
-                {"zh-chs","此软件的新版本可用。现在更新？"},
-                {"de","Eine neue Version dieser Software ist verfügbar. Jetzt aktualisieren?"}
             }
         },
         {
@@ -745,10 +701,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","イベント"},
                 {"fr","Événement"},
-                {"es","Evento"},
-                {"ja","イベント"},
-                {"hi","प्रतिस्पर्धा"},
                 {"zh-chs","事件"},
+                {"es","Evento"},
+                {"hi","प्रतिस्पर्धा"},
                 {"de","Veranstaltung"}
             }
         },
@@ -757,23 +712,10 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","拒否する"},
                 {"fr","Refuser"},
-                {"es","Negar"},
-                {"ja","拒否する"},
-                {"hi","मना"},
                 {"zh-chs","否定"},
+                {"es","Negar"},
+                {"hi","मना"},
                 {"de","Verweigern"}
-            }
-        },
-        {
-            "1 remote session",
-            new Dictionary<string, string>() {
-                {"ko","1 リモート セッション"},
-                {"fr","1 séance à distance"},
-                {"es","1 sesión remota"},
-                {"ja","1 リモート セッション"},
-                {"hi","1 दूरस्थ सत्र"},
-                {"zh-chs","1 个远程会话"},
-                {"de","1 Remote-Sitzung"}
             }
         },
         {
@@ -793,6 +735,17 @@ namespace MeshAssistant
                 {"nl","Sluiten"},
                 {"ko","닫기"},
                 {"ru","Закрыть"}
+            }
+        },
+        {
+            "Authenticating",
+            new Dictionary<string, string>() {
+                {"ko","認証中"},
+                {"fr","Authentification"},
+                {"zh-chs","认证"},
+                {"es","Autenticando"},
+                {"hi","प्रमाणित कर रहा है"},
+                {"de","Authentifizierung"}
             }
         },
         {
@@ -826,34 +779,14 @@ namespace MeshAssistant
             }
         },
         {
-            "Direct Connect",
+            "1 remote session",
             new Dictionary<string, string>() {
-                {"ko","ダイレクトコネクト"},
-                {"fr","Connection directe"},
-                {"es","Conexión directa"},
-                {"ja","ダイレクトコネクト"},
-                {"hi","प्रत्यक्ष रूप से कनेक्ट"},
-                {"zh-chs","直接联系"},
-                {"de","Direkte Verbindung"}
-            }
-        },
-        {
-            "Not Activated (In)",
-            new Dictionary<string, string>() {
-                {"de","Nicht aktiviert (In)"},
-                {"hi","सक्रिय नहीं (में)"},
-                {"fr","Non activé (en)"},
-                {"zh-cht","未啟動（輸入）"},
-                {"zh-chs","未激活（输入）"},
-                {"fi","Ei aktivoitu (sisään)"},
-                {"tr","Etkinleştirilmedi (İçinde)"},
-                {"cs","Neaktivováno (v)"},
-                {"ja","アクティブ化されていない（イン）"},
-                {"es","No Activada (entrada)"},
-                {"pt","Não ativado (entrada)"},
-                {"nl","Niet geactiveerd (In)"},
-                {"ko","활성화되지 않음 (In)"},
-                {"ru","Не активированно (In)"}
+                {"ko","1 リモート セッション"},
+                {"fr","1 séance à distance"},
+                {"zh-chs","1 个远程会话"},
+                {"es","1 sesión remota"},
+                {"hi","1 दूरस्थ सत्र"},
+                {"de","1 Remote-Sitzung"}
             }
         },
         {
@@ -861,10 +794,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","1 つのリモート セッションがアクティブです。"},
                 {"fr","1 session à distance est active."},
-                {"es","1 sesión remota está activa."},
-                {"ja","1 つのリモート セッションがアクティブです。"},
-                {"hi","1 दूरस्थ सत्र सक्रिय है।"},
                 {"zh-chs","1 个远程会话处于活动状态。"},
+                {"es","1 sesión remota está activa."},
+                {"hi","1 दूरस्थ सत्र सक्रिय है।"},
                 {"de","1 Remote-Sitzung ist aktiv."}
             }
         },
@@ -873,10 +805,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","（無し）"},
                 {"fr","(Rien)"},
-                {"es","(Ninguno)"},
-                {"ja","（無し）"},
-                {"hi","(कोई नहीं)"},
                 {"zh-chs","（没有任何）"},
+                {"es","(Ninguno)"},
+                {"hi","(कोई नहीं)"},
                 {"de","(Keiner)"}
             }
         },
@@ -918,6 +849,17 @@ namespace MeshAssistant
             }
         },
         {
+            "Agent is disconnected",
+            new Dictionary<string, string>() {
+                {"ko","エージェントが切断されました"},
+                {"fr","L'agent est déconnecté"},
+                {"zh-chs","代理已断开连接"},
+                {"es","El agente está desconectado"},
+                {"hi","एजेंट डिस्कनेक्ट हो गया है"},
+                {"de","Agent ist getrennt"}
+            }
+        },
+        {
             "Activated",
             new Dictionary<string, string>() {
                 {"de","Aktiviertes"},
@@ -937,14 +879,46 @@ namespace MeshAssistant
             }
         },
         {
+            "UDP relay",
+            new Dictionary<string, string>() {
+                {"ko","UDPリレー"},
+                {"fr","relais UDP"},
+                {"zh-chs","UDP中继"},
+                {"es","Relé UDP"},
+                {"hi","यूडीपी रिले"},
+                {"de","UDP-Relais"}
+            }
+        },
+        {
+            "A new version of this software is available. Update now?",
+            new Dictionary<string, string>() {
+                {"ko","このソフトウェアの新しいバージョンが利用可能です。今すぐアップデート？"},
+                {"fr","Une nouvelle version de ce logiciel est disponible. Mettez à jour maintenant?"},
+                {"zh-chs","此软件的新版本可用。现在更新？"},
+                {"es","Hay disponible una nueva versión de este software. ¿Actualizar ahora?"},
+                {"hi","इस सॉफ़्टवेयर का एक नया संस्करण उपलब्ध है। अभी अद्यतन करें?"},
+                {"de","Eine neue Version dieser Software ist verfügbar. Jetzt aktualisieren?"}
+            }
+        },
+        {
+            "&Open",
+            new Dictionary<string, string>() {
+                {"ko","＆開いた"},
+                {"fr","&Ouvert"},
+                {"zh-chs","＆打开"},
+                {"es","&Abierto"},
+                {"hi","&खुला हुआ"},
+                {"de","&Öffnen"}
+            }
+        },
+        {
             "Multiple Users",
             new Dictionary<string, string>() {
                 {"ko","複数のユーザー"},
                 {"fr","Utilisateurs multiples"},
-                {"es","Múltiples usuarios"},
-                {"ja","複数のユーザー"},
-                {"hi","एकाधिक उपयोगकर्ता"},
                 {"zh-chs","多个用户"},
+                {"es","Múltiples usuarios"},
+                {"hi","एकाधिक उपयोगकर्ता"},
                 {"de","Mehrere Benutzer"}
             }
         },
@@ -967,23 +941,10 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","＆閉じる"},
                 {"fr","&Fermer"},
-                {"es","&Cerca"},
-                {"ja","＆閉じる"},
-                {"hi","&बंद करे"},
                 {"zh-chs","＆关闭"},
+                {"es","&Cerca"},
+                {"hi","&बंद करे"},
                 {"de","&Schließen"}
-            }
-        },
-        {
-            "Authenticating",
-            new Dictionary<string, string>() {
-                {"ko","認証中"},
-                {"fr","Authentification"},
-                {"es","Autenticando"},
-                {"ja","認証中"},
-                {"hi","प्रमाणित कर रहा है"},
-                {"zh-chs","认证"},
-                {"de","Authentifizierung"}
             }
         },
         {
@@ -1025,27 +986,14 @@ namespace MeshAssistant
             }
         },
         {
-            "S&top Agent",
+            "Cancel Help Request",
             new Dictionary<string, string>() {
-                {"ko","トップエージェント"},
-                {"fr","Agent d'arrêt"},
-                {"es","Agente s & top"},
-                {"ja","トップエージェント"},
-                {"hi","शीर्ष एजेंट"},
-                {"zh-chs","停止代理 (&T)"},
-                {"de","Stop-Agent"}
-            }
-        },
-        {
-            "UDP relay",
-            new Dictionary<string, string>() {
-                {"ko","UDPリレー"},
-                {"fr","relais UDP"},
-                {"es","Relé UDP"},
-                {"ja","UDPリレー"},
-                {"hi","यूडीपी रिले"},
-                {"zh-chs","UDP中继"},
-                {"de","UDP-Relais"}
+                {"ko","ヘルプリクエストをキャンセル"},
+                {"fr","Annuler la demande d'aide"},
+                {"zh-chs","取消帮助请求"},
+                {"es","Cancelar solicitud de ayuda"},
+                {"hi","सहायता अनुरोध रद्द करें"},
+                {"de","Hilfeanfrage abbrechen"}
             }
         },
         {
@@ -1053,10 +1001,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","エージェントが停止しました"},
                 {"fr","L'agent est arrêté"},
-                {"es","El agente está detenido"},
-                {"ja","エージェントが停止しました"},
-                {"hi","एजेंट रोक दिया गया है"},
                 {"zh-chs","代理已停止"},
+                {"es","El agente está detenido"},
+                {"hi","एजेंट रोक दिया गया है"},
                 {"de","Agent wurde gestoppt"}
             }
         },
@@ -1065,10 +1012,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","インテル® マネジメント エンジン"},
                 {"fr","Moteur de gestion Intel®"},
-                {"es","Motor de administración Intel®"},
-                {"ja","インテル® マネジメント エンジン"},
-                {"hi","इंटेल® प्रबंधन इंजन"},
                 {"zh-chs","英特尔® 管理引擎"},
+                {"es","Motor de administración Intel®"},
+                {"hi","इंटेल® प्रबंधन इंजन"},
                 {"de","Intel® Management-Engine"}
             }
         },
@@ -1077,10 +1023,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","エージェントスナップショット"},
                 {"fr","Instantané de l'agent"},
-                {"es","Instantánea del agente"},
-                {"ja","エージェントスナップショット"},
-                {"hi","एजेंट स्नैपशॉट"},
                 {"zh-chs","代理快照"},
+                {"es","Instantánea del agente"},
+                {"hi","एजेंट स्नैपशॉट"},
                 {"de","Agenten-Snapshot"}
             }
         },
@@ -1089,11 +1034,21 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","ヘルプをリクエスト..."},
                 {"fr","Demander de l'aide..."},
-                {"es","Solicitar ayuda ..."},
-                {"ja","ヘルプをリクエスト..."},
-                {"hi","मदद का अनुरोध करें..."},
                 {"zh-chs","请求帮助..."},
+                {"es","Solicitar ayuda ..."},
+                {"hi","मदद का अनुरोध करें..."},
                 {"de","Hilfe anfordern..."}
+            }
+        },
+        {
+            "Direct Connect",
+            new Dictionary<string, string>() {
+                {"ko","ダイレクトコネクト"},
+                {"fr","Connection directe"},
+                {"zh-chs","直接联系"},
+                {"es","Conexión directa"},
+                {"hi","प्रत्यक्ष रूप से कनेक्ट"},
+                {"de","Direkte Verbindung"}
             }
         },
         {
@@ -1101,10 +1056,9 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"ko","ペンサイト(&P)..."},
                 {"fr","&Ouvrir le site..."},
-                {"es","Sitio de O & pen ..."},
-                {"ja","ペンサイト(&P)..."},
-                {"hi","साइट खोलें..."},
                 {"zh-chs","打开网站 (&P)..."},
+                {"es","Sitio de O & pen ..."},
+                {"hi","साइट खोलें..."},
                 {"de","Website öffnen..."}
             }
         },
@@ -1128,45 +1082,13 @@ namespace MeshAssistant
             }
         },
         {
-            "Clear",
-            new Dictionary<string, string>() {
-                {"de","Leeren"},
-                {"hi","स्पष्ट"},
-                {"fr","Nettoyer"},
-                {"zh-cht","清除"},
-                {"zh-chs","清除"},
-                {"fi","Tyhjennä"},
-                {"tr","Açık"},
-                {"cs","Vymazat"},
-                {"ja","クリア"},
-                {"es","Borrar"},
-                {"pt","Limpo"},
-                {"nl","Wissen"},
-                {"ko","지우기"},
-                {"ru","Очистить"}
-            }
-        },
-        {
-            "Cancel Help Request",
-            new Dictionary<string, string>() {
-                {"ko","ヘルプリクエストをキャンセル"},
-                {"fr","Annuler la demande d'aide"},
-                {"es","Cancelar solicitud de ayuda"},
-                {"ja","ヘルプリクエストをキャンセル"},
-                {"hi","सहायता अनुरोध रद्द करें"},
-                {"zh-chs","取消帮助请求"},
-                {"de","Hilfeanfrage abbrechen"}
-            }
-        },
-        {
             "TCP relay",
             new Dictionary<string, string>() {
                 {"ko","TCPリレー"},
                 {"fr","Relais TCP"},
-                {"es","Relé TCP"},
-                {"ja","TCPリレー"},
-                {"hi","टीसीपी रिले"},
                 {"zh-chs","TCP中继"},
+                {"es","Relé TCP"},
+                {"hi","टीसीपी रिले"},
                 {"de","TCP-Relais"}
             }
         },
@@ -1209,15 +1131,33 @@ namespace MeshAssistant
             }
         },
         {
-            "Agent is running",
+            "Agent is continue pending",
             new Dictionary<string, string>() {
-                {"ko","エージェントは実行中です"},
-                {"fr","L'agent est en cours d'exécution"},
-                {"es","El agente se está ejecutando"},
-                {"ja","エージェントは実行中です"},
-                {"hi","एजेंट चल रहा है"},
-                {"zh-chs","代理正在运行"},
-                {"de","Agent läuft"}
+                {"ko","エージェントは保留中です"},
+                {"fr","L'agent est en attente de poursuite"},
+                {"zh-chs","代理正在继续等待"},
+                {"es","El agente sigue pendiente"},
+                {"hi","एजेंट जारी है लंबित"},
+                {"de","Agent ist weiterhin ausstehend"}
+            }
+        },
+        {
+            "Not Activated (In)",
+            new Dictionary<string, string>() {
+                {"de","Nicht aktiviert (In)"},
+                {"hi","सक्रिय नहीं (में)"},
+                {"fr","Non activé (en)"},
+                {"zh-cht","未啟動（輸入）"},
+                {"zh-chs","未激活（输入）"},
+                {"fi","Ei aktivoitu (sisään)"},
+                {"tr","Etkinleştirilmedi (İçinde)"},
+                {"cs","Neaktivováno (v)"},
+                {"ja","アクティブ化されていない（イン）"},
+                {"es","No Activada (entrada)"},
+                {"pt","Não ativado (entrada)"},
+                {"nl","Niet geactiveerd (In)"},
+                {"ko","활성화되지 않음 (In)"},
+                {"ru","Не активированно (In)"}
             }
         },
         {
