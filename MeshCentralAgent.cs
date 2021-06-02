@@ -358,7 +358,6 @@ namespace MeshAssistant
         public void disconnect()
         {
             Log("Disconnect");
-            autoConnect = false;
             autoConnectTime = 5;
             if (autoConnectTimer != null) { autoConnectTimer.Dispose(); autoConnectTimer = null; }
             disconnectex();

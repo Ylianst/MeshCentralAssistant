@@ -218,7 +218,7 @@ namespace MeshAssistant
                     currentAgentName = agentNames[0]; // Default
                     for (var i = 0; i < agentNames.Length; i++) { if (agentNames[i] == currentAgentSelection) { currentAgentName = agentNames[i]; } }
                 }
-                if (agentNames.Length > 1)
+                if ((agentNames.Length > 1) || ((agentNames.Length > 0) && (mcagent != null)))
                 {
                     for (var i = 0; i < agentNames.Length; i++)
                     {
@@ -431,7 +431,6 @@ namespace MeshAssistant
                 pictureBoxUser.Visible = false;
                 pictureBoxUsers.Visible = false;
                 pictureBoxCustom.Visible = false;
-                pictureBoxUsers.Visible = false;
             }
             else
             {
@@ -457,7 +456,6 @@ namespace MeshAssistant
                 pictureBoxUser.Visible = false;
                 pictureBoxUsers.Visible = false;
                 pictureBoxCustom.Visible = false;
-                pictureBoxUsers.Visible = false;
             }
 
             string[] userids = getSessionUserIdList();
@@ -500,7 +498,7 @@ namespace MeshAssistant
         {
             Log(string.Format("connectToAgent {0}", currentAgentName));
 
-            if (agent != null) { agent.DisconnectPipe(); agent = null; }
+            if (agent != null) { agent.DisconnectPipe(); agent = null; connectionTimer.Enabled = false; }
             if ((mcagent != null) && (mcagent.state != 0)) { mcagent.disconnect(); }
             if ((currentAgentName != null) && (currentAgentName.Equals("~")))
             {
@@ -517,6 +515,8 @@ namespace MeshAssistant
                     mcagent.HelpRequest = null;
                     mcagent.connect();
                 }
+
+                updateBuiltinAgentStatus();
             }
             else
             {
@@ -526,6 +526,7 @@ namespace MeshAssistant
                     agent = new MeshAgent("MeshCentralAssistant", currentAgentName, agents[currentAgentName], selfExecutableHashHex, debug);
                     Settings.SetRegValue("SelectedAgent", currentAgentName);
                 }
+                connectionTimer.Enabled = true;
                 agent.onStateChanged += Agent_onStateChanged;
                 agent.onQueryResult += Agent_onQueryResult;
                 agent.onSessionChanged += Agent_onSessionChanged;
@@ -760,6 +761,13 @@ namespace MeshAssistant
                 startAgentToolStripMenuItem.Enabled = false;
                 stopAgentToolStripMenuItem.Enabled = false;
                 stateLabel.Text = Translate.T(Properties.Resources.AgentNotInstalled);
+                pictureBoxGreen.Visible = false; // Green
+                pictureBoxRed.Visible = true; // Red
+                pictureBoxYellow.Visible = false; // Yellow
+                pictureBoxQuestion.Visible = false; // Help
+                pictureBoxUser.Visible = false;
+                pictureBoxUsers.Visible = false;
+                pictureBoxCustom.Visible = false;
             }
         }
 
@@ -900,6 +908,10 @@ namespace MeshAssistant
                 if (timerSlowDown > 0) { timerSlowDown--; if (timerSlowDown == 0) { connectionTimer.Interval = 10000; } }
                 if (agent.State == 0) { agent.ConnectPipe(); }
                 UpdateServiceStatus();
+            }
+            else
+            {
+                connectionTimer.Enabled = false;
             }
         }
 

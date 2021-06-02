@@ -182,7 +182,6 @@
             // 
             // connectionTimer
             // 
-            this.connectionTimer.Enabled = true;
             this.connectionTimer.Interval = 1000;
             this.connectionTimer.Tick += new System.EventHandler(this.connectionTimer_Tick);
             // 
