@@ -1251,7 +1251,7 @@ namespace MeshAssistant
                 using (HttpWebResponse webResponse = (HttpWebResponse)webRequest.EndGetResponse(asyncResult))
                 {
                     byte[] buffer = new byte[4096];
-                    FileStream fileStream = File.OpenWrite(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe");
+                    FileStream fileStream = File.OpenWrite(Assembly.GetEntryAssembly().Location + ".update.exe");
                     using (Stream input = webResponse.GetResponseStream())
                     {
                         int size = input.Read(buffer, 0, buffer.Length);
@@ -1267,13 +1267,15 @@ namespace MeshAssistant
 
                     // Hash the resulting file, check that it's correct. This is our second security layer.
                     byte[] downloadHash;
-                    using (var sha384 = SHA384Managed.Create()) { using (var stream = File.OpenRead(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe")) { downloadHash = sha384.ComputeHash(stream); } }
+                    using (var sha384 = SHA384Managed.Create()) { using (var stream = File.OpenRead(Assembly.GetEntryAssembly().Location + ".update.exe")) { downloadHash = sha384.ComputeHash(stream); } }
                     string downloadHashHex = BitConverter.ToString(downloadHash).Replace("-", string.Empty).ToLower();
-                    if (downloadHashHex != seflUpdateDownloadHash)
+                    bool hashMatch = (downloadHashHex == seflUpdateDownloadHash);
+                    if (hashMatch == false) { hashMatch = (ExeHandler.HashExecutable(Assembly.GetEntryAssembly().Location + ".update.exe") == seflUpdateDownloadHash); }
+                    if (hashMatch == false)
                     {
                         Log("DownloadUpdateRespone - Invalid hash");
                         System.Threading.Thread.Sleep(500);
-                        File.Delete(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe");
+                        File.Delete(Assembly.GetEntryAssembly().Location + ".update.exe");
                     }
                     else
                     {
@@ -1281,9 +1283,9 @@ namespace MeshAssistant
                         doclose = true;
                         forceExit = true;
                         System.Threading.Thread.Sleep(500);
-                        string arguments = "-update:" + System.Reflection.Assembly.GetEntryAssembly().Location + " " + string.Join(" ", args);
+                        string arguments = "-update:" + Assembly.GetEntryAssembly().Location + " " + string.Join(" ", args);
                         if (this.Visible == true) { arguments += " -visible"; }
-                        Process.Start(System.Reflection.Assembly.GetEntryAssembly().Location + ".update.exe", arguments);
+                        Process.Start(Assembly.GetEntryAssembly().Location + ".update.exe", arguments);
                         Application.Exit();
                     }
                 }

@@ -94,7 +94,12 @@ namespace MeshAssistant
 
         public ConnectionStates State { get { return state; } }
 
-        public X509Certificate RemoteCertificate { get { return wsstream.RemoteCertificate; } }
+        public X509Certificate RemoteCertificate {
+            get
+            {
+                try { return wsstream.RemoteCertificate; } catch (Exception) { return null; }
+            }
+        }
 
         private void SetState(ConnectionStates newstate)
         {
@@ -297,7 +302,7 @@ namespace MeshAssistant
             SendData(UTF8Encoding.UTF8.GetBytes(header));
 
             // Start receiving data
-            wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this);
+            try { wsstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnTlsDataSink), this); } catch (Exception) { Dispose(); }
         }
 
         private void OnTlsDataSink(IAsyncResult ar)

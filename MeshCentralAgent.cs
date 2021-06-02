@@ -351,6 +351,7 @@ namespace MeshAssistant
 
         private void WebSocket_onStateChanged(webSocketClient sender, webSocketClient.ConnectionStates state)
         {
+            Log(string.Format("WebSocket_onStateChanged: {0}", state));
             if (state == webSocketClient.ConnectionStates.Disconnected)
             {
                 disconnectex();
@@ -361,13 +362,18 @@ namespace MeshAssistant
             }
             else if (state == webSocketClient.ConnectionStates.Connected)
             {
+                if ((ConnectionState & 2) != 0) return;
                 changeState(2);
                 ConnectionState |= 2;
+
+                // Get the TLS certificate
+                X509Certificate cert = WebSocket.RemoteCertificate;
+                if (cert == null) return;
 
                 // Compute the remote certificate SHA384 hash
                 using (SHA384 sha384Hash = SHA384.Create())
                 {
-                    byte[] bytes = ServerTlsHash = sha384Hash.ComputeHash(WebSocket.RemoteCertificate.GetRawCertData());
+                    byte[] bytes = ServerTlsHash = sha384Hash.ComputeHash(cert.GetRawCertData());
                     StringBuilder builder = new StringBuilder();
                     for (int i = 0; i < bytes.Length; i++) { builder.Append(bytes[i].ToString("x2")); }
                     ServerTlsHashStr = builder.ToString().ToUpper();
