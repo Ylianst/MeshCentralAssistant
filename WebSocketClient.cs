@@ -128,7 +128,7 @@ namespace MeshAssistant
             if (tlsCertFingerprint != null) { this.tlsCertFingerprint = tlsCertFingerprint.ToUpper(); }
             Uri proxyUri = null;
 
-            Log("Websocket Start, URL=" + url.ToString());
+            Log("Websocket Start, URL=" + ((url == null) ? "(NULL)" : url.ToString()));
 
             // Check if we need to use a HTTP proxy (Auto-proxy way)
             try

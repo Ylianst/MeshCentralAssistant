@@ -122,6 +122,7 @@
     <Compile Include="ConsentForm.Designer.cs">
       <DependentUpon>ConsentForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MeshDiscovery.cs" />
     <Compile Include="NotifyForm.cs">
       <SubType>Form</SubType>
     </Compile>

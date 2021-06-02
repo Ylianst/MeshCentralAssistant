@@ -60,6 +60,8 @@ namespace MeshAssistant
         private string selfExecutableHashHex = null;
         public string privacyBarText = null;
         private Random rand = new Random();
+        private string discoveryKey = null;
+        private MeshDiscovery scanner = null;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -144,11 +146,37 @@ namespace MeshAssistant
             // Get the MeshId, ServerId, and ServerUrl
             if (msh.ContainsKey("MeshID")) { string m = msh["MeshID"]; if (m.StartsWith("0x")) { m = m.Substring(2); } MeshId = StringToByteArray(m); }
             if (msh.ContainsKey("ServerID")) { ServerId = msh["ServerID"]; }
-            if (msh.ContainsKey("MeshServer")) { try { ServerUrl = new Uri(msh["MeshServer"]); } catch (Exception) { } }
+            if (msh.ContainsKey("MeshServer") && (msh["MeshServer"] != "local")) { try { ServerUrl = new Uri(msh["MeshServer"]); } catch (Exception) { } }
             if (msh.ContainsKey("AutoConnect")) { parent.autoConnect = (msh["AutoConnect"] == "1"); }
+            if (msh.ContainsKey("DiscoveryKey")) { discoveryKey = msh["DiscoveryKey"]; }
             Log("MSH MeshID: " + msh["MeshID"]);
             Log("MSH ServerID: " + ServerId);
             Log("MSH MeshServer: " + ServerUrl);
+
+            if (ServerUrl == null)
+            {
+                scanner = new MeshDiscovery(discoveryKey);
+                scanner.OnNotify += Discovery_OnNotify;
+                scanner.MulticastPing();
+            }
+        }
+
+        private void Discovery_OnNotify(MeshDiscovery sender, IPEndPoint source, IPEndPoint local, string agentCertHash, string url, string name, string info)
+        {
+            if (ServerId != agentCertHash) return;
+            url += "agent.ashx";
+            Uri u = null;
+            try { u = new Uri(url); } catch (Exception) { return; }
+            if (u == null) return;
+            if ((ServerUrl == null) || (ServerUrl.Equals(u) == false))
+            {
+                ServerUrl = u;
+                if (((state == 0) && (autoConnect)) || (state == 1))
+                {
+                    autoConnectTime = 5;
+                    reconnectAttempt(null);
+                }
+            }
         }
 
         public static bool checkMshFile()
@@ -300,6 +328,7 @@ namespace MeshAssistant
             Log("connect()");
             autoConnectTime = 5;
             if (autoConnectTimer != null) { autoConnectTimer.Dispose(); autoConnectTimer = null; }
+            if (ServerUrl == null) return false;
             return connectex();
         }
 
