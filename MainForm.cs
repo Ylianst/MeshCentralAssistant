@@ -53,6 +53,7 @@ namespace MeshAssistant
         public PrivacyBarForm privacyBar = null;
         public UpdateForm updateForm = null;
         public EventsForm eventsForm = null;
+        public BrowserForm browserForm = null;
         public bool isAdministrator = false;
         public bool forceExit = false;
         public bool noUpdate = false;
@@ -70,7 +71,7 @@ namespace MeshAssistant
         public List<PrivacyBarForm> privacyBars = null;
         private bool startVisible = false;
         public List<LogEventStruct> userEvents = new List<LogEventStruct>();
-        
+
         public struct LogEventStruct
         {
             public LogEventStruct(DateTime time, string userid, string msg) { this.time = time; this.userid = userid; this.msg = msg; }
@@ -1322,5 +1323,29 @@ namespace MeshAssistant
             eventsForm.Dispose();
             eventsForm = null;
         }
+
+        public delegate void OpenBrowserHandler(string url);
+
+        public void OpenBrowser(string url)
+        {
+            if (this.InvokeRequired) { this.Invoke(new OpenBrowserHandler(OpenBrowser), url); return; }
+            if (browserForm == null)
+            {
+                browserForm = new BrowserForm(this);
+                browserForm.setUrl(url);
+                browserForm.Show(this);
+            }
+            else
+            {
+                browserForm.Focus();
+            }
+        }
+
+        public void CloseBrowser()
+        {
+            browserForm.Dispose();
+            browserForm = null;
+        }
+
     }
 }

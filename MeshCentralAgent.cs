@@ -574,7 +574,12 @@ namespace MeshAssistant
                     }
                 case "openurl":
                     {
-                        if (cmd.Length != 2) { response = "Usage: openurl [url]"; } else { Process.Start(cmd[1]); sendOpenUrlEventLog(cmd[1]); response = "Ok"; }
+                        if (cmd.Length != 2) {
+                            response = "Usage: openurl [url]";
+                        } else {
+                            Process.Start(cmd[1]);
+                            sendOpenUrlEventLog(cmd[1]); response = "Ok";
+                        }
                         break;
                     }
                 case "notify":
@@ -645,6 +650,7 @@ namespace MeshAssistant
                         Event(userid, string.Format("Opening URL: {0}", jsonAction["url"].ToString()));
                         sendOpenUrlEventLog(jsonAction["url"].ToString());
                         Process.Start(jsonAction["url"].ToString());
+                        //parent.OpenBrowser(jsonAction["url"].ToString());
                         break;
                     }
                 case "msg": {
