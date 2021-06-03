@@ -195,22 +195,29 @@ namespace MeshAssistant
             string p12filename = getSelfFilename(".p12");
             X509Certificate2 cert = null;
             if (File.Exists(p12filename)) { try { cert = new X509Certificate2(p12filename, "dummy"); } catch (Exception) { } }
-            if (cert != null) { Log("LoadAgentCertificate() - Loaded existing certificate."); return cert; }
-
+            if (cert != null) { Log("LoadAgentCertificate() - Loaded existing certificate from file."); return cert; }
+            if (cert == null)
+            {
+                string certstr = Settings.GetRegValue("cert", null);
+                if (certstr != null) { try { cert = new X509Certificate2(Convert.FromBase64String(certstr), "dummy"); } catch (Exception) { } }
+                if (cert != null) { Log("LoadAgentCertificate() - Loaded existing certificate from registry."); return cert; }
+            }
             try
             {
                 Log("LoadAgentCertificate() - Creating new certificate...");
                 RSA rsa = RSA.Create(3072); // Generate asymmetric RSA key pair
                 CertificateRequest req = new CertificateRequest("cn=MeshAgent", rsa, HashAlgorithmName.SHA384, RSASignaturePadding.Pkcs1);
                 cert = req.CreateSelfSigned(DateTimeOffset.Now.AddDays(-10), DateTimeOffset.Now.AddYears(20));
-                File.WriteAllBytes(p12filename, cert.Export(X509ContentType.Pkcs12, "dummy"));
+                //File.WriteAllBytes(p12filename, cert.Export(X509ContentType.Pkcs12, "dummy"));
+                Settings.SetRegValue("cert", Convert.ToBase64String(cert.Export(X509ContentType.Pkcs12, "dummy")));
                 Log("LoadAgentCertificate() - Certificate created");
                 return cert;
             } catch (Exception) { }
 
             Log("LoadAgentCertificate() - Creating new certificate using CertEnroll...");
             cert = CreateSelfSignedCertificate("MeshAgent");
-            File.WriteAllBytes(p12filename, cert.Export(X509ContentType.Pkcs12, "dummy"));
+            //File.WriteAllBytes(p12filename, cert.Export(X509ContentType.Pkcs12, "dummy"));
+            Settings.SetRegValue("cert", Convert.ToBase64String(cert.Export(X509ContentType.Pkcs12, "dummy")));
             Log("LoadAgentCertificate() - Certificate created");
             return cert;
         }
