@@ -32,6 +32,8 @@ namespace MeshAssistant
         [STAThread]
         static void Main(string[] args)
         {
+            if (Environment.OSVersion.Version.Major >= 6) SetProcessDPIAware();
+
             string update = null;
             foreach (string arg in args)
             {
@@ -100,5 +102,8 @@ namespace MeshAssistant
         {
             Debug("UnhandledExceptionEventSink: " + ((Exception)args.ExceptionObject).ToString());
         }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetProcessDPIAware();
     }
 }

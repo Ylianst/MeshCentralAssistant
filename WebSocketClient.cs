@@ -205,7 +205,7 @@ namespace MeshAssistant
                 // Start TLS connection
                 Log("Websocket TCP connected, doing TLS...");
                 wsstream = new SslStream(wsclient.GetStream(), false, VerifyServerCertificate, null);
-                wsstream.BeginAuthenticateAsClient(url.Host, null, System.Security.Authentication.SslProtocols.Tls12, false, new AsyncCallback(OnTlsSetupSink), this);
+                try { wsstream.BeginAuthenticateAsClient(url.Host, null, System.Security.Authentication.SslProtocols.Tls12, false, new AsyncCallback(OnTlsSetupSink), this); } catch (Exception) { Dispose(); }
             }
         }
 
@@ -234,7 +234,7 @@ namespace MeshAssistant
                     readBufferLen = 0;
                     Log("Websocket TCP connected, doing TLS...");
                     wsstream = new SslStream(wsrawstream, false, VerifyServerCertificate, null);
-                    wsstream.BeginAuthenticateAsClient(url.Host, null, System.Security.Authentication.SslProtocols.Tls12, false, new AsyncCallback(OnTlsSetupSink), this);
+                    try { wsstream.BeginAuthenticateAsClient(url.Host, null, System.Security.Authentication.SslProtocols.Tls12, false, new AsyncCallback(OnTlsSetupSink), this); } catch (Exception) { Dispose(); }
                 }
                 else
                 {
@@ -254,7 +254,7 @@ namespace MeshAssistant
                 else
                 {
                     // Read more proxy data
-                    wsrawstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnProxyResponseSink), this);
+                    try {  wsrawstream.BeginRead(readBuffer, readBufferLen, readBuffer.Length - readBufferLen, new AsyncCallback(OnProxyResponseSink), this); } catch (Exception) { Dispose(); }
                 }
             }
         }

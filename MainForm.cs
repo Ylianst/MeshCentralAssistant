@@ -175,6 +175,7 @@ namespace MeshAssistant
 
             Log("InitializeComponent()");
             InitializeComponent();
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             Translate.TranslateControl(this);
             Translate.TranslateContextMenu(this.mainContextMenuStrip);
             Translate.TranslateContextMenu(this.dialogContextMenuStrip);
@@ -424,13 +425,11 @@ namespace MeshAssistant
                 cancelHelpRequestToolStripMenuItem.Visible = ((mcagent.state == 3) && helpRequested);
 
                 // Update image
-                pictureBoxGreen.Visible = ((mcagent.state == 3) && (helpRequested == false)); // Green
-                pictureBoxRed.Visible = false; // Red
-                pictureBoxYellow.Visible = (mcagent.state == 0) || (mcagent.state == 1) || (mcagent.state == 2); // Gray
-                pictureBoxQuestion.Visible = ((mcagent.state == 3) && (helpRequested == true)); // Question
-                pictureBoxUser.Visible = false;
-                pictureBoxUsers.Visible = false;
-                pictureBoxCustom.Visible = false;
+                if (mcagent.state == 3) {
+                    if (helpRequested) { setUiImage(uiImage.Question); } else { setUiImage(uiImage.Green); }
+                } else {
+                    setUiImage(uiImage.Red);
+                }
             }
             else
             {
@@ -449,13 +448,15 @@ namespace MeshAssistant
                 cancelHelpRequestToolStripMenuItem.Visible = (mcagent.state != 0);
 
                 // Update image
-                pictureBoxGreen.Visible = false; // Green
-                pictureBoxRed.Visible = (mcagent.state == 0); // Red
-                pictureBoxYellow.Visible = (mcagent.state == 1) || (mcagent.state == 2); // Gray
-                pictureBoxQuestion.Visible = (mcagent.state == 3); // Question
-                pictureBoxUser.Visible = false;
-                pictureBoxUsers.Visible = false;
-                pictureBoxCustom.Visible = false;
+                if (mcagent.state == 3) {
+                    setUiImage(uiImage.Question);
+                } else {
+                    if (mcagent.state == 0) {
+                        setUiImage(uiImage.Red);
+                    } else {
+                        setUiImage(uiImage.Yellow);
+                    }
+                }
             }
 
             string[] userids = getSessionUserIdList();
@@ -465,32 +466,14 @@ namespace MeshAssistant
                 string realname = userid.Split('/')[2];
                 if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
                 stateLabel.Text = realname;
-                pictureBoxGreen.Visible = false; // Green
-                pictureBoxRed.Visible = false; // Red
-                pictureBoxYellow.Visible = false; // Gray
-                pictureBoxQuestion.Visible = false; // Question
                 Image userImage = null;
                 if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
-                if (userImage == null)
-                {
-                    pictureBoxUser.Visible = true;
-                    pictureBoxCustom.Visible = false;
-                }
-                else
-                {
-                    pictureBoxUser.Visible = false;
-                    pictureBoxCustom.Image = RoundCorners(userImage, 30, this.BackColor);
-                    pictureBoxCustom.Visible = true;
-                }
+                if (userImage == null) { setUiImage(uiImage.User); } else { setUiImage(userImage); }
             }
             if (userids.Length > 1)
             {
                 stateLabel.Text = Translate.T(Properties.Resources.MultipleUsers);
-                pictureBoxGreen.Visible = false; // Green
-                pictureBoxRed.Visible = false; // Red
-                pictureBoxYellow.Visible = false; // Gray
-                pictureBoxQuestion.Visible = false; // Question
-                pictureBoxUsers.Visible = true;
+                setUiImage(uiImage.Users);
             }
         }
 
@@ -538,9 +521,7 @@ namespace MeshAssistant
                 agent.ConnectPipe();
                 UpdateServiceStatus();
 
-                pictureBoxGreen.Visible = false;
-                pictureBoxRed.Visible = false;
-                pictureBoxYellow.Visible = true;
+                setUiImage(uiImage.Yellow);
 
                 isAdministrator = IsAdministrator();
                 if (isAdministrator)
@@ -683,13 +664,7 @@ namespace MeshAssistant
                 if (sessionsForm != null) { sessionsForm.UpdateInfo(); }
 
                 stateLabel.Text = Translate.T(Properties.Resources.ConnectedToServer);
-                pictureBoxGreen.Visible = true; // Green
-                pictureBoxRed.Visible = false;  // Red
-                pictureBoxYellow.Visible = false; // Yellow
-                pictureBoxQuestion.Visible = false; // Help
-                pictureBoxUser.Visible = false;
-                pictureBoxUsers.Visible = false;
-                pictureBoxCustom.Visible = false;
+                setUiImage(uiImage.Green);
 
                 string[] userids = getSessionUserIdList2();
                 if (userids.Length == 1)
@@ -698,32 +673,14 @@ namespace MeshAssistant
                     string realname = userid.Split('/')[2];
                     if ((agent.userrealname != null) && (agent.userrealname.ContainsKey(userid)) && (agent.userrealname[userid] != null)) { realname = agent.userrealname[userid]; }
                     stateLabel.Text = realname;
-                    pictureBoxGreen.Visible = false; // Green
-                    pictureBoxRed.Visible = false;  // Red
-                    pictureBoxYellow.Visible = false; // Gray
-                    pictureBoxQuestion.Visible = false; // Question
                     Image userImage = null;
                     if ((agent.userimages != null) && agent.userimages.ContainsKey(userid) && (agent.userimages[userid] != null)) { userImage = agent.userimages[userid]; }
-                    if (userImage == null)
-                    {
-                        pictureBoxUser.Visible = true;
-                        pictureBoxCustom.Visible = false;
-                    }
-                    else
-                    {
-                        pictureBoxUser.Visible = false;
-                        pictureBoxCustom.Image = RoundCorners(userImage, 30, this.BackColor);
-                        pictureBoxCustom.Visible = true;
-                    }
+                    if (userImage == null) { setUiImage(uiImage.User); } else { setUiImage(userImage); }
                 }
                 if (userids.Length > 1)
                 {
                     stateLabel.Text = Translate.T(Properties.Resources.MultipleUsers);
-                    pictureBoxGreen.Visible = false; // Green
-                    pictureBoxRed.Visible = false;  // Red
-                    pictureBoxYellow.Visible = false; // Gray
-                    pictureBoxQuestion.Visible = false; // Question
-                    pictureBoxUsers.Visible = true;
+                    setUiImage(uiImage.Users);
                 }
             }
         }
@@ -738,13 +695,7 @@ namespace MeshAssistant
                 startAgentToolStripMenuItem.Enabled = (status == ServiceControllerStatus.Stopped);
                 stopAgentToolStripMenuItem.Enabled = (status != ServiceControllerStatus.Stopped);
                 if (agent.State != 0) return;
-                pictureBoxGreen.Visible = false; // Green
-                pictureBoxRed.Visible = true; // Red
-                pictureBoxYellow.Visible = false; // Yellow
-                pictureBoxQuestion.Visible = false; // Help
-                pictureBoxUser.Visible = false;
-                pictureBoxUsers.Visible = false;
-                pictureBoxCustom.Visible = false;
+                setUiImage(uiImage.Red);
                 switch (status)
                 {
                     case ServiceControllerStatus.ContinuePending: { stateLabel.Text = Translate.T(Properties.Resources.AgentIsContinuePending); break; }
@@ -761,13 +712,7 @@ namespace MeshAssistant
                 startAgentToolStripMenuItem.Enabled = false;
                 stopAgentToolStripMenuItem.Enabled = false;
                 stateLabel.Text = Translate.T(Properties.Resources.AgentNotInstalled);
-                pictureBoxGreen.Visible = false; // Green
-                pictureBoxRed.Visible = true; // Red
-                pictureBoxYellow.Visible = false; // Yellow
-                pictureBoxQuestion.Visible = false; // Help
-                pictureBoxUser.Visible = false;
-                pictureBoxUsers.Visible = false;
-                pictureBoxCustom.Visible = false;
+                setUiImage(uiImage.Red);
             }
         }
 
@@ -812,13 +757,7 @@ namespace MeshAssistant
             {
                 case 0:
                     {
-                        pictureBoxGreen.Visible = false; // Green
-                        pictureBoxRed.Visible = true;  // Red
-                        pictureBoxYellow.Visible = false; // Yellow
-                        pictureBoxQuestion.Visible = false; // Help
-                        pictureBoxUser.Visible = false; // User
-                        pictureBoxUsers.Visible = false;
-                        pictureBoxCustom.Visible = false;
+                        setUiImage(uiImage.Red);
                         UpdateServiceStatus();
                         requestHelpToolStripMenuItem.Enabled = false;
                         requestHelpToolStripMenuItem.Visible = true;
@@ -830,25 +769,13 @@ namespace MeshAssistant
                 case 1:
                     {
                         if (serverState == 1) {
-                            pictureBoxGreen.Visible = true;
-                            pictureBoxRed.Visible = false;
-                            pictureBoxYellow.Visible = false;
-                            pictureBoxQuestion.Visible = false;
-                            pictureBoxUser.Visible = false;
-                            pictureBoxUsers.Visible = false;
-                            pictureBoxCustom.Visible = false;
+                            setUiImage(uiImage.Green);
                             stateLabel.Text = Translate.T(Properties.Resources.ConnectedToServer);
                             requestHelpToolStripMenuItem.Enabled = true;
                             requestHelpToolStripMenuItem.Visible = true;
                             cancelHelpRequestToolStripMenuItem.Visible = false;
                         } else {
-                            pictureBoxGreen.Visible = false;
-                            pictureBoxRed.Visible = false;
-                            pictureBoxYellow.Visible = true;
-                            pictureBoxQuestion.Visible = false;
-                            pictureBoxUser.Visible = false;
-                            pictureBoxUsers.Visible = false;
-                            pictureBoxCustom.Visible = false;
+                            setUiImage(uiImage.Yellow);
                             stateLabel.Text = Translate.T(Properties.Resources.AgentIsDisconnected);
                             requestHelpToolStripMenuItem.Enabled = false;
                             requestHelpToolStripMenuItem.Visible = true;
@@ -1055,13 +982,7 @@ namespace MeshAssistant
                         stateLabel.Text = Translate.T(Properties.Resources.ConnectedToServer);
                         requestHelpToolStripMenuItem.Visible = true;
                         cancelHelpRequestToolStripMenuItem.Visible = false;
-                        pictureBoxGreen.Visible = true;
-                        pictureBoxRed.Visible = false;
-                        pictureBoxYellow.Visible = false;
-                        pictureBoxQuestion.Visible = false;
-                        pictureBoxUser.Visible = false;
-                        pictureBoxUsers.Visible = false;
-                        pictureBoxCustom.Visible = false;
+                        setUiImage(uiImage.Green);
                     }
                 }
                 else
@@ -1107,13 +1028,7 @@ namespace MeshAssistant
                     stateLabel.Text = Translate.T(Properties.Resources.HelpRequested);
                     requestHelpToolStripMenuItem.Visible = false;
                     cancelHelpRequestToolStripMenuItem.Visible = true;
-                    pictureBoxGreen.Visible = false;
-                    pictureBoxRed.Visible = false;
-                    pictureBoxYellow.Visible = false;
-                    pictureBoxQuestion.Visible = true;
-                    pictureBoxUser.Visible = false;
-                    pictureBoxUsers.Visible = false;
-                    pictureBoxCustom.Visible = false;
+                    setUiImage(uiImage.Question);
                 }
             }
         }
@@ -1359,6 +1274,55 @@ namespace MeshAssistant
         {
             browserForm.Dispose();
             browserForm = null;
+        }
+
+        private enum uiImage {
+            Green = 1,
+            Yellow = 2,
+            Red = 3,
+            Question = 4,
+            User = 5,
+            Users = 6,
+            Custom = 7
+        }
+
+        private void setUiImage(uiImage x)
+        {
+            mainPictureBox.Visible = (x != uiImage.Custom);
+            pictureBoxCustom.Visible = (x == uiImage.Custom);
+            switch (x)
+            {
+                case uiImage.Green:
+                    mainPictureBox.Image = Properties.Resources.MeshCentral;
+                    mainPictureBox.BackgroundImage = Properties.Resources.Green;
+                    break;
+                case uiImage.Yellow:
+                    mainPictureBox.Image = Properties.Resources.MeshCentral;
+                    mainPictureBox.BackgroundImage = Properties.Resources.Yellow;
+                    break;
+                case uiImage.Red:
+                    mainPictureBox.Image = Properties.Resources.MeshCentral;
+                    mainPictureBox.BackgroundImage = Properties.Resources.Red;
+                    break;
+                case uiImage.Question:
+                    mainPictureBox.Image = Properties.Resources.Question;
+                    mainPictureBox.BackgroundImage = Properties.Resources.Green;
+                    break;
+                case uiImage.User:
+                    mainPictureBox.Image = Properties.Resources.User;
+                    mainPictureBox.BackgroundImage = Properties.Resources.Green;
+                    break;
+                case uiImage.Users:
+                    mainPictureBox.Image = Properties.Resources.Users;
+                    mainPictureBox.BackgroundImage = Properties.Resources.Green;
+                    break;
+            }
+        }
+
+        private void setUiImage(Image x)
+        {
+            pictureBoxCustom.Image = RoundCorners(x, 30, this.BackColor);
+            setUiImage(uiImage.Custom);
         }
 
     }

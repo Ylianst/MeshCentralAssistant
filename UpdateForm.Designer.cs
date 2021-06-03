@@ -53,7 +53,7 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.MeshIconGreen2;
+            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.MeshCentral;
             resources.ApplyResources(this.pictureBox1, "pictureBox1");
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.TabStop = false;

@@ -55,22 +55,12 @@
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.showSessionsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.intelAMTStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pictureBoxUser = new System.Windows.Forms.PictureBox();
-            this.pictureBoxRed = new System.Windows.Forms.PictureBox();
-            this.pictureBoxQuestion = new System.Windows.Forms.PictureBox();
-            this.pictureBoxGreen = new System.Windows.Forms.PictureBox();
-            this.pictureBoxYellow = new System.Windows.Forms.PictureBox();
+            this.mainPictureBox = new System.Windows.Forms.PictureBox();
             this.pictureBoxCustom = new System.Windows.Forms.PictureBox();
-            this.pictureBoxUsers = new System.Windows.Forms.PictureBox();
             this.mainContextMenuStrip.SuspendLayout();
             this.dialogContextMenuStrip.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUser)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRed)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxQuestion)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGreen)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxYellow)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCustom)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUsers)).BeginInit();
             this.SuspendLayout();
             // 
             // stateLabel
@@ -242,76 +232,29 @@
             resources.ApplyResources(this.intelAMTStateToolStripMenuItem, "intelAMTStateToolStripMenuItem");
             this.intelAMTStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
             // 
-            // pictureBoxUser
+            // mainPictureBox
             // 
-            this.pictureBoxUser.ContextMenuStrip = this.dialogContextMenuStrip;
-            this.pictureBoxUser.Image = global::MeshAssistant.Properties.Resources.user;
-            resources.ApplyResources(this.pictureBoxUser, "pictureBoxUser");
-            this.pictureBoxUser.Name = "pictureBoxUser";
-            this.pictureBoxUser.TabStop = false;
-            // 
-            // pictureBoxRed
-            // 
-            this.pictureBoxRed.ContextMenuStrip = this.dialogContextMenuStrip;
-            this.pictureBoxRed.Image = global::MeshAssistant.Properties.Resources.MeshIconRed2;
-            resources.ApplyResources(this.pictureBoxRed, "pictureBoxRed");
-            this.pictureBoxRed.Name = "pictureBoxRed";
-            this.pictureBoxRed.TabStop = false;
-            // 
-            // pictureBoxQuestion
-            // 
-            this.pictureBoxQuestion.ContextMenuStrip = this.dialogContextMenuStrip;
-            this.pictureBoxQuestion.Image = global::MeshAssistant.Properties.Resources.MeshIconHelp2;
-            resources.ApplyResources(this.pictureBoxQuestion, "pictureBoxQuestion");
-            this.pictureBoxQuestion.Name = "pictureBoxQuestion";
-            this.pictureBoxQuestion.TabStop = false;
-            // 
-            // pictureBoxGreen
-            // 
-            this.pictureBoxGreen.ContextMenuStrip = this.dialogContextMenuStrip;
-            this.pictureBoxGreen.Image = global::MeshAssistant.Properties.Resources.MeshIconGreen2;
-            resources.ApplyResources(this.pictureBoxGreen, "pictureBoxGreen");
-            this.pictureBoxGreen.Name = "pictureBoxGreen";
-            this.pictureBoxGreen.TabStop = false;
-            // 
-            // pictureBoxYellow
-            // 
-            this.pictureBoxYellow.ContextMenuStrip = this.dialogContextMenuStrip;
-            this.pictureBoxYellow.Image = global::MeshAssistant.Properties.Resources.MeshIconGray2;
-            resources.ApplyResources(this.pictureBoxYellow, "pictureBoxYellow");
-            this.pictureBoxYellow.Name = "pictureBoxYellow";
-            this.pictureBoxYellow.TabStop = false;
+            resources.ApplyResources(this.mainPictureBox, "mainPictureBox");
+            this.mainPictureBox.ContextMenuStrip = this.dialogContextMenuStrip;
+            this.mainPictureBox.Name = "mainPictureBox";
+            this.mainPictureBox.TabStop = false;
             // 
             // pictureBoxCustom
             // 
-            this.pictureBoxCustom.ContextMenuStrip = this.dialogContextMenuStrip;
             resources.ApplyResources(this.pictureBoxCustom, "pictureBoxCustom");
             this.pictureBoxCustom.Name = "pictureBoxCustom";
             this.pictureBoxCustom.TabStop = false;
-            // 
-            // pictureBoxUsers
-            // 
-            this.pictureBoxUsers.ContextMenuStrip = this.dialogContextMenuStrip;
-            this.pictureBoxUsers.Image = global::MeshAssistant.Properties.Resources.users;
-            resources.ApplyResources(this.pictureBoxUsers, "pictureBoxUsers");
-            this.pictureBoxUsers.Name = "pictureBoxUsers";
-            this.pictureBoxUsers.TabStop = false;
             // 
             // MainForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
-            this.Controls.Add(this.pictureBoxUsers);
+            this.Controls.Add(this.pictureBoxCustom);
             this.Controls.Add(this.remoteSessionsLabel);
             this.Controls.Add(this.requestHelpButton);
             this.Controls.Add(this.stateLabel);
-            this.Controls.Add(this.pictureBoxUser);
-            this.Controls.Add(this.pictureBoxRed);
-            this.Controls.Add(this.pictureBoxQuestion);
-            this.Controls.Add(this.pictureBoxGreen);
-            this.Controls.Add(this.pictureBoxYellow);
-            this.Controls.Add(this.pictureBoxCustom);
+            this.Controls.Add(this.mainPictureBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -322,15 +265,9 @@
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.mainContextMenuStrip.ResumeLayout(false);
             this.dialogContextMenuStrip.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUser)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxRed)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxQuestion)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxGreen)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxYellow)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCustom)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUsers)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -348,10 +285,7 @@
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.Button requestHelpButton;
-        private System.Windows.Forms.PictureBox pictureBoxGreen;
-        private System.Windows.Forms.PictureBox pictureBoxRed;
-        private System.Windows.Forms.PictureBox pictureBoxYellow;
-        private System.Windows.Forms.PictureBox pictureBoxQuestion;
+        private System.Windows.Forms.PictureBox mainPictureBox;
         private System.Windows.Forms.Label remoteSessionsLabel;
         private System.Windows.Forms.ToolStripMenuItem showSessionsToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip dialogContextMenuStrip;
@@ -362,11 +296,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem intelMEStateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem agentSelectToolStripMenuItem;
-        private System.Windows.Forms.PictureBox pictureBoxUser;
-        private System.Windows.Forms.PictureBox pictureBoxCustom;
-        private System.Windows.Forms.PictureBox pictureBoxUsers;
         private System.Windows.Forms.ToolStripMenuItem updateSoftwareToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showEventsToolStripMenuItem;
+        private System.Windows.Forms.PictureBox pictureBoxCustom;
     }
 }
 

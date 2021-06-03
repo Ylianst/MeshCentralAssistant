@@ -39,8 +39,9 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.MeshIconHelp2;
+            this.pictureBox1.BackgroundImage = global::MeshAssistant.Properties.Resources.Green;
             resources.ApplyResources(this.pictureBox1, "pictureBox1");
+            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.Question;
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.TabStop = false;
             // 

@@ -56,7 +56,7 @@
             // 
             this.pictureBox1.Cursor = System.Windows.Forms.Cursors.SizeWE;
             resources.ApplyResources(this.pictureBox1, "pictureBox1");
-            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.MeshIconGray2;
+            this.pictureBox1.Image = global::MeshAssistant.Properties.Resources.MeshCentral;
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.TabStop = false;
             this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PrivacyBarForm_MouseDown);

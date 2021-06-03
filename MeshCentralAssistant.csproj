@@ -62,6 +62,9 @@
   <PropertyGroup>
     <ApplicationIcon>MeshServer.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -211,6 +214,7 @@
     <EmbeddedResource Include="UpdateForm.resx">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -225,20 +229,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="MeshIconGray2.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="MeshIconGreen2.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="MeshIconRed2.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="MeshIconHelp2.png" />
     <None Include="images\user.png" />
     <None Include="images\users.png" />
-    <None Include="images\user2.png" />
     <None Include="images\redx.png" />
+    <None Include="images\MeshCentral.png" />
+    <None Include="images\Green.png" />
+    <None Include="images\Yellow.png" />
+    <None Include="images\Red.png" />
+    <None Include="images\Question.png" />
     <Content Include="MeshServer.ico" />
     <Content Include="readme.txt" />
   </ItemGroup>

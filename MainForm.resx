@@ -2066,140 +2066,47 @@
   <data name="&gt;&gt;dialogContextMenuStrip.Type" xml:space="preserve">
     <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="pictureBoxUser.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="mainPictureBox.BackgroundImageLayout" type="System.Windows.Forms.ImageLayout, System.Windows.Forms">
+    <value>Zoom</value>
+  </data>
+  <data name="mainPictureBox.Location" type="System.Drawing.Point, System.Drawing">
     <value>12, 23</value>
   </data>
-  <data name="pictureBoxUser.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="mainPictureBox.Size" type="System.Drawing.Size, System.Drawing">
     <value>178, 136</value>
   </data>
-  <data name="pictureBoxUser.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
-    <value>AutoSize</value>
+  <data name="mainPictureBox.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
+    <value>Zoom</value>
   </data>
-  <data name="pictureBoxUser.TabIndex" type="System.Int32, mscorlib">
-    <value>12</value>
+  <data name="mainPictureBox.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
   </data>
-  <data name="&gt;&gt;pictureBoxUser.Name" xml:space="preserve">
-    <value>pictureBoxUser</value>
+  <data name="&gt;&gt;mainPictureBox.Name" xml:space="preserve">
+    <value>mainPictureBox</value>
   </data>
-  <data name="&gt;&gt;pictureBoxUser.Type" xml:space="preserve">
+  <data name="&gt;&gt;mainPictureBox.Type" xml:space="preserve">
     <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;pictureBoxUser.Parent" xml:space="preserve">
+  <data name="&gt;&gt;mainPictureBox.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="&gt;&gt;pictureBoxUser.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;mainPictureBox.ZOrder" xml:space="preserve">
     <value>6</value>
   </data>
-  <data name="pictureBoxRed.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 23</value>
-  </data>
-  <data name="pictureBoxRed.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 136</value>
-  </data>
-  <data name="pictureBoxRed.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
-    <value>AutoSize</value>
-  </data>
-  <data name="pictureBoxRed.TabIndex" type="System.Int32, mscorlib">
-    <value>8</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxRed.Name" xml:space="preserve">
-    <value>pictureBoxRed</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxRed.Type" xml:space="preserve">
-    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxRed.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxRed.ZOrder" xml:space="preserve">
-    <value>7</value>
-  </data>
-  <data name="pictureBoxQuestion.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 23</value>
-  </data>
-  <data name="pictureBoxQuestion.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 136</value>
-  </data>
-  <data name="pictureBoxQuestion.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
-    <value>AutoSize</value>
-  </data>
-  <data name="pictureBoxQuestion.TabIndex" type="System.Int32, mscorlib">
-    <value>10</value>
-  </data>
-  <data name="pictureBoxQuestion.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxQuestion.Name" xml:space="preserve">
-    <value>pictureBoxQuestion</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxQuestion.Type" xml:space="preserve">
-    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxQuestion.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxQuestion.ZOrder" xml:space="preserve">
-    <value>8</value>
-  </data>
-  <data name="pictureBoxGreen.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 23</value>
-  </data>
-  <data name="pictureBoxGreen.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 136</value>
-  </data>
-  <data name="pictureBoxGreen.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
-    <value>AutoSize</value>
-  </data>
-  <data name="pictureBoxGreen.TabIndex" type="System.Int32, mscorlib">
-    <value>7</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxGreen.Name" xml:space="preserve">
-    <value>pictureBoxGreen</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxGreen.Type" xml:space="preserve">
-    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxGreen.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxGreen.ZOrder" xml:space="preserve">
-    <value>9</value>
-  </data>
-  <data name="pictureBoxYellow.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 23</value>
-  </data>
-  <data name="pictureBoxYellow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 136</value>
-  </data>
-  <data name="pictureBoxYellow.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
-    <value>AutoSize</value>
-  </data>
-  <data name="pictureBoxYellow.TabIndex" type="System.Int32, mscorlib">
-    <value>9</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxYellow.Name" xml:space="preserve">
-    <value>pictureBoxYellow</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxYellow.Type" xml:space="preserve">
-    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxYellow.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxYellow.ZOrder" xml:space="preserve">
-    <value>10</value>
+  <data name="pictureBoxCustom.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
   </data>
   <data name="pictureBoxCustom.Location" type="System.Drawing.Point, System.Drawing">
-    <value>36, 28</value>
+    <value>12, 35</value>
   </data>
   <data name="pictureBoxCustom.Size" type="System.Drawing.Size, System.Drawing">
-    <value>130, 130</value>
+    <value>178, 120</value>
   </data>
   <data name="pictureBoxCustom.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
     <value>Zoom</value>
   </data>
   <data name="pictureBoxCustom.TabIndex" type="System.Int32, mscorlib">
-    <value>13</value>
+    <value>12</value>
   </data>
   <data name="&gt;&gt;pictureBoxCustom.Name" xml:space="preserve">
     <value>pictureBoxCustom</value>
@@ -2211,31 +2118,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;pictureBoxCustom.ZOrder" xml:space="preserve">
-    <value>11</value>
-  </data>
-  <data name="pictureBoxUsers.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 23</value>
-  </data>
-  <data name="pictureBoxUsers.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 136</value>
-  </data>
-  <data name="pictureBoxUsers.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
-    <value>AutoSize</value>
-  </data>
-  <data name="pictureBoxUsers.TabIndex" type="System.Int32, mscorlib">
-    <value>14</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxUsers.Name" xml:space="preserve">
-    <value>pictureBoxUsers</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxUsers.Type" xml:space="preserve">
-    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxUsers.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;pictureBoxUsers.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>

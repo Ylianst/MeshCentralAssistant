@@ -48,8 +48,7 @@
             // mainPictureBox
             // 
             resources.ApplyResources(this.mainPictureBox, "mainPictureBox");
-            this.mainPictureBox.Image = global::MeshAssistant.Properties.Resources.user2;
-            this.mainPictureBox.InitialImage = global::MeshAssistant.Properties.Resources.user2;
+            this.mainPictureBox.Image = global::MeshAssistant.Properties.Resources.User;
             this.mainPictureBox.Name = "mainPictureBox";
             this.mainPictureBox.TabStop = false;
             // 
