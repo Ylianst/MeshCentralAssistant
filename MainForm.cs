@@ -139,6 +139,7 @@ namespace MeshAssistant
             }
             if (debug) { try { File.AppendAllText("debug.log", "\r\n\r\n"); } catch (Exception) { } }
             Log("***** Starting MeshCentral Assistant *****");
+            Log("Version " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
 
             if (update != null)
             {
@@ -197,8 +198,8 @@ namespace MeshAssistant
                 mcagent.onUserInfoChange += Mcagent_onUserInfoChange;
                 mcagent.onRequestConsent += Mcagent_onRequestConsent;
                 mcagent.onLogEvent += Mcagent_onLogEvent;
-                if ((currentAgentSelection != null) && (currentAgentSelection.Equals("~"))) { currentAgentName = "~"; }
-                if (autoConnect == true) { currentAgentName = "~"; }
+                currentAgentSelection = "~"; // If a built-in agent is present, always default to that on start.
+                currentAgentName = "~";
                 ToolStripMenuItem m = new ToolStripMenuItem();
                 m.Name = "AgentSelector-~";
                 m.Text = Translate.T(Properties.Resources.DirectConnect);
