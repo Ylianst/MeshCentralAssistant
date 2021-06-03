@@ -62,6 +62,8 @@ namespace MeshAssistant
         private Random rand = new Random();
         private string discoveryKey = null;
         private MeshDiscovery scanner = null;
+        public Image CustomizationLogo = null;
+        public string CustomizationTitle = null;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -147,11 +149,23 @@ namespace MeshAssistant
             if (msh.ContainsKey("MeshID")) { string m = msh["MeshID"]; if (m.StartsWith("0x")) { m = m.Substring(2); } MeshId = StringToByteArray(m); }
             if (msh.ContainsKey("ServerID")) { ServerId = msh["ServerID"]; }
             if (msh.ContainsKey("MeshServer") && (msh["MeshServer"] != "local")) { try { ServerUrl = new Uri(msh["MeshServer"]); } catch (Exception) { } }
-            if (msh.ContainsKey("AutoConnect")) { parent.autoConnect = (msh["AutoConnect"] == "1"); }
+            if (msh.ContainsKey("Title")) { CustomizationTitle = msh["Title"]; }
+            if (msh.ContainsKey("AutoConnect")) {
+                int flags = 0;
+                if (int.TryParse(msh["AutoConnect"], out flags))
+                {
+                    parent.autoConnect = ((flags & 1) != 0); // Auto connect with built-in agent
+                    parent.SystemTrayApp = ((flags & 2) == 0); // Be a system tray tool
+                }
+            }
             if (msh.ContainsKey("DiscoveryKey")) { discoveryKey = msh["DiscoveryKey"]; }
             Log("MSH MeshID: " + msh["MeshID"]);
             Log("MSH ServerID: " + ServerId);
             Log("MSH MeshServer: " + ServerUrl);
+
+            // Load customization image
+            if (msh.ContainsKey("Image")) { try { CustomizationLogo = new Bitmap(new MemoryStream(Convert.FromBase64String(msh["Image"]))); } catch (Exception) { } }
+            if ((CustomizationLogo == null) && (File.Exists("logo.png"))) { try { CustomizationLogo = new Bitmap(new MemoryStream(File.ReadAllBytes("logo.png"))); } catch (Exception) { } }
 
             if (ServerUrl == null)
             {

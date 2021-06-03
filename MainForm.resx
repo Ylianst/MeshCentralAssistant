@@ -126,10 +126,10 @@
     <value>Microsoft Sans Serif, 8.25pt</value>
   </data>
   <data name="stateLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 11</value>
+    <value>0, 11</value>
   </data>
   <data name="stateLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>174, 13</value>
+    <value>201, 13</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="stateLabel.TabIndex" type="System.Int32, mscorlib">
@@ -151,7 +151,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;stateLabel.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>4</value>
   </data>
   <metadata name="mainNotifyIcon.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
@@ -1955,9 +1955,6 @@
   <data name="mainNotifyIcon.Text" xml:space="preserve">
     <value>MeshCentral Assistant</value>
   </data>
-  <data name="mainNotifyIcon.Visible" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
   <metadata name="connectionTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>330, 17</value>
   </metadata>
@@ -1989,19 +1986,22 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;requestHelpButton.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>3</value>
   </data>
   <data name="remoteSessionsLabel.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Left, Right</value>
+    <value>Bottom, Left, Right</value>
   </data>
   <data name="remoteSessionsLabel.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 8.25pt</value>
   </data>
+  <data name="remoteSessionsLabel.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="remoteSessionsLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 162</value>
+    <value>0, 162</value>
   </data>
   <data name="remoteSessionsLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>174, 13</value>
+    <value>201, 13</value>
   </data>
   <data name="remoteSessionsLabel.TabIndex" type="System.Int32, mscorlib">
     <value>11</value>
@@ -2022,7 +2022,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;remoteSessionsLabel.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>2</value>
   </data>
   <metadata name="dialogContextMenuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>473, 17</value>
@@ -2046,7 +2046,13 @@
     <value>183, 22</value>
   </data>
   <data name="showSessionsToolStripMenuItem1.Text" xml:space="preserve">
-    <value>Remote Sessions...</value>
+    <value>Show Sessions...</value>
+  </data>
+  <data name="showEventsToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>183, 22</value>
+  </data>
+  <data name="showEventsToolStripMenuItem1.Text" xml:space="preserve">
+    <value>Show &amp;Events...</value>
   </data>
   <data name="intelAMTStateToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>183, 22</value>
@@ -2058,13 +2064,16 @@
     <value>False</value>
   </data>
   <data name="dialogContextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>184, 98</value>
+    <value>184, 142</value>
   </data>
   <data name="&gt;&gt;dialogContextMenuStrip.Name" xml:space="preserve">
     <value>dialogContextMenuStrip</value>
   </data>
   <data name="&gt;&gt;dialogContextMenuStrip.Type" xml:space="preserve">
     <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="mainPictureBox.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
   </data>
   <data name="mainPictureBox.BackgroundImageLayout" type="System.Windows.Forms.ImageLayout, System.Windows.Forms">
     <value>Zoom</value>
@@ -2091,7 +2100,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;mainPictureBox.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>5</value>
   </data>
   <data name="pictureBoxCustom.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
@@ -2118,7 +2127,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;pictureBoxCustom.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>6</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -3944,6 +3953,12 @@
     <value>intelAMTStateToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;intelAMTStateToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;showEventsToolStripMenuItem1.Name" xml:space="preserve">
+    <value>showEventsToolStripMenuItem1</value>
+  </data>
+  <data name="&gt;&gt;showEventsToolStripMenuItem1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">

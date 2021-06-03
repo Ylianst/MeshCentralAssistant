@@ -57,6 +57,7 @@
             this.intelAMTStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainPictureBox = new System.Windows.Forms.PictureBox();
             this.pictureBoxCustom = new System.Windows.Forms.PictureBox();
+            this.showEventsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.mainContextMenuStrip.SuspendLayout();
             this.dialogContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).BeginInit();
@@ -198,6 +199,7 @@
             this.cancelHelpRequestToolStripMenuItem,
             this.toolStripMenuItem3,
             this.showSessionsToolStripMenuItem1,
+            this.showEventsToolStripMenuItem1,
             this.intelAMTStateToolStripMenuItem});
             this.dialogContextMenuStrip.Name = "dialogContextMenuStrip";
             resources.ApplyResources(this.dialogContextMenuStrip, "dialogContextMenuStrip");
@@ -245,19 +247,24 @@
             this.pictureBoxCustom.Name = "pictureBoxCustom";
             this.pictureBoxCustom.TabStop = false;
             // 
+            // showEventsToolStripMenuItem1
+            // 
+            this.showEventsToolStripMenuItem1.Name = "showEventsToolStripMenuItem1";
+            resources.ApplyResources(this.showEventsToolStripMenuItem1, "showEventsToolStripMenuItem1");
+            this.showEventsToolStripMenuItem1.Click += new System.EventHandler(this.showEventsToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
-            this.Controls.Add(this.pictureBoxCustom);
             this.Controls.Add(this.remoteSessionsLabel);
             this.Controls.Add(this.requestHelpButton);
             this.Controls.Add(this.stateLabel);
             this.Controls.Add(this.mainPictureBox);
+            this.Controls.Add(this.pictureBoxCustom);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
-            this.MinimizeBox = false;
             this.Name = "MainForm";
             this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
@@ -299,6 +306,7 @@
         private System.Windows.Forms.ToolStripMenuItem updateSoftwareToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showEventsToolStripMenuItem;
         private System.Windows.Forms.PictureBox pictureBoxCustom;
+        private System.Windows.Forms.ToolStripMenuItem showEventsToolStripMenuItem1;
     }
 }
 

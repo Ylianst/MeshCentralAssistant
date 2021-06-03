@@ -71,6 +71,7 @@ namespace MeshAssistant
         public List<PrivacyBarForm> privacyBars = null;
         private bool startVisible = false;
         public List<LogEventStruct> userEvents = new List<LogEventStruct>();
+        public bool SystemTrayApp = true;
 
         public struct LogEventStruct
         {
@@ -206,37 +207,50 @@ namespace MeshAssistant
                 m.Checked = ((currentAgentName != null) && (currentAgentName.Equals("~")));
                 m.Click += agentSelection_Click;
                 subMenus.Add(m);
+                if (mcagent.CustomizationTitle != null) { this.Text = mcagent.CustomizationTitle; } else { this.Text = Translate.T(Properties.Resources.MeshCentralAssistant); }
             }
+            this.Opacity = 0;
 
-            // Get the list of agents on the system
-            Log("Get list of background agents");
-            bool directConnectSeperator = false;
-            agents = MeshAgent.GetAgentInfo(selectedAgentName);
-            string[] agentNames = agents.Keys.ToArray();
-            if (agents.Count > 0) {
-                Log(string.Format("Found {0} background agent(s)", agents.Count));
-                if ((currentAgentName == null) || (currentAgentName != "~"))
+            // Configure system tray
+            if (SystemTrayApp == false) {
+                mainNotifyIcon.Visible = false;
+                this.ShowInTaskbar = true;
+                this.MinimizeBox = true;
+                startVisible = true;
+                this.Width = (this.Width * 160) / 100;
+                this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            } else {
+                // Get the list of agents on the system
+                Log("Get list of background agents");
+                bool directConnectSeperator = false;
+                agents = MeshAgent.GetAgentInfo(selectedAgentName);
+                string[] agentNames = agents.Keys.ToArray();
+                if (agents.Count > 0)
                 {
-                    currentAgentName = agentNames[0]; // Default
-                    for (var i = 0; i < agentNames.Length; i++) { if (agentNames[i] == currentAgentSelection) { currentAgentName = agentNames[i]; } }
-                }
-                if ((agentNames.Length > 1) || ((agentNames.Length > 0) && (mcagent != null)))
-                {
-                    for (var i = 0; i < agentNames.Length; i++)
+                    Log(string.Format("Found {0} background agent(s)", agents.Count));
+                    if ((currentAgentName == null) || (currentAgentName != "~"))
                     {
-                        if ((mcagent != null) && (!directConnectSeperator)) { subMenus.Add(new ToolStripSeparator()); directConnectSeperator = true; }
-                        ToolStripMenuItem m = new ToolStripMenuItem();
-                        m.Name = "AgentSelector-" + agentNames[i];
-                        m.Text = agentNames[i];
-                        m.Checked = (agentNames[i] == currentAgentName);
-                        m.Click += agentSelection_Click;
-                        subMenus.Add(m);
+                        currentAgentName = agentNames[0]; // Default
+                        for (var i = 0; i < agentNames.Length; i++) { if (agentNames[i] == currentAgentSelection) { currentAgentName = agentNames[i]; } }
+                    }
+                    if ((agentNames.Length > 1) || ((agentNames.Length > 0) && (mcagent != null)))
+                    {
+                        for (var i = 0; i < agentNames.Length; i++)
+                        {
+                            if ((mcagent != null) && (!directConnectSeperator)) { subMenus.Add(new ToolStripSeparator()); directConnectSeperator = true; }
+                            ToolStripMenuItem m = new ToolStripMenuItem();
+                            m.Name = "AgentSelector-" + agentNames[i];
+                            m.Text = agentNames[i];
+                            m.Checked = (agentNames[i] == currentAgentName);
+                            m.Click += agentSelection_Click;
+                            subMenus.Add(m);
+                        }
                     }
                 }
+                agentSelectToolStripMenuItem.DropDownItems.AddRange(subMenus.ToArray());
+                agentSelectToolStripMenuItem.Visible = (subMenus.Count > 1);
+                mainNotifyIcon.Visible = true;
             }
-            agentSelectToolStripMenuItem.DropDownItems.AddRange(subMenus.ToArray());
-            agentSelectToolStripMenuItem.Visible = (subMenus.Count > 1);
-            this.Opacity = 0;
 
             // Load events
             LoadEventsFromFile();
@@ -350,6 +364,7 @@ namespace MeshAssistant
                     submenu.Checked = (submenu.Name.Substring(14) == currentAgentName);
                 }
             }
+            if ((currentAgentName == "~") && (mcagent.CustomizationTitle != null)) { this.Text = mcagent.CustomizationTitle; } else { this.Text = Translate.T(Properties.Resources.MeshCentralAssistant); }
             Log(string.Format("agentSelection_Click {0}", currentAgentName));
             connectToAgent();
         }
@@ -486,7 +501,7 @@ namespace MeshAssistant
             if ((mcagent != null) && (mcagent.state != 0)) { mcagent.disconnect(); }
             if ((currentAgentName != null) && (currentAgentName.Equals("~")))
             {
-                this.Text = Translate.T(Properties.Resources.MeshCentralAssistant);
+                if ((currentAgentName == "~") && (mcagent.CustomizationTitle != null)) { this.Text = mcagent.CustomizationTitle; } else { this.Text = Translate.T(Properties.Resources.MeshCentralAssistant); }
                 Settings.SetRegValue("SelectedAgent", currentAgentName);
                 updateBuiltinAgentStatus();
                 startAgentToolStripMenuItem.Visible = false;
@@ -544,7 +559,7 @@ namespace MeshAssistant
                 }
                 else
                 {
-                    this.Text = Translate.T(Properties.Resources.MeshCentralAssistant);
+                    if ((currentAgentName == "~") && (mcagent.CustomizationTitle != null)) { this.Text = mcagent.CustomizationTitle; } else { this.Text = Translate.T(Properties.Resources.MeshCentralAssistant); }
                 }
             }
             Agent_onSessionChanged();
@@ -845,7 +860,19 @@ namespace MeshAssistant
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (doclose == false) { e.Cancel = true; this.Visible = false; }
+            if (SystemTrayApp)
+            {
+                if (doclose == false) { e.Cancel = true; this.Visible = false; }
+            } else
+            {
+                if ((mcagent != null) && (currentAgentName != null) && (currentAgentName.Equals("~")) && (mcagent.state == 3))
+                {
+                    if (MessageBox.Show(this, Properties.Resources.DisconnectFromServerAndClose, this.Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) != DialogResult.OK)
+                    {
+                        e.Cancel = true;
+                    }
+                }
+            }
         }
 
         private void openSiteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1294,15 +1321,15 @@ namespace MeshAssistant
             switch (x)
             {
                 case uiImage.Green:
-                    mainPictureBox.Image = Properties.Resources.MeshCentral;
+                    if ((currentAgentName == "~") && (mcagent.CustomizationLogo != null)) { mainPictureBox.Image = mcagent.CustomizationLogo; } else { mainPictureBox.Image = Properties.Resources.MeshCentral; }
                     mainPictureBox.BackgroundImage = Properties.Resources.Green;
                     break;
                 case uiImage.Yellow:
-                    mainPictureBox.Image = Properties.Resources.MeshCentral;
+                    if ((currentAgentName == "~") && (mcagent.CustomizationLogo != null)) { mainPictureBox.Image = mcagent.CustomizationLogo; } else { mainPictureBox.Image = Properties.Resources.MeshCentral; }
                     mainPictureBox.BackgroundImage = Properties.Resources.Yellow;
                     break;
                 case uiImage.Red:
-                    mainPictureBox.Image = Properties.Resources.MeshCentral;
+                    if ((currentAgentName == "~") && (mcagent.CustomizationLogo != null)) { mainPictureBox.Image = mcagent.CustomizationLogo; } else { mainPictureBox.Image = Properties.Resources.MeshCentral; }
                     mainPictureBox.BackgroundImage = Properties.Resources.Red;
                     break;
                 case uiImage.Question:

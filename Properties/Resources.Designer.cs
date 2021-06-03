@@ -232,6 +232,15 @@ namespace MeshAssistant.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disconnect from server and close?.
+        /// </summary>
+        internal static string DisconnectFromServerAndClose {
+            get {
+                return ResourceManager.GetString("DisconnectFromServerAndClose", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enabled.
         /// </summary>
         internal static string Enabled {
