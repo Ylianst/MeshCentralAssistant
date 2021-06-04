@@ -168,7 +168,8 @@ namespace MeshAssistant
             // If there is an embedded .msh file, write it out to "meshagent.msh"
             Log("Checking for embedded MSH file");
             string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
-            if (msh != null) { try { File.WriteAllText(MeshCentralAgent.getSelfFilename(".msh"), msh); } catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; } }
+            if (msh == null) { msh = MeshCentralAgent.LoadMshFileStr(); }
+            //if (msh != null) { try { File.WriteAllText(MeshCentralAgent.getSelfFilename(".msh"), msh); } catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; } }
             selfExecutableHashHex = ExeHandler.HashExecutable(Assembly.GetEntryAssembly().Location);
 
             // Set TLS 1.2
@@ -188,9 +189,9 @@ namespace MeshAssistant
             List<ToolStripItem> subMenus = new List<ToolStripItem>();
             string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
 
-            if (MeshCentralAgent.checkMshFile()) {
+            if (MeshCentralAgent.checkMshStr(msh)) {
                 Log("Starting built-in agent");
-                mcagent = new MeshCentralAgent(this, "MeshCentralAssistant", selfExecutableHashHex, debug);
+                mcagent = new MeshCentralAgent(this, msh, "MeshCentralAssistant", selfExecutableHashHex, debug);
                 mcagent.autoConnect = autoConnect;
                 mcagent.onStateChanged += Mcagent_onStateChanged;
                 mcagent.onNotify += Mcagent_onNotify;

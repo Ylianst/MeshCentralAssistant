@@ -42,6 +42,7 @@ namespace MeshAssistant
         public int state = 0;
         public string HelpRequest = null;
         private byte[] MeshId = null;
+        private string MeshIdMB64 = null;
         private string ServerId = null;
         private byte[] ServerTlsHash = null;
         private string ServerTlsHashStr = null;
@@ -132,7 +133,7 @@ namespace MeshAssistant
             }
         }
 
-        public MeshCentralAgent(MainForm parent, string softwareName, string selfExecutableHashHex, bool debug)
+        public MeshCentralAgent(MainForm parent, string mshstr, string softwareName, string selfExecutableHashHex, bool debug)
         {
             this.debug = debug;
             this.parent = parent;
@@ -143,7 +144,9 @@ namespace MeshAssistant
             agentCert = LoadAgentCertificate();
 
             // Load the MSH file
-            Dictionary<string, string> msh = LoadMshFile();
+            string[] lines = mshstr.Replace("\r\n", "\r").Split('\r');
+            Dictionary<string, string> msh = new Dictionary<string, string>();
+            foreach (string line in lines) { int i = line.IndexOf('='); if (i > 0) { msh.Add(line.Substring(0, i), line.Substring(i + 1)); } }
 
             // Get the MeshId, ServerId, and ServerUrl
             if (msh.ContainsKey("MeshID")) { string m = msh["MeshID"]; if (m.StartsWith("0x")) { m = m.Substring(2); } MeshId = StringToByteArray(m); }
@@ -162,6 +165,9 @@ namespace MeshAssistant
             Log("MSH MeshID: " + msh["MeshID"]);
             Log("MSH ServerID: " + ServerId);
             Log("MSH MeshServer: " + ServerUrl);
+
+            // Create a modified Base64 meshid, this will be used to request updates.
+            MeshIdMB64 = Convert.ToBase64String(MeshId).Replace("+", "@").Replace("/", "$");
 
             // Load customization image
             if (msh.ContainsKey("Image")) { try { CustomizationLogo = new Bitmap(new MemoryStream(Convert.FromBase64String(msh["Image"]))); } catch (Exception) { } }
@@ -203,6 +209,21 @@ namespace MeshAssistant
             if (!msh.ContainsKey("MeshServer")) return false;
             return true;
         }
+
+        public static bool checkMshStr(string mshstr)
+        {
+            string[] lines = mshstr.Replace("\r\n", "\r").Split('\r');
+            Dictionary<string, string> msh = new Dictionary<string, string>();
+            foreach (string line in lines) { int i = line.IndexOf('='); if (i > 0) { msh.Add(line.Substring(0, i), line.Substring(i + 1)); } }
+
+            // Load the MSH file
+            if (msh == null) return false;
+            if (!msh.ContainsKey("MeshID")) return false;
+            if (!msh.ContainsKey("ServerID")) return false;
+            if (!msh.ContainsKey("MeshServer")) return false;
+            return true;
+        }
+
 
         private X509Certificate2 LoadAgentCertificate()
         {
@@ -296,7 +317,16 @@ namespace MeshAssistant
             );
         }
 
-        private static Dictionary<string, string> LoadMshFile()
+        public static string LoadMshFileStr()
+        {
+            string mshfilename = getSelfFilename(".msh");
+            if (!File.Exists(mshfilename)) return null;
+            string str = null;
+            try { str = File.ReadAllText(mshfilename); } catch (Exception) { }
+            return str;
+        }
+
+        public static Dictionary<string, string> LoadMshFile()
         {
             string mshfilename = getSelfFilename(".msh");
             if (!File.Exists(mshfilename)) return null;
@@ -850,7 +880,7 @@ namespace MeshAssistant
                         if (jsonAction.ContainsKey("hash")) { hash = jsonAction["hash"].ToString(); } // File Hash
                         if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); } // Server url
                         if (jsonAction.ContainsKey("serverhash")) { serverhash = jsonAction["serverhash"].ToString(); } // Server TLS certificate hash
-                        if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) { onSelfUpdate(name, hash, url, serverhash); }
+                        if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) { url += ("&mesh=" + MeshIdMB64); onSelfUpdate(name, hash, url, serverhash); }
                         break;
                     }
                 default:
