@@ -65,6 +65,7 @@ namespace MeshAssistant
         private MeshDiscovery scanner = null;
         public Image CustomizationLogo = null;
         public string CustomizationTitle = null;
+        private int autoConnectFlags = 0;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -154,11 +155,10 @@ namespace MeshAssistant
             if (msh.ContainsKey("MeshServer") && (msh["MeshServer"] != "local")) { try { ServerUrl = new Uri(msh["MeshServer"]); } catch (Exception) { } }
             if (msh.ContainsKey("Title")) { CustomizationTitle = msh["Title"]; }
             if (msh.ContainsKey("AutoConnect")) {
-                int flags = 0;
-                if (int.TryParse(msh["AutoConnect"], out flags))
+                if (int.TryParse(msh["AutoConnect"], out autoConnectFlags))
                 {
-                    parent.autoConnect = ((flags & 1) != 0); // Auto connect with built-in agent
-                    parent.SystemTrayApp = ((flags & 2) == 0); // Be a system tray tool
+                    parent.autoConnect = ((autoConnectFlags & 1) != 0); // Auto connect with built-in agent
+                    parent.SystemTrayApp = ((autoConnectFlags & 2) == 0); // Be a system tray tool
                 }
             }
             if (msh.ContainsKey("DiscoveryKey")) { discoveryKey = msh["DiscoveryKey"]; }
@@ -212,6 +212,7 @@ namespace MeshAssistant
 
         public static bool checkMshStr(string mshstr)
         {
+            if (mshstr == null) return false;
             string[] lines = mshstr.Replace("\r\n", "\r").Split('\r');
             Dictionary<string, string> msh = new Dictionary<string, string>();
             foreach (string line in lines) { int i = line.IndexOf('='); if (i > 0) { msh.Add(line.Substring(0, i), line.Substring(i + 1)); } }
@@ -549,7 +550,7 @@ namespace MeshAssistant
         private void sendSelfUpdateQuery(string softwareName, string softwareHash)
         {
             Log(string.Format("sendSelfUpdateQuery {0}, {1}", softwareName, softwareHash));
-            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"meshToolInfo\",\"name\":\"" + escapeJsonString(softwareName) + "\",\"hash\":\"" + escapeJsonString(softwareHash) + "\",\"cookie\":true}"));
+            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"meshToolInfo\",\"name\":\"" + escapeJsonString(softwareName) + "\",\"hash\":\"" + escapeJsonString(softwareHash) + "\",\"cookie\":true,\"msh\":true}"));
         }
 
         private string[] parseArgString(string cmd) {
@@ -880,7 +881,11 @@ namespace MeshAssistant
                         if (jsonAction.ContainsKey("hash")) { hash = jsonAction["hash"].ToString(); } // File Hash
                         if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); } // Server url
                         if (jsonAction.ContainsKey("serverhash")) { serverhash = jsonAction["serverhash"].ToString(); } // Server TLS certificate hash
-                        if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) { url += ("&mesh=" + MeshIdMB64); onSelfUpdate(name, hash, url, serverhash); }
+                        if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) {
+                            if (url.StartsWith("*/")) { url = ServerUrl.ToString().Replace("/agent.ashx", "") + url.Substring(1); }
+                            url += ("&meshid=" + MeshIdMB64 + "&ac=" + autoConnectFlags);
+                            onSelfUpdate(name, hash, url, serverhash);
+                        }
                         break;
                     }
                 default:

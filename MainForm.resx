@@ -2063,8 +2063,14 @@
   <data name="intelAMTStateToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
     <value>False</value>
   </data>
+  <data name="updateSoftwareToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>183, 22</value>
+  </data>
+  <data name="updateSoftwareToolStripMenuItem1.Text" xml:space="preserve">
+    <value>&amp;Update Software</value>
+  </data>
   <data name="dialogContextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>184, 142</value>
+    <value>184, 164</value>
   </data>
   <data name="&gt;&gt;dialogContextMenuStrip.Name" xml:space="preserve">
     <value>dialogContextMenuStrip</value>
@@ -3949,16 +3955,22 @@
   <data name="&gt;&gt;showSessionsToolStripMenuItem1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="&gt;&gt;showEventsToolStripMenuItem1.Name" xml:space="preserve">
+    <value>showEventsToolStripMenuItem1</value>
+  </data>
+  <data name="&gt;&gt;showEventsToolStripMenuItem1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="&gt;&gt;intelAMTStateToolStripMenuItem.Name" xml:space="preserve">
     <value>intelAMTStateToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;intelAMTStateToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;showEventsToolStripMenuItem1.Name" xml:space="preserve">
-    <value>showEventsToolStripMenuItem1</value>
+  <data name="&gt;&gt;updateSoftwareToolStripMenuItem1.Name" xml:space="preserve">
+    <value>updateSoftwareToolStripMenuItem1</value>
   </data>
-  <data name="&gt;&gt;showEventsToolStripMenuItem1.Type" xml:space="preserve">
+  <data name="&gt;&gt;updateSoftwareToolStripMenuItem1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">

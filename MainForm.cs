@@ -111,6 +111,7 @@ namespace MeshAssistant
             userEvents.Add(e);
             AddEventToForm(e);
             try { File.AppendAllText("events.log", now.ToString("yyyy-MM-ddTHH:mm:sszzz") + ", " + userid + ", " + msg + "\r\n"); } catch (Exception) { }
+            Log(string.Format("Event ({0}): {1}", userid, msg));
         }
 
         delegate void AddEventToFormHandler(LogEventStruct e);
@@ -218,6 +219,7 @@ namespace MeshAssistant
                 this.ShowInTaskbar = true;
                 this.MinimizeBox = true;
                 startVisible = true;
+                this.Height += 60;
                 this.Width = (this.Width * 160) / 100;
                 this.FormBorderStyle = FormBorderStyle.FixedDialog;
             } else {
@@ -414,9 +416,9 @@ namespace MeshAssistant
 
         private void updateBuiltinAgentStatus()
         {
-            if (mcagent == null) { updateSoftwareToolStripMenuItem.Visible = false; return; }
+            if (mcagent == null) { updateSoftwareToolStripMenuItem1.Visible = updateSoftwareToolStripMenuItem.Visible = false; return; }
             helpRequested = (mcagent.HelpRequest != null);
-            if (mcagent.state != 3) { updateSoftwareToolStripMenuItem.Visible = false; } // If not connected, don't offer auto-update option.
+            if (mcagent.state != 3) { updateSoftwareToolStripMenuItem1.Visible = updateSoftwareToolStripMenuItem.Visible = false; } // If not connected, don't offer auto-update option.
 
             if (mcagent.autoConnect)
             {
@@ -861,10 +863,12 @@ namespace MeshAssistant
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (forceExit || (e.CloseReason != CloseReason.UserClosing)) return;
             if (SystemTrayApp)
             {
                 if (doclose == false) { e.Cancel = true; this.Visible = false; }
-            } else
+            }
+            else
             {
                 if ((mcagent != null) && (currentAgentName != null) && (currentAgentName.Equals("~")) && (mcagent.state == 3))
                 {
@@ -1155,8 +1159,8 @@ namespace MeshAssistant
             updateForm = null;
             if (doUpdateNow)
             {
-                Event("Local", "Approved software update");
-                updateSoftwareToolStripMenuItem.Visible = false;
+                Event("Local", "Approved software update: " + updateUrl);
+                updateSoftwareToolStripMenuItem1.Visible = updateSoftwareToolStripMenuItem.Visible = false;
                 seflUpdateDownloadHash = updateHash;
                 serverTlsCertHash = updateServerHash;
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(updateUrl);
@@ -1169,7 +1173,7 @@ namespace MeshAssistant
             else
             {
                 Event("Local", "Delayed software update");
-                updateSoftwareToolStripMenuItem.Visible = true;
+                updateSoftwareToolStripMenuItem1.Visible = updateSoftwareToolStripMenuItem.Visible = true;
             }
         }
 

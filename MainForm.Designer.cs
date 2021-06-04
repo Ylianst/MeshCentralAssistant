@@ -54,10 +54,11 @@
             this.cancelHelpRequestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.showSessionsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.showEventsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.intelAMTStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainPictureBox = new System.Windows.Forms.PictureBox();
             this.pictureBoxCustom = new System.Windows.Forms.PictureBox();
-            this.showEventsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateSoftwareToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.mainContextMenuStrip.SuspendLayout();
             this.dialogContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).BeginInit();
@@ -200,7 +201,8 @@
             this.toolStripMenuItem3,
             this.showSessionsToolStripMenuItem1,
             this.showEventsToolStripMenuItem1,
-            this.intelAMTStateToolStripMenuItem});
+            this.intelAMTStateToolStripMenuItem,
+            this.updateSoftwareToolStripMenuItem1});
             this.dialogContextMenuStrip.Name = "dialogContextMenuStrip";
             resources.ApplyResources(this.dialogContextMenuStrip, "dialogContextMenuStrip");
             this.dialogContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.dialogContextMenuStrip_Opening);
@@ -228,6 +230,12 @@
             resources.ApplyResources(this.showSessionsToolStripMenuItem1, "showSessionsToolStripMenuItem1");
             this.showSessionsToolStripMenuItem1.Click += new System.EventHandler(this.remoteSessionsLabel_Click);
             // 
+            // showEventsToolStripMenuItem1
+            // 
+            this.showEventsToolStripMenuItem1.Name = "showEventsToolStripMenuItem1";
+            resources.ApplyResources(this.showEventsToolStripMenuItem1, "showEventsToolStripMenuItem1");
+            this.showEventsToolStripMenuItem1.Click += new System.EventHandler(this.showEventsToolStripMenuItem_Click);
+            // 
             // intelAMTStateToolStripMenuItem
             // 
             this.intelAMTStateToolStripMenuItem.Name = "intelAMTStateToolStripMenuItem";
@@ -247,11 +255,11 @@
             this.pictureBoxCustom.Name = "pictureBoxCustom";
             this.pictureBoxCustom.TabStop = false;
             // 
-            // showEventsToolStripMenuItem1
+            // updateSoftwareToolStripMenuItem1
             // 
-            this.showEventsToolStripMenuItem1.Name = "showEventsToolStripMenuItem1";
-            resources.ApplyResources(this.showEventsToolStripMenuItem1, "showEventsToolStripMenuItem1");
-            this.showEventsToolStripMenuItem1.Click += new System.EventHandler(this.showEventsToolStripMenuItem_Click);
+            this.updateSoftwareToolStripMenuItem1.Name = "updateSoftwareToolStripMenuItem1";
+            resources.ApplyResources(this.updateSoftwareToolStripMenuItem1, "updateSoftwareToolStripMenuItem1");
+            this.updateSoftwareToolStripMenuItem1.Click += new System.EventHandler(this.updateSoftwareToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -307,6 +315,7 @@
         private System.Windows.Forms.ToolStripMenuItem showEventsToolStripMenuItem;
         private System.Windows.Forms.PictureBox pictureBoxCustom;
         private System.Windows.Forms.ToolStripMenuItem showEventsToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem updateSoftwareToolStripMenuItem1;
     }
 }
 
