@@ -166,13 +166,6 @@ namespace MeshAssistant
                 try { System.Threading.Thread.Sleep(1000); File.Delete(delete); } catch (Exception) { }
             }
 
-            // If there is an embedded .msh file, write it out to "meshagent.msh"
-            Log("Checking for embedded MSH file");
-            string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
-            if (msh == null) { msh = MeshCentralAgent.LoadMshFileStr(); }
-            //if (msh != null) { try { File.WriteAllText(MeshCentralAgent.getSelfFilename(".msh"), msh); } catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; } }
-            selfExecutableHashHex = ExeHandler.HashExecutable(Assembly.GetEntryAssembly().Location);
-
             // Set TLS 1.2
             Log("Set TLS 1.2");
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -183,6 +176,15 @@ namespace MeshAssistant
             Translate.TranslateControl(this);
             Translate.TranslateContextMenu(this.mainContextMenuStrip);
             Translate.TranslateContextMenu(this.dialogContextMenuStrip);
+            this.Opacity = 0;
+
+
+            // If there is an embedded .msh file, write it out to "meshagent.msh"
+            Log("Checking for embedded MSH file");
+            string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
+            if (msh == null) { msh = MeshCentralAgent.LoadMshFileStr(); }
+            //if (msh != null) { try { File.WriteAllText(MeshCentralAgent.getSelfFilename(".msh"), msh); } catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; } }
+            selfExecutableHashHex = ExeHandler.HashExecutable(Assembly.GetEntryAssembly().Location);
 
             // Check if the built-in agent will be activated
             Log("Check for built-in agent");
@@ -190,7 +192,8 @@ namespace MeshAssistant
             List<ToolStripItem> subMenus = new List<ToolStripItem>();
             string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
 
-            if (MeshCentralAgent.checkMshStr(msh)) {
+            if (MeshCentralAgent.checkMshStr(msh))
+            {
                 Log("Starting built-in agent");
                 mcagent = new MeshCentralAgent(this, msh, "MeshCentralAssistant", selfExecutableHashHex, debug);
                 mcagent.autoConnect = autoConnect;
@@ -209,16 +212,19 @@ namespace MeshAssistant
                 m.Checked = ((currentAgentName != null) && (currentAgentName.Equals("~")));
                 m.Click += agentSelection_Click;
                 subMenus.Add(m);
-                if (mcagent.CustomizationTitle != null) {
+                if (mcagent.CustomizationTitle != null)
+                {
                     this.Text = mainNotifyIcon.Text = mcagent.CustomizationTitle;
-                } else {
+                }
+                else
+                {
                     this.Text = mainNotifyIcon.Text = Translate.T(Properties.Resources.MeshCentralAssistant);
                 }
             }
-            this.Opacity = 0;
 
             // Configure system tray
-            if (SystemTrayApp == false) {
+            if (SystemTrayApp == false)
+            {
                 mainNotifyIcon.Visible = false;
                 this.ShowInTaskbar = true;
                 this.MinimizeBox = true;
@@ -226,7 +232,9 @@ namespace MeshAssistant
                 this.Height += 60;
                 this.Width = (this.Width * 160) / 100;
                 this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            } else {
+            }
+            else
+            {
                 // Get the list of agents on the system
                 Log("Get list of background agents");
                 bool directConnectSeperator = false;
@@ -263,8 +271,21 @@ namespace MeshAssistant
             LoadEventsFromFile();
         }
 
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            Log("MainForm_Load()");
+            this.WindowState = FormWindowState.Normal;
+            this.StartPosition = FormStartPosition.Manual;
+            this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
+            this.Visible = startVisible;
+            this.Opacity = 1;
+            connectToAgent();
+        }
+
         private void Mcagent_onLogEvent(DateTime time, string userid, string msg)
         {
+            if (forceExit) return;
             LogEventStruct e = new LogEventStruct(time, userid, msg);
             userEvents.Add(e);
             AddEventToForm(e);
@@ -272,6 +293,7 @@ namespace MeshAssistant
 
         private void Mcagent_onRequestConsent(MeshCentralTunnel tunnel, string msg, int protocol, string userid)
         {
+            if (forceExit) return;
             if (this.InvokeRequired) { this.Invoke(new MeshCentralAgent.onRequestConsentHandler(Mcagent_onRequestConsent), tunnel, msg, protocol, userid); return; }
             if ((msg == null) && (consentForm != null) && (consentForm.tunnel == tunnel))
             {
@@ -301,6 +323,7 @@ namespace MeshAssistant
 
         public void ShowNotification(string userid, string title, string message)
         {
+            if (forceExit) return;
             if (this.InvokeRequired) { this.Invoke(new ShowNotificationHandler(ShowNotification), userid, title, message); return; }
             Log("Show notification");
             string realname = userid.Split('/')[2];
@@ -318,6 +341,7 @@ namespace MeshAssistant
 
         private void Mcagent_onSessionChanged()
         {
+            if (forceExit) return;
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onSessionChangedHandler(Mcagent_onSessionChanged)); return; }
             Log("onSessionChanged");
             updateBuiltinAgentStatus();
@@ -325,6 +349,7 @@ namespace MeshAssistant
 
         private void Mcagent_onUserInfoChange(string userid, int change)
         {
+            if (forceExit) return;
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onUserInfoChangeHandler(Mcagent_onUserInfoChange), userid, change); return; }
             Log(string.Format("onUserInfoChange {0}, {1}", userid, change));
             updateBuiltinAgentStatus();
@@ -344,6 +369,7 @@ namespace MeshAssistant
 
         private void Mcagent_onNotify(string userid, string title, string msg)
         {
+            if (forceExit) return;
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onNotifyHandler(Mcagent_onNotify), userid, title, msg); return; }
             ShowNotification(userid, title, msg);
             //MessageBox.Show(msg, title);
@@ -353,6 +379,7 @@ namespace MeshAssistant
 
         private void Mcagent_onStateChanged(int state)
         {
+            if (forceExit) return;
             if (InvokeRequired) { Invoke(new MeshCentralAgent.onStateChangedHandler(Mcagent_onStateChanged), state); return; }
             Log(string.Format("Mcagent_onStateChanged {0}", state));
             if (state == 0) { PrivacyBarClose(); }
@@ -502,6 +529,7 @@ namespace MeshAssistant
 
         private void connectToAgent()
         {
+            if (forceExit) return;
             Log(string.Format("connectToAgent {0}", currentAgentName));
 
             if (agent != null) { agent.DisconnectPipe(); agent = null; connectionTimer.Enabled = false; }
@@ -574,12 +602,14 @@ namespace MeshAssistant
 
         private void Agent_onUserInfoChange(string userid, int change)
         {
+            if (forceExit) return;
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onUserInfoChangeHandler(Agent_onUserInfoChange), userid, change); return; }
             Agent_onSessionChanged();
         }
 
         private void Agent_onConsoleMessage(string str)
         {
+            if (forceExit) return;
             if (consoleForm == null) return;
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onConsoleHandler(Agent_onConsoleMessage), str); return; }
             consoleForm.appendText(str);
@@ -587,12 +617,14 @@ namespace MeshAssistant
 
         private void Agent_onCancelHelp()
         {
+            if (forceExit) return;
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onCancelHelpHandler(Agent_onCancelHelp)); return; }
             if (helpRequested == true) { requestHelpButton_Click(null, null); }
         }
 
         private void Agent_onSelfUpdate(string name, string hash, string url, string serverhash)
         {
+            if (forceExit) return;
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSelfUpdateHandler(Agent_onSelfUpdate), name, hash, url, serverhash); return; }
             updateHash = hash;
             updateUrl = url;
@@ -603,6 +635,7 @@ namespace MeshAssistant
 
         private void Agent_onAmtState(System.Collections.Generic.Dictionary<string, object> state)
         {
+            if (forceExit) return;
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onAmtStateHandler(Agent_onAmtState), state); return; }
             if (meInfoForm != null) { meInfoForm.updateInfo(state); }
         }
@@ -644,6 +677,7 @@ namespace MeshAssistant
 
         private void Agent_onSessionChanged()
         {
+            if (forceExit) return;
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onSessionChangedHandler(Agent_onSessionChanged)); return; }
 
             if ((mcagent != null) && (currentAgentName != null) && (currentAgentName.Equals("~")))
@@ -748,23 +782,11 @@ namespace MeshAssistant
             }
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            Log("MainForm_Load()");
-            this.WindowState = FormWindowState.Normal;
-            this.StartPosition = FormStartPosition.Manual;
-            this.Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - this.Width, Screen.PrimaryScreen.WorkingArea.Height - this.Height);
-            this.Visible = startVisible;
-            this.Opacity = 1;
-            connectToAgent();
-        }
 
         private void Agent_onStateChanged(int state, int serverState)
         {
-            if (this.InvokeRequired) {
-                this.Invoke(new MeshAgent.onStateChangedHandler(Agent_onStateChanged), state, serverState);
-                return;
-            }
+            if (forceExit) return;
+            if (this.InvokeRequired) { this.Invoke(new MeshAgent.onStateChangedHandler(Agent_onStateChanged), state, serverState); return; }
 
             Log(string.Format("Agent_onStateChanged {0}, {1}, {2}", state, serverState, currentAgentName));
 
@@ -839,6 +861,7 @@ namespace MeshAssistant
 
         private void Agent_onQueryResult(string value, string result)
         {
+            if (forceExit) return;
             if (this.InvokeRequired) { this.Invoke(new MeshAgent.onQueryResultHandler(Agent_onQueryResult), value, result); return; }
             if (snapShotForm != null) { snapShotForm.displaySnapShot(result); }
         }
@@ -853,6 +876,7 @@ namespace MeshAssistant
 
         private void connectionTimer_Tick(object sender, EventArgs e)
         {
+            if (forceExit) return;
             if (agent != null)
             {
                 if (timerSlowDown > 0) { timerSlowDown--; if (timerSlowDown == 0) { connectionTimer.Interval = 10000; } }
@@ -870,7 +894,11 @@ namespace MeshAssistant
             if (forceExit || (e.CloseReason != CloseReason.UserClosing)) return;
             if (SystemTrayApp)
             {
-                if (doclose == false) { e.Cancel = true; this.Visible = false; }
+                if (doclose == false) {
+                    e.Cancel = true;
+                    this.Visible = false;
+                    return;
+                }
             }
             else
             {
@@ -879,9 +907,13 @@ namespace MeshAssistant
                     if (MessageBox.Show(this, Properties.Resources.DisconnectFromServerAndClose, this.Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) != DialogResult.OK)
                     {
                         e.Cancel = true;
+                        return;
                     }
                 }
             }
+
+            forceExit = true;
+            if (mcagent != null) { mcagent.disconnect(); }
         }
 
         private void openSiteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1039,6 +1071,7 @@ namespace MeshAssistant
 
         public void RequestHelp(string details)
         {
+            if (forceExit) return;
             Log(string.Format("RequestHelp {0}, \"{1}\"", currentAgentName, details));
             if (currentAgentName.Equals("~"))
             {
