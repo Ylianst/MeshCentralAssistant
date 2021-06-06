@@ -27,6 +27,7 @@ namespace MeshAssistant
         {
             "Agent is paused",
             new Dictionary<string, string>() {
+                {"nl","Agent is gepauzeerd"},
                 {"ko","エージェントは一時停止しています"},
                 {"fr","L'agent est en pause"},
                 {"zh-chs","代理已暂停"},
@@ -64,19 +65,9 @@ namespace MeshAssistant
             }
         },
         {
-            "Remote Sessions...",
-            new Dictionary<string, string>() {
-                {"ko","リモート セッション..."},
-                {"fr","Séances à distance..."},
-                {"zh-chs","远程会话..."},
-                {"es","Sesiones remotas ..."},
-                {"hi","दूरस्थ सत्र..."},
-                {"de","Remote-Sitzungen..."}
-            }
-        },
-        {
             "Remote Sessions",
             new Dictionary<string, string>() {
+                {"nl","Externe Sessies"},
                 {"ko","リモート セッション"},
                 {"fr","Séances à distance"},
                 {"zh-chs","远程会话"},
@@ -100,6 +91,7 @@ namespace MeshAssistant
         {
             "Count",
             new Dictionary<string, string>() {
+                {"nl","Aantal"},
                 {"ko","カウント"},
                 {"fr","Compter"},
                 {"zh-chs","数数"},
@@ -111,6 +103,7 @@ namespace MeshAssistant
         {
             "Intel® ME State...",
             new Dictionary<string, string>() {
+                {"nl","Intel® ME status..."},
                 {"ko","インテル® ME 状態..."},
                 {"fr","État Intel® ME..."},
                 {"zh-chs","英特尔® ME 状态..."},
@@ -133,6 +126,7 @@ namespace MeshAssistant
         {
             "Agent is stopped pending",
             new Dictionary<string, string>() {
+                {"nl","Agent is in behandeling gestopt"},
                 {"ko","エージェントが停止中です"},
                 {"fr","L'agent est arrêté en attente"},
                 {"zh-chs","代理停止等待"},
@@ -163,6 +157,7 @@ namespace MeshAssistant
         {
             "&Update Software",
             new Dictionary<string, string>() {
+                {"nl","&Software bijwerken"},
                 {"ko","&アップデートソフトウェア"},
                 {"fr","&Mettre à jour le logiciel"},
                 {"zh-chs","更新软件 (&S)"},
@@ -172,19 +167,9 @@ namespace MeshAssistant
             }
         },
         {
-            "Show &Events...",
-            new Dictionary<string, string>() {
-                {"ko","イベントを表示..."},
-                {"fr","Afficher les &événements..."},
-                {"zh-chs","显示(&Events)..."},
-                {"es","Espectáculos y eventos ..."},
-                {"hi","&घटनाक्रम दिखाएं..."},
-                {"de","&Veranstaltungen anzeigen..."}
-            }
-        },
-        {
             "Agent is missing",
             new Dictionary<string, string>() {
+                {"nl","Agent ontbreekt"},
                 {"ko","エージェントが行方不明"},
                 {"fr","L'agent est manquant"},
                 {"zh-chs","代理不见了"},
@@ -226,6 +211,7 @@ namespace MeshAssistant
         {
             "{0} remote sessions",
             new Dictionary<string, string>() {
+                {"nl","{0} externe sessies"},
                 {"ko","{0} リモート セッション"},
                 {"fr","{0} sessions à distance"},
                 {"zh-chs","{0} 个远程会话"},
@@ -267,6 +253,7 @@ namespace MeshAssistant
         {
             "Connected to server",
             new Dictionary<string, string>() {
+                {"nl","Verbonden met server"},
                 {"ko","サーバーに接続しました"},
                 {"fr","Connecté au serveur"},
                 {"zh-chs","连接到服务器"},
@@ -278,6 +265,7 @@ namespace MeshAssistant
         {
             "Connecting",
             new Dictionary<string, string>() {
+                {"nl","Verbinden"},
                 {"ko","接続中"},
                 {"fr","De liaison"},
                 {"zh-chs","连接"},
@@ -300,6 +288,7 @@ namespace MeshAssistant
         {
             "{0} remote sessions are active.",
             new Dictionary<string, string>() {
+                {"nl","{0} sessies op afstand zijn actief.."},
                 {"ko","{0} 個のリモート セッションがアクティブです。"},
                 {"fr","{0} sessions à distance sont actives."},
                 {"zh-chs","{0} 个远程会话处于活动状态。"},
@@ -311,6 +300,7 @@ namespace MeshAssistant
         {
             "E&xit",
             new Dictionary<string, string>() {
+                {"nl","Sluiten"},
                 {"ko","出口"},
                 {"fr","Sortir"},
                 {"zh-chs","出口"},
@@ -322,6 +312,7 @@ namespace MeshAssistant
         {
             "Agent is running",
             new Dictionary<string, string>() {
+                {"nl","Agent is actief"},
                 {"ko","エージェントは実行中です"},
                 {"fr","L'agent est en cours d'exécution"},
                 {"zh-chs","代理正在运行"},
@@ -390,6 +381,7 @@ namespace MeshAssistant
         {
             "Request Help",
             new Dictionary<string, string>() {
+                {"nl","Hulp vragen"},
                 {"ko","助けを求める"},
                 {"fr","Demander de l'aide"},
                 {"zh-chs","请求帮助"},
@@ -401,6 +393,7 @@ namespace MeshAssistant
         {
             "Versions",
             new Dictionary<string, string>() {
+                {"nl","Versies"},
                 {"ko","バージョン"},
                 {"zh-chs","版本"},
                 {"es","Versiones"},
@@ -409,19 +402,9 @@ namespace MeshAssistant
             }
         },
         {
-            "Agent Select",
-            new Dictionary<string, string>() {
-                {"ko","エージェントセレクト"},
-                {"fr","Sélection d'agent"},
-                {"zh-chs","代理选择"},
-                {"es","Seleccionar agente"},
-                {"hi","एजेंट चुनें"},
-                {"de","Agentenauswahl"}
-            }
-        },
-        {
             "Value",
             new Dictionary<string, string>() {
+                {"nl","Waarde"},
                 {"ko","値"},
                 {"fr","Valeur"},
                 {"zh-chs","价值"},
@@ -431,19 +414,9 @@ namespace MeshAssistant
             }
         },
         {
-            "Agent is pause pending",
-            new Dictionary<string, string>() {
-                {"ko","エージェントは一時停止保留中です"},
-                {"fr","L'agent est en attente de pause"},
-                {"zh-chs","代理暂停待定"},
-                {"es","El agente está en pausa pendiente"},
-                {"hi","एजेंट रुका हुआ है"},
-                {"de","Agent ist pausiert"}
-            }
-        },
-        {
             "Remote Sessions: {0}",
             new Dictionary<string, string>() {
+                {"nl","Externe Sessies: {0}"},
                 {"ko","リモート セッション: {0}"},
                 {"fr","Sessions à distance : {0}"},
                 {"zh-chs","远程会话：{0}"},
@@ -455,6 +428,7 @@ namespace MeshAssistant
         {
             "Agent is start pending",
             new Dictionary<string, string>() {
+                {"nl","Agent wacht op start"},
                 {"ko","エージェントは開始保留中です"},
                 {"fr","L'agent est en attente de démarrage"},
                 {"zh-chs","代理正在启动待处理"},
@@ -466,6 +440,7 @@ namespace MeshAssistant
         {
             "Intel® Management Engine state for this computer.",
             new Dictionary<string, string>() {
+                {"nl","Intel® Management Engine status voor deze computer."},
                 {"ko","このコンピューターの Intel® Management Engine の状態。"},
                 {"fr","État du moteur de gestion Intel® pour cet ordinateur."},
                 {"zh-chs","此计算机的英特尔® 管理引擎状态。"},
@@ -515,6 +490,7 @@ namespace MeshAssistant
         {
             "Item",
             new Dictionary<string, string>() {
+                {"nl","Artikel"},
                 {"ko","項目"},
                 {"fr","Article"},
                 {"zh-chs","物品"},
@@ -526,6 +502,7 @@ namespace MeshAssistant
         {
             "List of remote sessions active on this computer.",
             new Dictionary<string, string>() {
+                {"nl","Lijst met externe sessies die actief zijn op deze computer."},
                 {"ko","このコンピュータでアクティブなリモート セッションのリスト。"},
                 {"fr","Liste des sessions distantes actives sur cet ordinateur."},
                 {"zh-chs","此计算机上活动的远程会话列表。"},
@@ -537,6 +514,7 @@ namespace MeshAssistant
         {
             "Help Requested",
             new Dictionary<string, string>() {
+                {"nl","Hulp gevraagd"},
                 {"ko","リクエストされたヘルプ"},
                 {"fr","Aide demandée"},
                 {"zh-chs","请求帮助"},
@@ -624,6 +602,7 @@ namespace MeshAssistant
         {
             "Show Sessions...",
             new Dictionary<string, string>() {
+                {"nl","Sessies weergeven..."},
                 {"ko","セッションを表示..."},
                 {"fr","Afficher les séances..."},
                 {"zh-chs","显示会话..."},
@@ -635,6 +614,7 @@ namespace MeshAssistant
         {
             "No remote sessions",
             new Dictionary<string, string>() {
+                {"nl","Geen externe sessies"},
                 {"ko","リモート セッションなし"},
                 {"fr","Pas de sessions à distance"},
                 {"zh-chs","没有远程会话"},
@@ -655,6 +635,7 @@ namespace MeshAssistant
         {
             "Agent not installed",
             new Dictionary<string, string>() {
+                {"nl","Agent is niet geïnstalleerd"},
                 {"ko","エージェントがインストールされていません"},
                 {"fr","Agent non installé"},
                 {"zh-chs","未安装代理"},
@@ -666,6 +647,7 @@ namespace MeshAssistant
         {
             "Enter help request details",
             new Dictionary<string, string>() {
+                {"nl","Voer de details van het hulpverzoek in"},
                 {"ko","ヘルプリクエストの詳細を入力してください"},
                 {"fr","Entrez les détails de la demande d'aide"},
                 {"zh-chs","输入帮助请求详细信息"},
@@ -677,6 +659,7 @@ namespace MeshAssistant
         {
             "No active remote sessions.",
             new Dictionary<string, string>() {
+                {"nl","Geen actieve externe sessies."},
                 {"ko","アクティブなリモート セッションはありません。"},
                 {"fr","Aucune session à distance active."},
                 {"zh-chs","没有活动的远程会话。"},
@@ -688,6 +671,7 @@ namespace MeshAssistant
         {
             "Allow",
             new Dictionary<string, string>() {
+                {"nl","Toestaan"},
                 {"ko","許可する"},
                 {"fr","Permettre"},
                 {"zh-chs","允许"},
@@ -699,6 +683,7 @@ namespace MeshAssistant
         {
             "Event",
             new Dictionary<string, string>() {
+                {"nl","Gebeurtenis"},
                 {"ko","イベント"},
                 {"fr","Événement"},
                 {"zh-chs","事件"},
@@ -710,6 +695,7 @@ namespace MeshAssistant
         {
             "Deny",
             new Dictionary<string, string>() {
+                {"nl","Weigeren"},
                 {"ko","拒否する"},
                 {"fr","Refuser"},
                 {"zh-chs","否定"},
@@ -740,6 +726,7 @@ namespace MeshAssistant
         {
             "Authenticating",
             new Dictionary<string, string>() {
+                {"nl","Authenticatie"},
                 {"ko","認証中"},
                 {"fr","Authentification"},
                 {"zh-chs","认证"},
@@ -781,6 +768,7 @@ namespace MeshAssistant
         {
             "1 remote session",
             new Dictionary<string, string>() {
+                {"nl","1 externe sessie"},
                 {"ko","1 リモート セッション"},
                 {"fr","1 séance à distance"},
                 {"zh-chs","1 个远程会话"},
@@ -792,6 +780,7 @@ namespace MeshAssistant
         {
             "1 remote session is active.",
             new Dictionary<string, string>() {
+                {"nl","1 externe sessie is actief."},
                 {"ko","1 つのリモート セッションがアクティブです。"},
                 {"fr","1 session à distance est active."},
                 {"zh-chs","1 个远程会话处于活动状态。"},
@@ -803,6 +792,7 @@ namespace MeshAssistant
         {
             "(None)",
             new Dictionary<string, string>() {
+                {"nl","(Geen)"},
                 {"ko","（無し）"},
                 {"fr","(Rien)"},
                 {"zh-chs","（没有任何）"},
@@ -851,6 +841,7 @@ namespace MeshAssistant
         {
             "Agent is disconnected",
             new Dictionary<string, string>() {
+                {"nl","Verbinding met agent is verbroken"},
                 {"ko","エージェントが切断されました"},
                 {"fr","L'agent est déconnecté"},
                 {"zh-chs","代理已断开连接"},
@@ -879,8 +870,21 @@ namespace MeshAssistant
             }
         },
         {
+            "Show &Events...",
+            new Dictionary<string, string>() {
+                {"nl","&Gebeurtenissen tonen..."},
+                {"ko","イベントを表示..."},
+                {"fr","Afficher les &événements..."},
+                {"zh-chs","显示(&Events)..."},
+                {"es","Espectáculos y eventos ..."},
+                {"hi","&घटनाक्रम दिखाएं..."},
+                {"de","&Veranstaltungen anzeigen..."}
+            }
+        },
+        {
             "UDP relay",
             new Dictionary<string, string>() {
+                {"nl","UDP relais"},
                 {"ko","UDPリレー"},
                 {"fr","relais UDP"},
                 {"zh-chs","UDP中继"},
@@ -892,6 +896,7 @@ namespace MeshAssistant
         {
             "A new version of this software is available. Update now?",
             new Dictionary<string, string>() {
+                {"nl","Er is een nieuwe versie van deze software beschikbaar. Nu bijwerken?"},
                 {"ko","このソフトウェアの新しいバージョンが利用可能です。今すぐアップデート？"},
                 {"fr","Une nouvelle version de ce logiciel est disponible. Mettez à jour maintenant?"},
                 {"zh-chs","此软件的新版本可用。现在更新？"},
@@ -914,6 +919,7 @@ namespace MeshAssistant
         {
             "Multiple Users",
             new Dictionary<string, string>() {
+                {"nl","Meerdere gebruikers"},
                 {"ko","複数のユーザー"},
                 {"fr","Utilisateurs multiples"},
                 {"zh-chs","多个用户"},
@@ -939,6 +945,7 @@ namespace MeshAssistant
         {
             "&Close",
             new Dictionary<string, string>() {
+                {"nl","&Sluiten"},
                 {"ko","＆閉じる"},
                 {"fr","&Fermer"},
                 {"zh-chs","＆关闭"},
@@ -988,6 +995,7 @@ namespace MeshAssistant
         {
             "Cancel Help Request",
             new Dictionary<string, string>() {
+                {"nl","Annuleer hulpverzoek"},
                 {"ko","ヘルプリクエストをキャンセル"},
                 {"fr","Annuler la demande d'aide"},
                 {"zh-chs","取消帮助请求"},
@@ -999,6 +1007,7 @@ namespace MeshAssistant
         {
             "Agent is stopped",
             new Dictionary<string, string>() {
+                {"nl","Agent is gestopt"},
                 {"ko","エージェントが停止しました"},
                 {"fr","L'agent est arrêté"},
                 {"zh-chs","代理已停止"},
@@ -1021,6 +1030,7 @@ namespace MeshAssistant
         {
             "Agent Snapshot",
             new Dictionary<string, string>() {
+                {"nl","Agent momentopname"},
                 {"ko","エージェントスナップショット"},
                 {"fr","Instantané de l'agent"},
                 {"zh-chs","代理快照"},
@@ -1032,6 +1042,7 @@ namespace MeshAssistant
         {
             "Request Help...",
             new Dictionary<string, string>() {
+                {"nl","Hulp vragen..."},
                 {"ko","ヘルプをリクエスト..."},
                 {"fr","Demander de l'aide..."},
                 {"zh-chs","请求帮助..."},
@@ -1043,6 +1054,7 @@ namespace MeshAssistant
         {
             "Direct Connect",
             new Dictionary<string, string>() {
+                {"nl","Directe verbinding"},
                 {"ko","ダイレクトコネクト"},
                 {"fr","Connection directe"},
                 {"zh-chs","直接联系"},
@@ -1054,6 +1066,7 @@ namespace MeshAssistant
         {
             "O&pen Site...",
             new Dictionary<string, string>() {
+                {"nl","O&pen website..."},
                 {"ko","ペンサイト(&P)..."},
                 {"fr","&Ouvrir le site..."},
                 {"zh-chs","打开网站 (&P)..."},
@@ -1133,6 +1146,7 @@ namespace MeshAssistant
         {
             "Agent is continue pending",
             new Dictionary<string, string>() {
+                {"nl","Agent is in behandeling"},
                 {"ko","エージェントは保留中です"},
                 {"fr","L'agent est en attente de poursuite"},
                 {"zh-chs","代理正在继续等待"},
