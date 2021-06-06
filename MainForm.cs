@@ -209,7 +209,11 @@ namespace MeshAssistant
                 m.Checked = ((currentAgentName != null) && (currentAgentName.Equals("~")));
                 m.Click += agentSelection_Click;
                 subMenus.Add(m);
-                if (mcagent.CustomizationTitle != null) { this.Text = mcagent.CustomizationTitle; } else { this.Text = Translate.T(Properties.Resources.MeshCentralAssistant); }
+                if (mcagent.CustomizationTitle != null) {
+                    this.Text = mainNotifyIcon.Text = mcagent.CustomizationTitle;
+                } else {
+                    this.Text = mainNotifyIcon.Text = Translate.T(Properties.Resources.MeshCentralAssistant);
+                }
             }
             this.Opacity = 0;
 
