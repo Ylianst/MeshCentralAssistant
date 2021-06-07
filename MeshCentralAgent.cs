@@ -612,10 +612,15 @@ namespace MeshAssistant
                     response += "{";
                     response += "\"address\":\"" + addr.Address.ToString() + "\",";
                     response += "\"fqdn\":\"" + properties.DnsSuffix + "\",";
-                    if (addr.Address.AddressFamily == AddressFamily.InterNetwork) { response += "\"family\":\"IPv4\","; }
-                    if (addr.Address.AddressFamily == AddressFamily.InterNetworkV6) { response += "\"family\":\"IPv6\","; }
+                    if (addr.Address.AddressFamily == AddressFamily.InterNetwork) {
+                        response += "\"family\":\"IPv4\",";
+                        response += "\"index\":\"" + adapter.GetIPProperties().GetIPv4Properties().Index + "\",";
+                    }
+                    if (addr.Address.AddressFamily == AddressFamily.InterNetworkV6) {
+                        response += "\"family\":\"IPv6\",";
+                        response += "\"index\":\"" + adapter.GetIPProperties().GetIPv6Properties().Index + "\",";
+                    }
                     response += "\"mac\":\"" + fixMacAddress(adapter.GetPhysicalAddress().ToString()) + "\",";
-                    response += "\"index\":\"" + adapter.GetIPProperties().GetIPv6Properties().Index + "\",";
                     response += "\"type\":\"" + adapter.NetworkInterfaceType.ToString().ToLower() + "\",";
                     response += "\"status\":\"" + adapter.OperationalStatus.ToString().ToLower() + "\"";
                     response += "}";

@@ -306,7 +306,7 @@ namespace MeshAssistant
                 {"zh-chs","出口"},
                 {"es","Salida"},
                 {"hi","बाहर जाएं"},
-                {"de","Ausgang"}
+                {"de","Beenden"}
             }
         },
         {
@@ -411,6 +411,18 @@ namespace MeshAssistant
                 {"es","Valor"},
                 {"hi","मूल्य"},
                 {"de","Wert"}
+            }
+        },
+        {
+            "Agent is pause pending",
+            new Dictionary<string, string>() {
+                {"nl","Agent is gepauzeerd"},
+                {"ko","エージェントは一時停止保留中です"},
+                {"fr","L'agent est en attente de pause"},
+                {"zh-chs","代理暂停待定"},
+                {"es","El agente está en pausa pendiente"},
+                {"hi","एजेंट रुका हुआ है"},
+                {"de","Agent ist pausiert"}
             }
         },
         {
@@ -689,7 +701,7 @@ namespace MeshAssistant
                 {"zh-chs","事件"},
                 {"es","Evento"},
                 {"hi","प्रतिस्पर्धा"},
-                {"de","Veranstaltung"}
+                {"de","Ereignis"}
             }
         },
         {
