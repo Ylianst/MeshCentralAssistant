@@ -72,6 +72,8 @@ namespace MeshAssistant
         private bool startVisible = false;
         public List<LogEventStruct> userEvents = new List<LogEventStruct>();
         public bool SystemTrayApp = true;
+        public Image CustomizationLogo = null;
+        public string CustomizationTitle = null;
 
         public struct LogEventStruct
         {
@@ -212,15 +214,10 @@ namespace MeshAssistant
                 m.Checked = ((currentAgentName != null) && (currentAgentName.Equals("~")));
                 m.Click += agentSelection_Click;
                 subMenus.Add(m);
-                if (mcagent.CustomizationTitle != null)
-                {
-                    this.Text = mainNotifyIcon.Text = mcagent.CustomizationTitle;
-                }
-                else
-                {
-                    this.Text = mainNotifyIcon.Text = Translate.T(Properties.Resources.MeshCentralAssistant);
-                }
+            } else {
+                MeshCentralAgent.getMshCustomization(msh, out CustomizationTitle, out CustomizationLogo);
             }
+            UpdateTitle();
 
             // Configure system tray
             if (SystemTrayApp == false)
@@ -398,7 +395,7 @@ namespace MeshAssistant
                     submenu.Checked = (submenu.Name.Substring(14) == currentAgentName);
                 }
             }
-            if ((currentAgentName == "~") && (mcagent.CustomizationTitle != null)) { this.Text = mcagent.CustomizationTitle; } else { this.Text = Translate.T(Properties.Resources.MeshCentralAssistant); }
+            UpdateTitle();
             Log(string.Format("agentSelection_Click {0}", currentAgentName));
             connectToAgent();
         }
@@ -536,7 +533,6 @@ namespace MeshAssistant
             if ((mcagent != null) && (mcagent.state != 0)) { mcagent.disconnect(); }
             if ((currentAgentName != null) && (currentAgentName.Equals("~")))
             {
-                if ((currentAgentName == "~") && (mcagent.CustomizationTitle != null)) { this.Text = mcagent.CustomizationTitle; } else { this.Text = Translate.T(Properties.Resources.MeshCentralAssistant); }
                 Settings.SetRegValue("SelectedAgent", currentAgentName);
                 updateBuiltinAgentStatus();
                 startAgentToolStripMenuItem.Visible = false;
@@ -587,17 +583,50 @@ namespace MeshAssistant
                     stopAgentToolStripMenuItem.Visible = false;
                     toolStripMenuItem2.Visible = false;
                 }
+            }
+            UpdateTitle();
+            Agent_onSessionChanged();
+        }
 
-                if (currentAgentName != "Mesh Agent")
+        private void UpdateTitle()
+        {
+            if (currentAgentName == "~")
+            {
+                if (mcagent.CustomizationTitle != null)
                 {
-                    this.Text = string.Format(Translate.T(Properties.Resources.XAssistant), currentAgentName);
+                    this.Text = mcagent.CustomizationTitle;
                 }
                 else
                 {
-                    if ((currentAgentName == "~") && (mcagent.CustomizationTitle != null)) { this.Text = mcagent.CustomizationTitle; } else { this.Text = Translate.T(Properties.Resources.MeshCentralAssistant); }
+                    this.Text = Translate.T(Properties.Resources.MeshCentralAssistant);
                 }
             }
-            Agent_onSessionChanged();
+            else
+            {
+                if (currentAgentName != "Mesh Agent")
+                {
+                    if (CustomizationTitle != null)
+                    {
+                        this.Text = CustomizationTitle + " - " + currentAgentName;
+                    }
+                    else
+                    {
+                        this.Text = string.Format(Translate.T(Properties.Resources.XAssistant), currentAgentName);
+                    }
+                }
+                else
+                {
+                    if (CustomizationTitle != null)
+                    {
+                        this.Text = mainNotifyIcon.Text = CustomizationTitle;
+                    }
+                    else
+                    {
+                        this.Text = mainNotifyIcon.Text = Translate.T(Properties.Resources.MeshCentralAssistant);
+                    }
+                }
+            }
+            mainNotifyIcon.Text = this.Text;
         }
 
         private void Agent_onUserInfoChange(string userid, int change)
@@ -673,7 +702,6 @@ namespace MeshAssistant
             }
             return r;
         }
-
 
         private void Agent_onSessionChanged()
         {
@@ -1363,15 +1391,15 @@ namespace MeshAssistant
             switch (x)
             {
                 case uiImage.Green:
-                    if ((currentAgentName == "~") && (mcagent.CustomizationLogo != null)) { mainPictureBox.Image = mcagent.CustomizationLogo; } else { mainPictureBox.Image = Properties.Resources.MeshCentral; }
+                    if ((currentAgentName == "~") && (mcagent.CustomizationLogo != null)) { mainPictureBox.Image = mcagent.CustomizationLogo; } else { if (CustomizationLogo == null) { mainPictureBox.Image = Properties.Resources.MeshCentral; } else { mainPictureBox.Image = CustomizationLogo; } }
                     mainPictureBox.BackgroundImage = Properties.Resources.Green;
                     break;
                 case uiImage.Yellow:
-                    if ((currentAgentName == "~") && (mcagent.CustomizationLogo != null)) { mainPictureBox.Image = mcagent.CustomizationLogo; } else { mainPictureBox.Image = Properties.Resources.MeshCentral; }
+                    if ((currentAgentName == "~") && (mcagent.CustomizationLogo != null)) { mainPictureBox.Image = mcagent.CustomizationLogo; } else { if (CustomizationLogo == null) { mainPictureBox.Image = Properties.Resources.MeshCentral; } else { mainPictureBox.Image = CustomizationLogo; } }
                     mainPictureBox.BackgroundImage = Properties.Resources.Yellow;
                     break;
                 case uiImage.Red:
-                    if ((currentAgentName == "~") && (mcagent.CustomizationLogo != null)) { mainPictureBox.Image = mcagent.CustomizationLogo; } else { mainPictureBox.Image = Properties.Resources.MeshCentral; }
+                    if ((currentAgentName == "~") && (mcagent.CustomizationLogo != null)) { mainPictureBox.Image = mcagent.CustomizationLogo; } else { if (CustomizationLogo == null) { mainPictureBox.Image = Properties.Resources.MeshCentral; } else { mainPictureBox.Image = CustomizationLogo; } }
                     mainPictureBox.BackgroundImage = Properties.Resources.Red;
                     break;
                 case uiImage.Question:

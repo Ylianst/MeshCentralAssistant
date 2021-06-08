@@ -353,7 +353,7 @@ namespace MeshAssistant
             }
         }
 
-        private void setConsoleText(string msg, int msgid, string msgargs, int timeout)
+        public void setConsoleText(string msg, int msgid, string msgargs, int timeout)
         {
             string x = "{\"ctrlChannel\":\"102938\",\"type\":\"console\",\"msgid\":" + msgid;
             if (msg != null) { x += ",\"msg\":\"" + escapeJsonString(msg) + "\""; } else { x += ",\"msg\":null"; }
@@ -361,6 +361,11 @@ namespace MeshAssistant
             if (timeout != 0) { x += ",\"timeout\":" + timeout; }
             x += "}";
             WebSocket.SendString(x);
+        }
+
+        public void clearConsoleText()
+        {
+            WebSocket.SendString("{\"ctrlChannel\":\"102938\",\"type\":\"console\",\"msgid\":0}");
         }
 
         private void WebSocket_onBinaryData(webSocketClient sender, byte[] data, int off, int len, int orglen)

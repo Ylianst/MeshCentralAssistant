@@ -54,6 +54,13 @@ namespace MeshAssistant
         private Rectangle screenRect = Rectangle.Empty;
         private int screenScaleWidth = 0;
         private int screenScaleHeight = 0;
+        private int exceptionLogState = 0;
+        private bool UnableToCaptureShowing = false;
+
+        public void Log(string msg)
+        {
+            try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff") + ": MCAgent: " + msg + "\r\n"); } catch (Exception) { }
+        }
 
         [DllImport("user32.dll")]
         public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, int dwExtraInfo);
@@ -523,26 +530,30 @@ namespace MeshAssistant
 
                 try
                 {
-                    // Take a look at the mouse cursor
-                    // var mouseCursors = ['default', 'progress', 'crosshair', 'pointer', 'help', 'text', 'no-drop', 'move', 'nesw-resize', 'ns-resize', 'nwse-resize', 'w-resize', 'alias', 'wait', 'none', 'not-allowed', 'col-resize', 'row-resize', 'copy', 'zoom-in', 'zoom-out'];
-                    CURSORINFO pci;
-                    pci.cbSize = Marshal.SizeOf(typeof(CURSORINFO));
-                    GetCursorInfo(out pci);
                     int pointerType = 0;
-                    if (pci.hCursor == Cursors.Default.Handle) { pointerType = 0; } // Default
-                    else if (pci.hCursor == Cursors.Cross.Handle) { pointerType = 2; } // Crosshair
-                    else if (pci.hCursor == Cursors.Hand.Handle) { pointerType = 3; } // Pointer
-                    else if (pci.hCursor == Cursors.Help.Handle) { pointerType = 4; } // Help
-                    else if (pci.hCursor == Cursors.IBeam.Handle) { pointerType = 5; } // Text
-                    else if (pci.hCursor == Cursors.SizeNESW.Handle) { pointerType = 8; } // nesw-resize
-                    else if (pci.hCursor == Cursors.SizeNS.Handle) { pointerType = 9; } // ns-resize
-                    else if (pci.hCursor == Cursors.SizeNWSE.Handle) { pointerType = 10; } // nwse-resize
-                    else if (pci.hCursor == Cursors.SizeWE.Handle) { pointerType = 11; } // w-resize
-                    else if (pci.hCursor == Cursors.WaitCursor.Handle) { pointerType = 13; } // Wait
-                    else if (pci.hCursor == Cursors.No.Handle) { pointerType = 15; } // not-allowed
-                    else if (pci.hCursor == Cursors.VSplit.Handle) { pointerType = 16; } // col-resize
-                    else if (pci.hCursor == Cursors.HSplit.Handle) { pointerType = 17; } // col-resize
-                    else if (pci.hCursor == Cursors.AppStarting.Handle) { pointerType = 13; } // Wait
+                    try
+                    {
+                        // Take a look at the mouse cursor
+                        // var mouseCursors = ['default', 'progress', 'crosshair', 'pointer', 'help', 'text', 'no-drop', 'move', 'nesw-resize', 'ns-resize', 'nwse-resize', 'w-resize', 'alias', 'wait', 'none', 'not-allowed', 'col-resize', 'row-resize', 'copy', 'zoom-in', 'zoom-out'];
+                        CURSORINFO pci;
+                        pci.cbSize = Marshal.SizeOf(typeof(CURSORINFO));
+                        GetCursorInfo(out pci);
+                        if (pci.hCursor == Cursors.Default.Handle) { pointerType = 0; } // Default
+                        else if (pci.hCursor == Cursors.Cross.Handle) { pointerType = 2; } // Crosshair
+                        else if (pci.hCursor == Cursors.Hand.Handle) { pointerType = 3; } // Pointer
+                        else if (pci.hCursor == Cursors.Help.Handle) { pointerType = 4; } // Help
+                        else if (pci.hCursor == Cursors.IBeam.Handle) { pointerType = 5; } // Text
+                        else if (pci.hCursor == Cursors.SizeNESW.Handle) { pointerType = 8; } // nesw-resize
+                        else if (pci.hCursor == Cursors.SizeNS.Handle) { pointerType = 9; } // ns-resize
+                        else if (pci.hCursor == Cursors.SizeNWSE.Handle) { pointerType = 10; } // nwse-resize
+                        else if (pci.hCursor == Cursors.SizeWE.Handle) { pointerType = 11; } // w-resize
+                        else if (pci.hCursor == Cursors.WaitCursor.Handle) { pointerType = 13; } // Wait
+                        else if (pci.hCursor == Cursors.No.Handle) { pointerType = 15; } // not-allowed
+                        else if (pci.hCursor == Cursors.VSplit.Handle) { pointerType = 16; } // col-resize
+                        else if (pci.hCursor == Cursors.HSplit.Handle) { pointerType = 17; } // col-resize
+                        else if (pci.hCursor == Cursors.AppStarting.Handle) { pointerType = 13; } // Wait
+                    }
+                    catch (Exception) { } // If we can't get the mouse pointer, use default.
                     if (mousePointer != pointerType) // Update the mouse pointer
                     {
                         byte[] mousePointerCmd = new byte[5];
@@ -610,7 +621,15 @@ namespace MeshAssistant
 
                     // Capture the screen & scale it if needed
                     Graphics captureGraphics = Graphics.FromImage(captureBitmap);
-                    captureGraphics.CopyFromScreen(tscreenlocation.X, tscreenlocation.Y, 0, 0, ScreenSize);
+                    try
+                    {
+                        captureGraphics.CopyFromScreen(tscreenlocation.X, tscreenlocation.Y, 0, 0, ScreenSize);
+                    }
+                    catch (Exception)
+                    {
+                        if (UnableToCaptureShowing == false) { parent.setConsoleText("Unable to capture display", 6, null, 0); UnableToCaptureShowing = true; }
+                        continue;
+                    }
                     Bitmap scaledCaptureBitmap = captureBitmap;
                     if (encoderScaling != 1024) { scaledCaptureBitmap = new Bitmap(captureBitmap, screenScaleWidth, screenScaleHeight); }
 
@@ -668,8 +687,12 @@ namespace MeshAssistant
                         }
                         if (sendx != -1) { SendSubBitmap(scaledCaptureBitmap, sendx, sendy, sendw, 64); sendx = -1; }
                     }
+
+                    // Everything went ok
+                    exceptionLogState = 0;
+                    if (UnableToCaptureShowing == true) { parent.clearConsoleText(); UnableToCaptureShowing = false; }
                 }
-                catch (Exception) { }
+                catch (Exception ex) { if (exceptionLogState == 0) { Log(ex.ToString()); exceptionLogState++; } }
             }
         }
 
