@@ -31,6 +31,8 @@ using System.Windows.Forms;
 using System.Drawing;
 using CERTENROLLLib;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Reflection;
 
 namespace MeshAssistant
 {
@@ -505,6 +507,9 @@ namespace MeshAssistant
             Log("Server Connected");
             autoConnectTime = 5;
 
+            // Send core information
+            SendCoreInfo();
+
             // Update network information
             sendNetworkInfo();
 
@@ -524,6 +529,37 @@ namespace MeshAssistant
 
             // Send system information
             sendSysInfo(null, null);
+        }
+
+        public void SendCoreInfo()
+        {
+            string core = GetCoreInfo();
+            Log(string.Format("sendCoreInfo: {0}", core));
+            if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(core));
+        }
+
+        public string GetCoreInfo()
+        {
+            int caps = (1 + 4 + 8); // Capabilities of the agent (bitmask): 1 = Desktop, 2 = Terminal, 4 = Files, 8 = Console, 16 = JavaScript, 32 = Temporary, 64 = Recovery
+            string version = "v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            string core = "{\"action\":\"coreinfo\",\"value\":\"" + escapeJsonString(version) + "\",\"caps\":" + caps;
+            try { core += ",\"root\":" + (IsAdministrator() ? "true" : "false"); } catch (Exception) { }
+            try { core += ",\"users\":[\"" + escapeJsonString(WindowsIdentity.GetCurrent().Name) + "\"]"; } catch (Exception) { }
+            try
+            {
+                bool first = true;
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_OperatingSystem"))
+                {
+                    foreach (ManagementObject queryObj in searcher.Get())
+                    {
+                        if (first) { first = false; } else { continue; }
+                        core += ",\"osdesc\":\"" + escapeJsonString(queryObj["Caption"].ToString() + " v" + queryObj["Version"].ToString()) + "\"";
+                    }
+                }
+            }
+            catch (Exception) { }
+            core += "}";
+            return core;
         }
 
         public void RequestHelp(string HelpRequest)
@@ -668,12 +704,17 @@ namespace MeshAssistant
             switch (cmd[0])
             {
                 case "help": {
-                        response = "Available commands: \r\n" + "args, help, netinfo, notify, openurl, sysinfo" + ".";
+                        response = "Available commands: \r\n" + "args, coreinfo, help, netinfo, notify, openurl, sysinfo" + ".";
                         break;
                     }
                 case "sysinfo":
                     {
                         response = getSysInfo();
+                        break;
+                    }
+                case "coreinfo":
+                    {
+                        response = GetCoreInfo();
                         break;
                     }
                 case "args":
@@ -692,6 +733,8 @@ namespace MeshAssistant
                     {
                         if (cmd.Length != 2) {
                             response = "Usage: openurl [url]";
+                        } else if ((!cmd[1].ToLower().StartsWith("http://")) && (!cmd[1].ToLower().StartsWith("https://"))) {
+                            response = "Url must start with http:// or https://";
                         } else {
                             Process.Start(cmd[1]);
                             sendOpenUrlEventLog(cmd[1]); response = "Ok";
@@ -763,10 +806,12 @@ namespace MeshAssistant
                 case "openUrl":
                     {
                         if (!jsonAction.ContainsKey("url") || (jsonAction["url"].GetType() != typeof(string))) return;
-                        Event(userid, string.Format("Opening URL: {0}", jsonAction["url"].ToString()));
-                        sendOpenUrlEventLog(jsonAction["url"].ToString());
-                        Process.Start(jsonAction["url"].ToString());
-                        //parent.OpenBrowser(jsonAction["url"].ToString());
+                        string url = (string)jsonAction["url"];
+                        if ((!url.ToLower().StartsWith("http://")) && (!url.ToLower().StartsWith("https://"))) return;
+                        Event(userid, string.Format("Opening URL: {0}", url));
+                        sendOpenUrlEventLog(url);
+                        Process.Start(url);
+                        //parent.OpenBrowser(url);
                         break;
                     }
                 case "msg": {
@@ -1426,5 +1471,13 @@ namespace MeshAssistant
             else { return -1; }
         }
 
+        public static bool IsAdministrator()
+        {
+            using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+            {
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+        }
     }
 }
