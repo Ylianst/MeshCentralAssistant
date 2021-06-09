@@ -19,6 +19,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Linq;
+using System.Management;
 using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -520,6 +521,9 @@ namespace MeshAssistant
             {
                 sendSelfUpdateQuery(softwareName, selfExecutableHashHex);
             }
+
+            // Send system information
+            sendSysInfo(null, null);
         }
 
         public void RequestHelp(string HelpRequest)
@@ -664,7 +668,12 @@ namespace MeshAssistant
             switch (cmd[0])
             {
                 case "help": {
-                        response = "Available commands: \r\n" + "args, help, netinfo, notify, openurl" + ".";
+                        response = "Available commands: \r\n" + "args, help, netinfo, notify, openurl, sysinfo" + ".";
+                        break;
+                    }
+                case "sysinfo":
+                    {
+                        response = getSysInfo();
                         break;
                     }
                 case "args":
@@ -783,6 +792,15 @@ namespace MeshAssistant
                                     }
                                     catch (Exception) { }
 
+                                    break;
+                                }
+                            case "sysinfo":
+                                {
+                                    if ((!jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() != typeof(string))) break;
+                                    string sessionid = (string)jsonAction["sessionid"];
+                                    string tag = null;
+                                    if ((jsonAction.ContainsKey("tag")) && (jsonAction["tag"].GetType() == typeof(string))) { tag = (string)jsonAction["tag"]; }
+                                    sendSysInfoMsg(sessionid, tag);
                                     break;
                                 }
                             case "console": {
@@ -935,6 +953,242 @@ namespace MeshAssistant
                         break;
                     }
             }
+        }
+
+        private void sendSysInfoMsg(string sessionid, string tag)
+        {
+            try
+            {
+                string sysinfo = getSysInfo();
+                if (sysinfo == null) return;
+                string r = "{\"action\":\"msg\",\"type\":\"sysinfo\"";
+                if (sessionid != null) { r += ",\"sessionid\":\"" + escapeJsonString(sessionid) + "\""; }
+                if (tag != null) { r += ",\"tag\":\"" + escapeJsonString(tag) + "\""; }
+                r += ",\"data\":" + sysinfo + "}";
+                if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(r));
+            }
+            catch (Exception) { }
+        }
+
+        private void sendSysInfo(string sessionid, string tag)
+        {
+            try
+            {
+                string sysinfo = getSysInfo();
+                if (sysinfo == null) return;
+                if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"sysinfo\",\"data\":" + sysinfo + "}"));
+            }
+            catch (Exception) { }
+        }
+
+        private string addQueryValue(ManagementObject queryObj, string vname, string name, ref bool qfirst)
+        {
+            if (queryObj[name] == null) return "";
+            string r = "";
+            if (qfirst) { qfirst = false; } else { r = ","; }
+            return r + "\"" + vname + "\":\"" + escapeJsonString(queryObj[name].ToString()) + "\"";
+        }
+
+        private string getSysInfo()
+        {
+            bool first;
+            bool qfirst;
+            try
+            {
+                string r = "{";
+                r += "\"hardware\":{";
+                r += "\"windows\":{";
+                r += "\"memory\":[";
+                first = true;
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_PhysicalMemory"))
+                {
+                    foreach (ManagementObject queryObj in searcher.Get())
+                    {
+                        if (first) { first = false; } else { r += ","; }
+                        r += "{";
+                        qfirst = true;
+                        r += addQueryValue(queryObj, "BankLabel", "BankLabel", ref qfirst);
+                        r += addQueryValue(queryObj, "Capacity", "Capacity", ref qfirst);
+                        r += addQueryValue(queryObj, "DataWidth", "DataWidth", ref qfirst);
+                        r += addQueryValue(queryObj, "Description", "Description", ref qfirst);
+                        r += addQueryValue(queryObj, "DeviceLocator", "DeviceLocator", ref qfirst);
+                        r += addQueryValue(queryObj, "FormFactor", "FormFactor", ref qfirst);
+                        r += addQueryValue(queryObj, "Manufacturer", "Manufacturer", ref qfirst);
+                        r += addQueryValue(queryObj, "MemoryType", "MemoryType", ref qfirst);
+                        r += addQueryValue(queryObj, "Name", "Name", ref qfirst);
+                        r += addQueryValue(queryObj, "PartNumber", "PartNumber", ref qfirst);
+                        r += addQueryValue(queryObj, "SerialNumber", "SerialNumber", ref qfirst);
+                        r += addQueryValue(queryObj, "Speed", "Speed", ref qfirst);
+                        r += addQueryValue(queryObj, "Tag", "Tag", ref qfirst);
+                        r += addQueryValue(queryObj, "TotalWidth", "TotalWidth", ref qfirst);
+                        r += addQueryValue(queryObj, "TypeDetail", "TypeDetail", ref qfirst);
+                        r += "}";
+                    }
+                }
+                r += "]"; // memory
+                r += ",\"osinfo\":{";
+                first = true;
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_OperatingSystem"))
+                {
+                    foreach (ManagementObject queryObj in searcher.Get())
+                    {
+                        if (first) { first = false; } else { continue; }
+                        qfirst = true;
+                        r += addQueryValue(queryObj, "BootDevice", "BootDevice", ref qfirst);
+                        r += addQueryValue(queryObj, "BuildNumber", "BuildNumber", ref qfirst);
+                        r += addQueryValue(queryObj, "BuildType", "BuildType", ref qfirst);
+                        r += addQueryValue(queryObj, "Caption", "Caption", ref qfirst);
+                        r += addQueryValue(queryObj, "CodeSet", "CodeSet", ref qfirst);
+                        r += addQueryValue(queryObj, "CountryCode", "CountryCode", ref qfirst);
+                        r += addQueryValue(queryObj, "CreationClassName", "CreationClassName", ref qfirst);
+                        r += addQueryValue(queryObj, "CSCreationClassName", "CSCreationClassName", ref qfirst);
+                        r += addQueryValue(queryObj, "CSName", "CSName", ref qfirst);
+                        r += addQueryValue(queryObj, "CurrentTimeZone", "CurrentTimeZone", ref qfirst);
+                        r += addQueryValue(queryObj, "DataExecutionPrevention_32BitApplications", "DataExecutionPrevention_32BitApplications", ref qfirst);
+                        r += addQueryValue(queryObj, "DataExecutionPrevention_Available", "DataExecutionPrevention_Available", ref qfirst);
+                        r += addQueryValue(queryObj, "DataExecutionPrevention_Drivers", "DataExecutionPrevention_Drivers", ref qfirst);
+                        r += addQueryValue(queryObj, "DataExecutionPrevention_SupportPolicy", "DataExecutionPrevention_SupportPolicy", ref qfirst);
+                        r += addQueryValue(queryObj, "Debug", "Debug", ref qfirst);
+                        r += addQueryValue(queryObj, "Distributed", "Distributed", ref qfirst);
+                        r += addQueryValue(queryObj, "EncryptionLevel", "EncryptionLevel", ref qfirst);
+                        r += addQueryValue(queryObj, "ForegroundApplicationBoost", "ForegroundApplicationBoost", ref qfirst);
+                        r += addQueryValue(queryObj, "InstallDate", "InstallDate", ref qfirst);
+                        r += addQueryValue(queryObj, "LastBootUpTime", "LastBootUpTime", ref qfirst);
+                        r += addQueryValue(queryObj, "Locale", "Locale", ref qfirst);
+                        r += addQueryValue(queryObj, "Manufacturer", "Manufacturer", ref qfirst);
+                        r += addQueryValue(queryObj, "MaxNumberOfProcesses", "MaxNumberOfProcesses", ref qfirst);
+                        r += addQueryValue(queryObj, "MUILanguages", "MUILanguages", ref qfirst);
+                        r += addQueryValue(queryObj, "Name", "Name", ref qfirst);
+                        r += addQueryValue(queryObj, "NumberOfLicensedUsers", "NumberOfLicensedUsers", ref qfirst);
+                        r += addQueryValue(queryObj, "NumberOfProcesses", "NumberOfProcesses", ref qfirst);
+                        r += addQueryValue(queryObj, "NumberOfUsers", "NumberOfUsers", ref qfirst);
+                        r += addQueryValue(queryObj, "OperatingSystemSKU", "OperatingSystemSKU", ref qfirst);
+                        r += addQueryValue(queryObj, "OSArchitecture", "OSArchitecture", ref qfirst);
+                        r += addQueryValue(queryObj, "OSLanguage", "OSLanguage", ref qfirst);
+                        r += addQueryValue(queryObj, "OSProductSuite", "OSProductSuite", ref qfirst);
+                        r += addQueryValue(queryObj, "OSType", "OSType", ref qfirst);
+                        r += addQueryValue(queryObj, "PortableOperatingSystem", "PortableOperatingSystem", ref qfirst);
+                        r += addQueryValue(queryObj, "Primary", "Primary", ref qfirst);
+                        r += addQueryValue(queryObj, "ProductType", "ProductType", ref qfirst);
+                        r += addQueryValue(queryObj, "SerialNumber", "SerialNumber", ref qfirst);
+                        r += addQueryValue(queryObj, "ServicePackMajorVersion", "ServicePackMajorVersion", ref qfirst);
+                        r += addQueryValue(queryObj, "ServicePackMinorVersion", "ServicePackMinorVersion", ref qfirst);
+                        r += addQueryValue(queryObj, "SizeStoredInPagingFiles", "SizeStoredInPagingFiles", ref qfirst);
+                        r += addQueryValue(queryObj, "Status", "Status", ref qfirst);
+                        r += addQueryValue(queryObj, "SuiteMask", "SuiteMask", ref qfirst);
+                        r += addQueryValue(queryObj, "SystemDevice", "SystemDevice", ref qfirst);
+                        r += addQueryValue(queryObj, "SystemDirectory", "SystemDirectory", ref qfirst);
+                        r += addQueryValue(queryObj, "SystemDrive", "SystemDrive", ref qfirst);
+                        r += addQueryValue(queryObj, "Version", "Version", ref qfirst);
+                        r += addQueryValue(queryObj, "WindowsDirectory", "WindowsDirectory", ref qfirst);
+                    }
+                }
+                r += "}"; // osinfo
+                r += ",\"cpu\":[";
+                first = true;
+                string firstCpuName = null;
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_Processor"))
+                {
+                    foreach (ManagementObject queryObj in searcher.Get())
+                    {
+                        if (first) { first = false; } else { r += ","; }
+                        r += "{";
+                        qfirst = true;
+                        if (queryObj["Name"] != null) { firstCpuName = queryObj["Name"].ToString(); }
+                        r += addQueryValue(queryObj, "Caption", "Caption", ref qfirst);
+                        r += addQueryValue(queryObj, "DeviceID", "DeviceID", ref qfirst);
+                        r += addQueryValue(queryObj, "Manufacturer", "Manufacturer", ref qfirst);
+                        r += addQueryValue(queryObj, "MaxClockSpeed", "MaxClockSpeed", ref qfirst);
+                        r += addQueryValue(queryObj, "Name", "Name", ref qfirst);
+                        r += addQueryValue(queryObj, "SocketDesignation", "SocketDesignation", ref qfirst);
+                        r += "}";
+                    }
+                }
+                r += "]"; // cpu
+                r += "},"; // windows
+                r += "\"identifiers\":{";
+
+                Dictionary<string, string> identifiers = new Dictionary<string, string>();
+                if (firstCpuName != null) { identifiers.Add("cpu_name", firstCpuName); }
+                first = true;
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM CIM_BIOSElement"))
+                {
+                    foreach (ManagementObject queryObj in searcher.Get())
+                    {
+                        if (first) { first = false; } else { continue; }
+                        if (queryObj["ReleaseDate"] != null) { identifiers.Add("bios_date", queryObj["ReleaseDate"].ToString()); }
+                        if (queryObj["Manufacturer"] != null) { identifiers.Add("bios_vendor", queryObj["Manufacturer"].ToString()); }
+                        if (queryObj["Version"] != null) { identifiers.Add("bios_version", queryObj["SMBIOSBIOSVersion"].ToString()); }
+                    }
+                }
+                first = true;
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_BaseBoard"))
+                {
+                    foreach (ManagementObject queryObj in searcher.Get())
+                    {
+                        if (first) { first = false; } else { continue; }
+                        if (queryObj["Product"] != null) { identifiers.Add("board_name", queryObj["Product"].ToString()); }
+                        if (queryObj["SerialNumber"] != null) { identifiers.Add("board_serial", queryObj["SerialNumber"].ToString()); }
+                        if (queryObj["Manufacturer"] != null) { identifiers.Add("board_vendor", queryObj["Manufacturer"].ToString()); }
+                        if (queryObj["Version"] != null) { identifiers.Add("board_version", queryObj["Version"].ToString()); }
+                    }
+                }
+                first = true;
+                foreach (string key in identifiers.Keys)
+                {
+                    if (first) { first = false; } else { r += ","; }
+                    r += "\"" + key + "\":\"" + escapeJsonString(identifiers[key]) + "\"";
+                }
+
+                List<string> gpuNames = new List<string>();
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_VideoController"))
+                {
+                    foreach (ManagementObject queryObj in searcher.Get())
+                    {
+                        if (queryObj["Name"] != null) { gpuNames.Add(queryObj["Name"].ToString()); }
+                    }
+                }
+                if (gpuNames.Count > 0)
+                {
+                    r += ",\"gpu_name\":[";
+                    first = true;
+                    foreach (string n in gpuNames)
+                    {
+                        if (first) { first = false; } else { r += ","; }
+                        r += "\"" + escapeJsonString(n) + "\"";
+                    }
+                    r += "]";
+                }
+
+                r += ",\"storage_devices\":[";
+                first = true;
+                using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_DiskDrive"))
+                {
+                    foreach (ManagementObject queryObj in searcher.Get())
+                    {
+                        if (queryObj["Size"] == null) continue;
+                        if (first) { first = false; } else { r += ","; }
+                        r += "{";
+                        qfirst = true;
+                        r += addQueryValue(queryObj, "Caption", "Model", ref qfirst);
+                        r += addQueryValue(queryObj, "Size", "Size", ref qfirst);
+                        r += addQueryValue(queryObj, "Serial", "SerialNumber", ref qfirst);
+                        r += "}";
+                    }
+                }
+                r += "]"; // storage_devices
+                r += "}"; // identifiers
+                r += "}"; // hardware
+                string hash = null;
+                using (SHA384 shaM = new SHA384Managed()) { hash = Convert.ToBase64String(shaM.ComputeHash(UTF8Encoding.UTF8.GetBytes(r))); }
+                r += ",\"hash\":\"" + hash + "\"";
+                r += "}"; // start
+                return r;
+            }
+            catch (Exception ex) {
+                try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff") + ": MCAgent: " + ex.ToString() + "\r\n"); } catch (Exception) { }
+            }
+            return null;
         }
 
         private string getAllProcesses()

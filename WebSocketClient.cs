@@ -172,7 +172,7 @@ namespace MeshAssistant
                 wsclient = new TcpClient();
                 string h = url.Host;
                 if (h.StartsWith("[") && h.EndsWith("]")) { h = h.Substring(1, h.Length - 2); }
-                wsclient.BeginConnect(url.Host, url.Port, new AsyncCallback(OnConnectSink), this);
+                wsclient.BeginConnect(h, url.Port, new AsyncCallback(OnConnectSink), this);
             }
 
             return true;
