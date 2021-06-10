@@ -122,7 +122,7 @@ namespace MeshAssistant
                     }
                 }
                 r += "}}";
-                if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(r));
+                if (WebSocket != null) WebSocket.SendString(r);
             }
             else if (protocol == 5)
             {
@@ -136,7 +136,7 @@ namespace MeshAssistant
                     }
                 }
                 r += "}}";
-                if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(r));
+                if (WebSocket != null) WebSocket.SendString(r);
             }
         }
 
@@ -535,7 +535,7 @@ namespace MeshAssistant
         {
             string core = GetCoreInfo();
             Log(string.Format("sendCoreInfo: {0}", core));
-            if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(core));
+            if (WebSocket != null) WebSocket.SendString(core);
         }
 
         public string GetCoreInfo()
@@ -582,31 +582,31 @@ namespace MeshAssistant
         private void sendSessionUpdate(string type, string value)
         {
             Log(string.Format("sendSessionUpdate {0}, {1}", type, value));
-            if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"sessions\",\"type\":\"" + type + "\",\"value\":" + value + "}"));
+            if (WebSocket != null) WebSocket.SendString("{\"action\":\"sessions\",\"type\":\"" + type + "\",\"value\":" + value + "}");
         }
 
         private void sendConsoleEventLog(string cmd)
         {
             Log(string.Format("sendConsoleEventLog {0}", cmd));
-            if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":17,\"msgArgs\":[\"" + escapeJsonString(cmd) + "\"],\"msg\":\"Processing console command: " + escapeJsonString(cmd) + "\"}"));
+            if (WebSocket != null) WebSocket.SendString("{\"action\":\"log\",\"msgid\":17,\"msgArgs\":[\"" + escapeJsonString(cmd) + "\"],\"msg\":\"Processing console command: " + escapeJsonString(cmd) + "\"}");
         }
 
         private void sendOpenUrlEventLog(string url)
         {
             Log(string.Format("sendOpenUrlEventLog {0}", url));
-            if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":20,\"msgArgs\":[\"" + escapeJsonString(url) + "\"],\"msg\":\"Opening: " + escapeJsonString(url) + "\"}"));
+            if (WebSocket != null) WebSocket.SendString("{\"action\":\"log\",\"msgid\":20,\"msgArgs\":[\"" + escapeJsonString(url) + "\"],\"msg\":\"Opening: " + escapeJsonString(url) + "\"}");
         }
 
         private void sendHelpEventLog(string username, string helpstring)
         {
             Log(string.Format("sendHelpEventLog {0}, {1}", username, helpstring));
-            if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":98,\"msgArgs\":[\"" + escapeJsonString(username) + "\",\"" + escapeJsonString(helpstring) + "\"],\"msg\":\"Help Requested, user: " + escapeJsonString(username) + ", details: " + escapeJsonString(helpstring) + "\"}"));
+            if (WebSocket != null) WebSocket.SendString("{\"action\":\"log\",\"msgid\":98,\"msgArgs\":[\"" + escapeJsonString(username) + "\",\"" + escapeJsonString(helpstring) + "\"],\"msg\":\"Help Requested, user: " + escapeJsonString(username) + ", details: " + escapeJsonString(helpstring) + "\"}");
         }
 
         private void sendSelfUpdateQuery(string softwareName, string softwareHash)
         {
             Log(string.Format("sendSelfUpdateQuery {0}, {1}", softwareName, softwareHash));
-            if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"meshToolInfo\",\"name\":\"" + escapeJsonString(softwareName) + "\",\"hash\":\"" + escapeJsonString(softwareHash) + "\",\"cookie\":true,\"msh\":true}"));
+            if (WebSocket != null) WebSocket.SendString("{\"action\":\"meshToolInfo\",\"name\":\"" + escapeJsonString(softwareName) + "\",\"hash\":\"" + escapeJsonString(softwareHash) + "\",\"cookie\":true,\"msh\":true}");
         }
 
         private string[] parseArgString(string cmd) {
@@ -641,13 +641,13 @@ namespace MeshAssistant
         private void sendNetworkInfo()
         {
             Log("sendNetworkInfo");
-            if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"netinfo\",\"netif2\":" + getNetworkInfo() + "}"));
+            if (WebSocket != null) WebSocket.SendString("{\"action\":\"netinfo\",\"netif2\":" + getNetworkInfo() + "}");
         }
 
         private void getUserImage(string userid)
         {
             Log(string.Format("getUserImage {0}", userid));
-            if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"getUserImage\",\"userid\":\"" + escapeJsonString(userid) + "\"}"));
+            if (WebSocket != null) WebSocket.SendString("{\"action\":\"getUserImage\",\"userid\":\"" + escapeJsonString(userid) + "\"}");
         }
 
         private string getNetworkInfo()
@@ -754,7 +754,7 @@ namespace MeshAssistant
             }
 
             if (response != null) {
-                if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"console\",\"value\":\"" + escapeJsonString(response) + "\",\"sessionid\":\"" + sessionid + "\"}"));
+                if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"console\",\"value\":\"" + escapeJsonString(response) + "\",\"sessionid\":\"" + sessionid + "\"}");
             }
         }
 
@@ -780,7 +780,7 @@ namespace MeshAssistant
             string action = jsonAction["action"].ToString();
             switch (action)
             {
-                case "ping": { if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"pong\"}")); break; }
+                case "ping": { if (WebSocket != null) WebSocket.SendString("{\"action\":\"pong\"}"); break; }
                 case "pong": { break; }
                 case "errorlog": { break; }
                 case "sysinfo": { break; }
@@ -833,7 +833,7 @@ namespace MeshAssistant
                                         r += ",\"cpu\":{\"total\":" + cpuCounter.NextValue() + "}";
                                         r += ",\"memory\":{\"percentConsumed\":" + GetUsedMemory() + "}";
                                         r += "}";
-                                        if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(r));
+                                        if (WebSocket != null) WebSocket.SendString(r);
                                     }
                                     catch (Exception) { }
 
@@ -951,7 +951,7 @@ namespace MeshAssistant
                                     string sessionid = null;
                                     if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string))) { sessionid = (string)jsonAction["sessionid"]; }
                                     string ps = getAllProcesses();
-                                    if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"ps\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"value\":\"" + escapeJsonString(ps) + "\"}"));
+                                    if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"ps\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"value\":\"" + escapeJsonString(ps) + "\"}");
                                     break;
                                 }
                             case "pskill":
@@ -1010,7 +1010,7 @@ namespace MeshAssistant
                 if (sessionid != null) { r += ",\"sessionid\":\"" + escapeJsonString(sessionid) + "\""; }
                 if (tag != null) { r += ",\"tag\":\"" + escapeJsonString(tag) + "\""; }
                 r += ",\"data\":" + sysinfo + "}";
-                if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(r));
+                if (WebSocket != null) WebSocket.SendString(r);
             }
             catch (Exception) { }
         }
@@ -1021,7 +1021,7 @@ namespace MeshAssistant
             {
                 string sysinfo = getSysInfo();
                 if (sysinfo == null) return;
-                if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"sysinfo\",\"data\":" + sysinfo + "}"));
+                if (WebSocket != null) WebSocket.SendString("{\"action\":\"sysinfo\",\"data\":" + sysinfo + "}");
             }
             catch (Exception) { }
         }
@@ -1276,8 +1276,8 @@ namespace MeshAssistant
                 if (Clipboard.ContainsText(TextDataFormat.Text))
                 {
                     string clipboardValue = Clipboard.GetText();
-                    if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":21,\"msgArgs\":[" + clipboardValue.Length + "],\"msg\":\"Getting clipboard content, " + clipboardValue.Length + " byte(s)\"" + extraLogStr + "}"));
-                    if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"getclip\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"data\":\"" + escapeJsonString(clipboardValue) + "\",\"tag\":" + tag + "}"));
+                    if (WebSocket != null) WebSocket.SendString("{\"action\":\"log\",\"msgid\":21,\"msgArgs\":[" + clipboardValue.Length + "],\"msg\":\"Getting clipboard content, " + clipboardValue.Length + " byte(s)\"" + extraLogStr + "}");
+                    if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"getclip\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"data\":\"" + escapeJsonString(clipboardValue) + "\",\"tag\":" + tag + "}");
                 }
             }
         }
@@ -1299,7 +1299,7 @@ namespace MeshAssistant
                 string clipboardData = (string)jsonAction["data"];
                 Clipboard.SetText(clipboardData);
                 string sessionid = (string)jsonAction["sessionid"];
-                if (WebSocket != null) WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"msg\",\"type\":\"setclip\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"success\":true}"));
+                if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"setclip\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"success\":true}");
             }
         }
 
