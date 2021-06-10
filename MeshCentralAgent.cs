@@ -832,6 +832,28 @@ namespace MeshAssistant
                                         if (tag != null) { r += "\"tag\":\"" + escapeJsonString(tag) + "\""; }
                                         r += ",\"cpu\":{\"total\":" + cpuCounter.NextValue() + "}";
                                         r += ",\"memory\":{\"percentConsumed\":" + GetUsedMemory() + "}";
+                                        try
+                                        {
+                                            Dictionary<string, double> temps = new Dictionary<string, double>();
+                                            using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM MSAcpi_ThermalZoneTemperature"))
+                                            {
+                                                foreach (ManagementObject queryObj in searcher.Get())
+                                                {
+                                                    double temperature = Convert.ToDouble(queryObj["CurrentTemperature"].ToString());
+                                                    // Convert the value to celsius degrees
+                                                    temps.Add(queryObj["InstanceName"].ToString(), (temperature - 2732) / 10.0);
+                                                }
+                                            }
+                                            if (temps.Count > 0)
+                                            {
+                                                r += ",\"thermals\":[";
+                                                bool first = true;
+                                                foreach (string key in temps.Keys) { if (first) { first = false; } else { r += ","; } r += "\"" + temps[key] + "\""; }
+                                                r += "]";
+                                            }
+                                        }
+                                        catch (Exception) { }
+
                                         r += "}";
                                         if (WebSocket != null) WebSocket.SendString(r);
                                     }
