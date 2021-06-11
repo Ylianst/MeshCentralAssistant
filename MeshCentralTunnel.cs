@@ -34,6 +34,7 @@ namespace MeshAssistant
         public webSocketClient WebSocket = null;
         private JavaScriptSerializer JSON = new JavaScriptSerializer();
         private MeshCentralDesktop Desktop = null;
+        private MeshCentralTerminal Terminal = null;
         private Dictionary<string, object> jsonOptions = null;
         private FileStream fileSendTransfer = null;
         private FileStream fileRecvTransfer = null;
@@ -118,6 +119,7 @@ namespace MeshAssistant
             if (fileSendTransfer != null) { fileSendTransfer.Close(); fileSendTransfer = null; }
             if (fileRecvTransfer != null) { fileRecvTransfer.Close(); fileRecvTransfer = null; }
             if (WebSocket != null) { WebSocket.Dispose(); WebSocket = null; }
+            if (Terminal != null) { Terminal.Dispose(); Terminal = null; }
             if (Desktop != null) { Desktop.Dispose(); Desktop = null; }
 
             // Cancel the consent request if active
@@ -129,7 +131,19 @@ namespace MeshAssistant
             // Update session
             if (sessionUserName != null)
             {
-                if (protocol == 2)
+                if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal
+                {
+                    if (parent.TerminalSessions != null)
+                    {
+                        if (parent.TerminalSessions.ContainsKey(sessionUserName))
+                        {
+                            parent.TerminalSessions[sessionUserName] = (int)parent.TerminalSessions[sessionUserName] - 1;
+                            if ((int)parent.TerminalSessions[sessionUserName] == 0) { parent.TerminalSessions.Remove(sessionUserName); }
+                        }
+                        parent.fireSessionChanged(1);
+                    }
+                }
+                else if (protocol == 2) // Desktop
                 {
                     if (parent.DesktopSessions != null)
                     {
@@ -141,7 +155,7 @@ namespace MeshAssistant
                         parent.fireSessionChanged(2);
                     }
                 }
-                if (protocol == 5)
+                else if (protocol == 5) // Files
                 {
                     if (parent.FilesSessions != null)
                     {
@@ -157,8 +171,9 @@ namespace MeshAssistant
             }
 
             // Update event log
-            if (protocol == 2) { parent.Event(userid, "Closed desktop session"); }
-            if (protocol == 5) { parent.Event(userid, "Closed files session"); }
+            if ((protocol == 1) || (protocol == 8) || (protocol == 9)) { parent.Event(userid, "Closed terminal session"); }
+            else if (protocol == 2) { parent.Event(userid, "Closed desktop session"); }
+            else if (protocol == 5) { parent.Event(userid, "Closed files session"); }
         }
         
         private void connectedToServer()
@@ -177,7 +192,15 @@ namespace MeshAssistant
                 // This is a control command
                 if (!jsonAction.ContainsKey("type") || jsonAction["type"].GetType() != typeof(string)) return;
                 string type = (string)jsonAction["type"];
-                if (type.Equals("close")) { disconnect(); return; }
+                if (type.Equals("close")) { disconnect(); }
+                if ((type.Equals("termsize")) && (Terminal != null)) {
+                    int cols = 0;
+                    int rows = 0;
+                    if (jsonAction.ContainsKey("cols") && (jsonAction["cols"].GetType() == typeof(int))) { cols = (int)jsonAction["cols"]; }
+                    if (jsonAction.ContainsKey("rows") && (jsonAction["rows"].GetType() == typeof(int))) { rows = (int)jsonAction["rows"]; }
+                    if ((cols > 0) && (rows > 0)) { Terminal.Resize(cols, rows); }
+                }
+                return;
             }
 
             if (!jsonAction.ContainsKey("action") || jsonAction["action"].GetType() != typeof(string)) return;
@@ -222,6 +245,14 @@ namespace MeshAssistant
                     if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["userid"]; }
                     if (sessionUserName != null)
                     {
+                        if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal: 1 = Admin Shell, 8 = User Shell, 9 = User PowerShell
+                        {
+                            if (parent.terminalSupport == false) { disconnect(); return; } // Terminal not supported
+                            if (parent.TerminalSessions == null) { parent.TerminalSessions = new Dictionary<string, object>(); }
+                            if (parent.TerminalSessions.ContainsKey(sessionUserName)) { parent.TerminalSessions[sessionUserName] = (int)parent.TerminalSessions[sessionUserName] + 1; } else { parent.TerminalSessions[sessionUserName] = 1; }
+                            parent.fireSessionChanged(2);
+                            parent.Event(userid, "Started terminal session");
+                        }
                         if (protocol == 2) // Desktop
                         {
                             if (parent.DesktopSessions == null) { parent.DesktopSessions = new Dictionary<string, object>(); }
@@ -245,7 +276,28 @@ namespace MeshAssistant
                     if (parent.privacyBarText != (string)creationArgs["privacybartext"]) { parent.privacyBarText = (string)creationArgs["privacybartext"]; parent.PrivacyTextChanged(); }
                 }
 
-                if (protocol == 2)
+                if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal
+                {
+                    if (((consent & 0x10) != 0) || parent.autoConnect) // Remote Terminal Consent Prompt
+                    {
+                        consentRequested = true;
+                        setConsoleText("Waiting for user to grant access...", 1, null, 0);
+                        parent.askForConsent(this, "User \"{0}\" is requesting remote terminal control of this computer. Click allow to grant access.", protocol, sessionUserName);
+                        parent.Event(userid, "Requesting user consent for terminal session");
+                    }
+                    else
+                    {
+                        int cols = 80;
+                        int rows = 25;
+                        if (jsonOptions != null)
+                        {
+                            if (jsonOptions.ContainsKey("cols") && (jsonOptions["cols"].GetType() == typeof(int))) { cols = (int)jsonOptions["cols"]; }
+                            if (jsonOptions.ContainsKey("rows") && (jsonOptions["rows"].GetType() == typeof(int))) { rows = (int)jsonOptions["rows"]; }
+                        }
+                        Terminal = new MeshCentralTerminal(this, protocol, cols, rows);
+                    }
+                }
+                else if (protocol == 2) // Desktop
                 {
                     if (((consent & 8) != 0) || parent.autoConnect) // Remote Desktop Consent Prompt
                     {
@@ -259,7 +311,7 @@ namespace MeshAssistant
                         Desktop = new MeshCentralDesktop(this);
                     }
                 }
-                else if (protocol == 5)
+                else if (protocol == 5) // Files
                 {
                     if (((consent & 32) != 0) || parent.autoConnect) // Remote Files Consent Prompt
                     {
@@ -317,13 +369,26 @@ namespace MeshAssistant
             if (consentRequested == false) return;
             consentRequested = false;
             setConsoleText(null, 0, null, 0);
-            if (protocol == 2)
+            if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal
+            {
+                // Start remote terminal
+                parent.Event(userid, "Terminal consent approved");
+                int cols = 80;
+                int rows = 25;
+                if (jsonOptions != null)
+                {
+                    if (jsonOptions.ContainsKey("cols") && (jsonOptions["cols"].GetType() == typeof(int))) { cols = (int)jsonOptions["cols"]; }
+                    if (jsonOptions.ContainsKey("rows") && (jsonOptions["rows"].GetType() == typeof(int))) { rows = (int)jsonOptions["rows"]; }
+                }
+                Terminal = new MeshCentralTerminal(this, protocol, cols, rows);
+            }
+            else if (protocol == 2) // Desktop
             {
                 // Start remote desktop
                 parent.Event(userid, "Desktop consent approved");
                 Desktop = new MeshCentralDesktop(this);
             }
-            if (protocol == 5)
+            else if (protocol == 5) // Files
             {
                 // Start files
                 parent.Event(userid, "Files consent approved");
@@ -338,8 +403,9 @@ namespace MeshAssistant
             consentRequested = false;
             setConsoleText("Denied", 2, null, 0);
             disconnect();
-            if (protocol == 2) { parent.Event(userid, "Desktop consent denied"); }
-            if (protocol == 5) { parent.Event(userid, "Files consent denied"); }
+            if ((protocol == 1) || (protocol == 8) || (protocol == 9)) { parent.Event(userid, "Terminal consent denied"); }
+            else if (protocol == 2) { parent.Event(userid, "Desktop consent denied"); }
+            else if (protocol == 5) { parent.Event(userid, "Files consent denied"); }
         }
 
 
@@ -378,7 +444,11 @@ namespace MeshAssistant
                 return;
             }
             if (state != 2) return;
-            if (protocol == 2) // Desktop
+            if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal
+            {
+                if (Terminal != null) { Terminal.onBinaryData(data, off, len); }
+            }
+            else if (protocol == 2) // Desktop
             {
                 if (Desktop != null) { Desktop.onBinaryData(data, off, len); }
             }

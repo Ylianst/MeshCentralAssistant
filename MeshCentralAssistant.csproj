@@ -120,6 +120,7 @@
     <Compile Include="MeshCentralAgent.cs" />
     <Compile Include="MeshCentralDesktop.cs" />
     <Compile Include="MeshCentralTcpTunnel.cs" />
+    <Compile Include="MeshCentralTerminal.cs" />
     <Compile Include="MeshCentralTunnel.cs" />
     <Compile Include="ConsentForm.cs">
       <SubType>Form</SubType>

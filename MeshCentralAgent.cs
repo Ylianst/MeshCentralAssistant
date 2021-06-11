@@ -72,6 +72,7 @@ namespace MeshAssistant
         private int autoConnectFlags = 0;
         PerformanceCounter cpuCounter;
         PerformanceCounter ramCounter;
+        public bool terminalSupport = true;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -541,6 +542,7 @@ namespace MeshAssistant
         public string GetCoreInfo()
         {
             int caps = (1 + 4 + 8); // Capabilities of the agent (bitmask): 1 = Desktop, 2 = Terminal, 4 = Files, 8 = Console, 16 = JavaScript, 32 = Temporary, 64 = Recovery
+            if (terminalSupport) { caps += 2; }
             string version = "v" + Assembly.GetExecutingAssembly().GetName().Version.ToString();
             string core = "{\"action\":\"coreinfo\",\"value\":\"" + escapeJsonString(version) + "\",\"caps\":" + caps;
             try { core += ",\"root\":" + (IsAdministrator() ? "true" : "false"); } catch (Exception) { }
