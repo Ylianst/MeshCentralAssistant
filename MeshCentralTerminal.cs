@@ -23,7 +23,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace MeshAssistant
 {
-    class MeshCentralTerminal
+    public class MeshCentralTerminal
     {
         private MeshCentralTunnel parent = null;
         private Thread mainThread = null;
@@ -35,6 +35,19 @@ namespace MeshAssistant
         private ConPTY.XProcess process;
         private StreamWriter writer;
         private int protocol = 0;
+
+        /// <summary>
+        /// Check if Pseudo Console is supported
+        /// </summary>
+        /// <returns></returns>
+        public static bool CheckTerminalSupport()
+        {
+            IntPtr hPC;
+            int createResult = 0;
+            try { createResult = Win32Api.CreatePseudoConsole(new Win32Api.COORD { X = (short)0, Y = (short)0 }, IntPtr.Zero, IntPtr.Zero, 0, out hPC); } catch (Exception) { }
+            return (createResult == -2147024809);
+        }
+
 
         public void Log(string msg)
         {

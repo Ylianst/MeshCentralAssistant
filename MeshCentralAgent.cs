@@ -72,7 +72,7 @@ namespace MeshAssistant
         private int autoConnectFlags = 0;
         PerformanceCounter cpuCounter;
         PerformanceCounter ramCounter;
-        public bool terminalSupport = true;
+        public bool terminalSupport = MeshCentralTerminal.CheckTerminalSupport();
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
