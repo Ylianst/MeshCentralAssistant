@@ -18,6 +18,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
@@ -73,12 +74,15 @@ namespace MeshAssistant
 
         public void Dispose()
         {
-            if (inputPipe != null) { try { inputPipe.Dispose(); } catch (Exception) { } inputPipe = null; }
-            if (outputPipe != null) { try { outputPipe.Dispose(); } catch (Exception) { } outputPipe = null; }
-            if (pseudoConsole != null) { try { pseudoConsole.Dispose(); } catch (Exception) { } pseudoConsole = null; }
-            //if (process != null) { try { process.Dispose(); } catch (Exception) { } process = null; } // Running this sometimes kills the entire app (???)
-            process = null;
-            if (writer != null) { try { writer.Dispose(); } catch (Exception) { } writer = null; }
+            if (process != null) {
+                try { Process p = Process.GetProcessById(process.ProcessInfo.dwProcessId); if (p.HasExited == false) { p.Kill(); } } catch (Exception) { }
+                try { process.Dispose(); } catch (Exception) { }
+                process = null;
+            }
+            inputPipe = null;
+            outputPipe = null;
+            pseudoConsole = null;
+            writer = null;
             mainThread = null;
             parent = null;
         }
