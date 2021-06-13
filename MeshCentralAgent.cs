@@ -978,6 +978,41 @@ namespace MeshAssistant
                                     if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"ps\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"value\":\"" + escapeJsonString(ps) + "\"}");
                                     break;
                                 }
+                            case "psinfo":
+                                {
+                                    string sessionid = null;
+                                    if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string))) { sessionid = (string)jsonAction["sessionid"]; }
+                                    int pid = -1;
+                                    if ((jsonAction.ContainsKey("pid")) && (jsonAction["pid"].GetType() == typeof(int))) { pid = (int)jsonAction["pid"]; }
+                                    if (pid < 0) break;
+                                    Process p = Process.GetProcessById(pid);
+                                    if (p == null) {
+                                        if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"psinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"pid\":" + pid + ",\"value\":null}");
+                                    } else {
+                                        string x = "";
+                                        x += "\"processName\":\"" + escapeJsonString(p.ProcessName) + "\"";
+                                        x += ",\"privateMemorySize\":" + p.PrivateMemorySize64.ToString() + "";
+                                        x += ",\"virtualMemorySize\":" + p.VirtualMemorySize64.ToString() + "";
+                                        x += ",\"workingSet\":" + p.WorkingSet64.ToString() + "";
+                                        x += ",\"totalProcessorTime\":" + p.TotalProcessorTime.TotalSeconds.ToString() + "";
+                                        x += ",\"userProcessorTime\":" + p.UserProcessorTime.TotalSeconds.ToString() + "";
+                                        x += ",\"startTime\":\"" + escapeJsonString(p.StartTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")) + "\"";
+                                        x += ",\"sessionId\":" + p.SessionId.ToString() + "";
+                                        x += ",\"privilegedProcessorTime\":" + p.PrivilegedProcessorTime.TotalSeconds.ToString() + "";
+                                        if (p.PriorityBoostEnabled) { x += ",\"PriorityBoostEnabled\":true"; }
+                                        x += ",\"peakWorkingSet\":" + p.PeakWorkingSet64.ToString() + "";
+                                        x += ",\"peakVirtualMemorySize\":" + p.PeakVirtualMemorySize64.ToString() + "";
+                                        x += ",\"peakPagedMemorySize\":" + p.PeakPagedMemorySize64.ToString() + "";
+                                        x += ",\"pagedSystemMemorySize\":" + p.PagedSystemMemorySize64.ToString() + "";
+                                        x += ",\"pagedMemorySize\":" + p.PagedMemorySize64.ToString() + "";
+                                        x += ",\"nonpagedSystemMemorySize\":" + p.NonpagedSystemMemorySize64.ToString() + "";
+                                        x += ",\"mainWindowTitle\":\"" + escapeJsonString(p.MainWindowTitle) + "\"";
+                                        if ((p.MachineName != null) && (p.MachineName != ".")) { x += ",\"machineName\":\"" + escapeJsonString(p.MachineName) + "\""; }
+                                        x += ",\"handleCount\":" + p.HandleCount.ToString() + "";
+                                        if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"psinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"pid\":" + pid + ",\"value\":{" + x + "}}");
+                                    }
+                                    break;
+                                }
                             case "pskill":
                                 {
                                     int pid = 0;
