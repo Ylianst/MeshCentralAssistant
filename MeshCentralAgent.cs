@@ -989,26 +989,33 @@ namespace MeshAssistant
                                     if (p == null) {
                                         if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"psinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"pid\":" + pid + ",\"value\":null}");
                                     } else {
+                                        string processUser = null;
+                                        string processDomain = null;
+                                        string processCmd = null;
+                                        try { GetProcessOwnerByProcessId(pid, out processUser, out processDomain, out processCmd); } catch (Exception) { }
                                         string x = "";
-                                        x += "\"processName\":\"" + escapeJsonString(p.ProcessName) + "\"";
-                                        x += ",\"privateMemorySize\":" + p.PrivateMemorySize64.ToString() + "";
-                                        x += ",\"virtualMemorySize\":" + p.VirtualMemorySize64.ToString() + "";
-                                        x += ",\"workingSet\":" + p.WorkingSet64.ToString() + "";
-                                        x += ",\"totalProcessorTime\":" + p.TotalProcessorTime.TotalSeconds.ToString() + "";
-                                        x += ",\"userProcessorTime\":" + p.UserProcessorTime.TotalSeconds.ToString() + "";
-                                        x += ",\"startTime\":\"" + escapeJsonString(p.StartTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")) + "\"";
-                                        x += ",\"sessionId\":" + p.SessionId.ToString() + "";
-                                        x += ",\"privilegedProcessorTime\":" + p.PrivilegedProcessorTime.TotalSeconds.ToString() + "";
-                                        if (p.PriorityBoostEnabled) { x += ",\"PriorityBoostEnabled\":true"; }
-                                        x += ",\"peakWorkingSet\":" + p.PeakWorkingSet64.ToString() + "";
-                                        x += ",\"peakVirtualMemorySize\":" + p.PeakVirtualMemorySize64.ToString() + "";
-                                        x += ",\"peakPagedMemorySize\":" + p.PeakPagedMemorySize64.ToString() + "";
-                                        x += ",\"pagedSystemMemorySize\":" + p.PagedSystemMemorySize64.ToString() + "";
-                                        x += ",\"pagedMemorySize\":" + p.PagedMemorySize64.ToString() + "";
-                                        x += ",\"nonpagedSystemMemorySize\":" + p.NonpagedSystemMemorySize64.ToString() + "";
-                                        x += ",\"mainWindowTitle\":\"" + escapeJsonString(p.MainWindowTitle) + "\"";
-                                        if ((p.MachineName != null) && (p.MachineName != ".")) { x += ",\"machineName\":\"" + escapeJsonString(p.MachineName) + "\""; }
-                                        x += ",\"handleCount\":" + p.HandleCount.ToString() + "";
+                                        try { x += "\"processName\":\"" + escapeJsonString(p.ProcessName) + "\""; } catch (Exception) { }
+                                        try { if (processUser != null) { x += ",\"processUser\":\"" + escapeJsonString(processUser) + "\""; } } catch (Exception) { }
+                                        try { if (processDomain != null) { x += ",\"processDomain\":\"" + escapeJsonString(processDomain) + "\""; } } catch (Exception) { }
+                                        try { if (processCmd != null) { x += ",\"cmd\":\"" + escapeJsonString(processCmd) + "\""; } } catch (Exception) { }
+                                        try { x += ",\"privateMemorySize\":" + p.PrivateMemorySize64.ToString(); } catch (Exception) { }
+                                        try { x += ",\"virtualMemorySize\":" + p.VirtualMemorySize64.ToString(); } catch (Exception) { }
+                                        try { x += ",\"workingSet\":" + p.WorkingSet64.ToString(); } catch (Exception) { }
+                                        try { x += ",\"totalProcessorTime\":" + p.TotalProcessorTime.TotalSeconds.ToString(); } catch (Exception) { }
+                                        try { x += ",\"userProcessorTime\":" + p.UserProcessorTime.TotalSeconds.ToString(); } catch (Exception) { }
+                                        try { x += ",\"startTime\":\"" + escapeJsonString(p.StartTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")) + "\""; } catch (Exception) { }
+                                        try { x += ",\"sessionId\":" + p.SessionId.ToString(); } catch (Exception) { }
+                                        try { x += ",\"privilegedProcessorTime\":" + p.PrivilegedProcessorTime.TotalSeconds.ToString(); } catch (Exception) { }
+                                        try { if (p.PriorityBoostEnabled) { x += ",\"PriorityBoostEnabled\":true"; } } catch (Exception) { }
+                                        try { x += ",\"peakWorkingSet\":" + p.PeakWorkingSet64.ToString(); } catch (Exception) { }
+                                        try { x += ",\"peakVirtualMemorySize\":" + p.PeakVirtualMemorySize64.ToString(); } catch (Exception) { }
+                                        try { x += ",\"peakPagedMemorySize\":" + p.PeakPagedMemorySize64.ToString(); } catch (Exception) { }
+                                        try { x += ",\"pagedSystemMemorySize\":" + p.PagedSystemMemorySize64.ToString(); } catch (Exception) { }
+                                        try { x += ",\"pagedMemorySize\":" + p.PagedMemorySize64.ToString(); } catch (Exception) { }
+                                        try { x += ",\"nonpagedSystemMemorySize\":" + p.NonpagedSystemMemorySize64.ToString(); } catch (Exception) { }
+                                        try { x += ",\"mainWindowTitle\":\"" + escapeJsonString(p.MainWindowTitle) + "\""; } catch (Exception) { }
+                                        try { if ((p.MachineName != null) && (p.MachineName != ".")) { x += ",\"machineName\":\"" + escapeJsonString(p.MachineName) + "\""; } } catch (Exception) { }
+                                        try { x += ",\"handleCount\":" + p.HandleCount.ToString(); } catch (Exception) { }
                                         if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"psinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"pid\":" + pid + ",\"value\":{" + x + "}}");
                                     }
                                     break;
@@ -1299,18 +1306,24 @@ namespace MeshAssistant
         {
             Log("getAllProcesses()");
             string r = "{";
-            try
+            using (ManagementObjectSearcher Processes = new ManagementObjectSearcher("SELECT * FROM Win32_Process"))
             {
                 bool first = true;
-                Process[] allProcessesOnLocalMachine = Process.GetProcesses();
-                foreach (Process process in allProcessesOnLocalMachine)
+                foreach (ManagementObject p in Processes.Get())
                 {
-                    if (process.Id == 0) continue;
-                    if (first) { first = false; } else { r += ","; }
-                    r += "\"" + process.Id + "\":{\"pid\":" + process.Id + ",\"cmd\":\"" + escapeJsonString(process.ProcessName) + "\"}";
+                    if (p["ProcessId"].ToString() == "0") continue;
+                    string rr = null;
+                    try
+                    {
+                        if (first) { first = false; } else { r += ","; }
+                        string ppath = "";
+                        if (p["CommandLine"] != null) { ppath = ",\"path\":\"" + escapeJsonString(p["CommandLine"].ToString()) + "\""; }
+                        rr = "\"" + p["ProcessId"].ToString() + "\":{\"pid\":" + p["ProcessId"].ToString() + ",\"cmd\":\"" + escapeJsonString(p["Description"].ToString()) + "\"" + ppath + "}";
+                    }
+                    catch (Exception) { }
+                    if (rr != null) { r += rr; }
                 }
             }
-            catch (Exception) { }
             return r + "}";
         }
 
@@ -1538,5 +1551,23 @@ namespace MeshAssistant
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
         }
+
+        public static void GetProcessOwnerByProcessId(int processId, out string user, out string domain, out string cmd)
+        {
+            user = null;
+            domain = null;
+            cmd = null;
+            using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Process WHERE ProcessID = '" + processId + "'"))
+            {
+                if (searcher.Get().Count != 1) return;
+                var process = searcher.Get().Cast<ManagementObject>().First();
+                if (process["CommandLine"] != null) { cmd = process["CommandLine"].ToString(); }
+                var ownerInfo = new string[2];
+                process.InvokeMethod("GetOwner", ownerInfo);
+                user = ownerInfo[0];
+                domain = ownerInfo[1];
+            }
+        }
+
     }
 }
