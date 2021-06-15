@@ -798,7 +798,7 @@ namespace MeshAssistant
                 imageCmd[15] = (byte)(y & 0xFF); // Y
 
                 // Send with JUMBO command
-                parent.WebSocket.SendBinary(imageCmd, 0, cmdlen + 8);
+                if (parent.WebSocket != null) { parent.WebSocket.SendBinary(imageCmd, 0, cmdlen + 8); }
             }
             else
             {
@@ -813,7 +813,7 @@ namespace MeshAssistant
                 imageCmd[15] = (byte)(y & 0xFF); // Y
 
                 // Send normal command
-                parent.WebSocket.SendBinary(imageCmd, 8, cmdlen);
+                if (parent.WebSocket != null) { parent.WebSocket.SendBinary(imageCmd, 8, cmdlen); }
             }
         }
 
