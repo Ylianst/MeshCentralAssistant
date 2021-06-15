@@ -247,7 +247,7 @@ namespace MeshAssistant
                 try
                 {
                     // We received some data, decode it
-                    buffer = decryptPacket(buffer); // Decypt if needed
+                    try { buffer = decryptPacket(buffer); } catch (Exception) { } // Decypt if needed
                     if (buffer != null)
                     {
                         string[] values = UTF8Encoding.UTF8.GetString(buffer).Split('|');

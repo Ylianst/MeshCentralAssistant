@@ -33,6 +33,9 @@ using CERTENROLLLib;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Reflection;
+using System.Net.Security;
+using System.Threading.Tasks;
+using System.Collections;
 
 namespace MeshAssistant
 {
@@ -73,6 +76,9 @@ namespace MeshAssistant
         PerformanceCounter cpuCounter;
         PerformanceCounter ramCounter;
         public bool terminalSupport = MeshCentralTerminal.CheckTerminalSupport();
+        public List<HttpFileDownload> fileDownloads = new List<HttpFileDownload>();
+        public List<string> pendingWakeOnLan = new List<string>();
+        private System.Threading.Timer pendingWakeOnLanTimer = null;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -1058,12 +1064,78 @@ namespace MeshAssistant
                         }
                         break;
                     }
+                case "wget":
+                    {
+                        // Download a file from URL
+                        string urlpath = null;
+                        string path = null;
+                        string folder = null;
+                        string servertlshash = null;
+                        bool overwrite = false;
+                        bool createFolder = false;
+                        if (jsonAction.ContainsKey("urlpath")) { urlpath = jsonAction["urlpath"].ToString(); }
+                        if (jsonAction.ContainsKey("path")) { path = jsonAction["path"].ToString(); }
+                        if (jsonAction.ContainsKey("folder")) { folder = jsonAction["folder"].ToString(); }
+                        if (jsonAction.ContainsKey("servertlshash")) { servertlshash = jsonAction["servertlshash"].ToString(); }
+                        if (jsonAction.ContainsKey("overwrite") && (jsonAction["overwrite"].GetType() == typeof(Boolean))) { overwrite = (Boolean)jsonAction["overwrite"]; }
+                        if (jsonAction.ContainsKey("createFolder") && (jsonAction["createFolder"].GetType() == typeof(Boolean))) { createFolder = (Boolean)jsonAction["createFolder"]; }
+                        if ((urlpath == null) || (path == null) || (folder == null) || (servertlshash == null) || (userid == null)) break;
+
+                        // Check if user consent is needed
+                        if (autoConnect == true) return; // TODO: Do user consent.
+
+                        // Check if the folder exists, create it if asked to do so.
+                        if (!Directory.Exists(folder))
+                        {
+                            if (createFolder == false) return;
+                            try { Directory.CreateDirectory(folder); } catch (Exception) { }
+                            if (!Directory.Exists(folder)) return;
+                        }
+
+                        // Check if the file exists
+                        if (File.Exists(path))
+                        {
+                            if (overwrite == false) return;
+                            try { File.Delete(path); } catch (Exception) { }
+                            if (File.Exists(path)) return;
+                        }
+
+                        // Log the event
+                        parent.Event(userid, string.Format("Uploaded file {0}", path));
+
+                        // Setup and perform file download
+                        string dlurl = ServerUrl.AbsoluteUri.Substring(0, ServerUrl.AbsoluteUri.Length - ServerUrl.PathAndQuery.Length) + urlpath;
+                        HttpFileDownload httpget = new HttpFileDownload(this, dlurl, path, servertlshash);
+                        fileDownloads.Add(httpget);
+                        httpget.Start();
+
+                        break;
+                    }
+                case "wakeonlan":
+                    {
+                        // Send wake-on-lan on all interfaces for all MAC addresses in data.macs array. The array is a list of HEX MAC addresses.
+                        if (jsonAction.ContainsKey("macs") && (jsonAction["macs"].GetType() == typeof(ArrayList))) {
+                            int added = 0;
+                            ArrayList macs = (ArrayList)jsonAction["macs"];
+                            foreach (object x in macs) { if (x.GetType() == typeof(string)) { pendingWakeOnLan.Add(((string)x).Replace(":", "")); added++; } }
+                            if ((added > 0) && (pendingWakeOnLanTimer == null)) { pendingWakeOnLanTimer = new System.Threading.Timer(new System.Threading.TimerCallback(sendNextWakeOnLanPacket), null, 100, 100); }
+                        }
+                        break;
+                    }
                 default:
                     {
                         Log("Unprocessed command: " + action);
                         break;
                     }
             }
+        }
+
+        private async void sendNextWakeOnLanPacket(object state)
+        {
+            string mac = null;
+            lock (pendingWakeOnLan) { if (pendingWakeOnLan.Count > 0) { mac = pendingWakeOnLan[0]; pendingWakeOnLan.RemoveAt(0); } }
+            if (mac != null) { await WakeOnLan(mac); }
+            if ((pendingWakeOnLan.Count == 0) && (pendingWakeOnLanTimer != null)) { pendingWakeOnLanTimer.Dispose(); pendingWakeOnLanTimer = null; }
         }
 
         private void sendSysInfoMsg(string sessionid, string tag)
@@ -1569,5 +1641,121 @@ namespace MeshAssistant
             }
         }
 
+
+        /// <summary>
+        /// Send wake-on-lan packet
+        /// </summary>
+        /// <param name="macAddress"></param>
+        /// <returns></returns>
+        public static async Task WakeOnLan(string macAddress)
+        {
+            byte[] magicPacket = BuildWakePacket(macAddress);
+            foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces().Where((n) =>
+                n.NetworkInterfaceType != NetworkInterfaceType.Loopback && n.OperationalStatus == OperationalStatus.Up))
+            {
+                IPInterfaceProperties iPInterfaceProperties = networkInterface.GetIPProperties();
+                foreach (MulticastIPAddressInformation multicastIPAddressInformation in iPInterfaceProperties.MulticastAddresses)
+                {
+                    IPAddress multicastIpAddress = multicastIPAddressInformation.Address;
+                    if (multicastIpAddress.ToString().StartsWith("ff02::1%", StringComparison.OrdinalIgnoreCase))
+                    {
+                        UnicastIPAddressInformation unicastIPAddressInformation = iPInterfaceProperties.UnicastAddresses.Where((u) =>
+                            u.Address.AddressFamily == AddressFamily.InterNetworkV6 && !u.Address.IsIPv6LinkLocal).FirstOrDefault();
+                        if (unicastIPAddressInformation != null)
+                        {
+                            await SendWakeOnLan(unicastIPAddressInformation.Address, multicastIpAddress, magicPacket);
+                            break;
+                        }
+                    }
+                    else if (multicastIpAddress.ToString().Equals("224.0.0.1"))
+                    {
+                        UnicastIPAddressInformation unicastIPAddressInformation = iPInterfaceProperties.UnicastAddresses.Where((u) =>
+                            u.Address.AddressFamily == AddressFamily.InterNetwork && !iPInterfaceProperties.GetIPv4Properties().IsAutomaticPrivateAddressingActive).FirstOrDefault();
+                        if (unicastIPAddressInformation != null)
+                        {
+                            await SendWakeOnLan(unicastIPAddressInformation.Address, multicastIpAddress, magicPacket);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        static byte[] BuildWakePacket(string macAddress)
+        {
+            byte[] macBytes = new byte[6];
+            for (int i = 0; i < 6; i++) { macBytes[i] = Convert.ToByte(macAddress.Substring(i * 2, 2), 16); }
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (BinaryWriter bw = new BinaryWriter(ms))
+                {
+                    for (int i = 0; i < 6; i++) { bw.Write((byte)0xff); }
+                    for (int i = 0; i < 16; i++) { bw.Write(macBytes); }
+                }
+                return ms.ToArray();
+            }
+        }
+
+        static async Task SendWakeOnLan(IPAddress localIpAddress, IPAddress multicastIpAddress, byte[] magicPacket)
+        {
+            using (UdpClient client = new UdpClient(new IPEndPoint(localIpAddress, 0)))
+            {
+                await client.SendAsync(magicPacket, magicPacket.Length, multicastIpAddress.ToString(), 9);
+            }
+        }
+
     }
+
+
+    public class HttpFileDownload {
+        private MeshCentralAgent parent;
+        private string uri;
+        private string filepath;
+        private string certhash;
+
+        public HttpFileDownload(MeshCentralAgent parent, string uri, string filepath, string certhash) {
+            this.parent = parent;
+            this.uri = uri;
+            this.filepath = filepath;
+            this.certhash = certhash;
+        }
+
+        public async void Start()
+        {
+            try
+            {
+                using (var fileStream = new FileStream(filepath, FileMode.Create))
+                {
+                    // Download the file
+                    HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+                    request.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(RemoteCertificateValidationCallback);
+                    using (WebResponse response = await request.GetResponseAsync())
+                    {
+                        using (Stream dataStream = response.GetResponseStream())
+                        {
+                            int len = 0;
+                            byte[] buffer = new byte[4096];
+                            do
+                            {
+                                len = await dataStream.ReadAsync(buffer, 0, buffer.Length);
+                                if (len > 0) { await fileStream.WriteAsync(buffer, 0, len); }
+                            }
+                            while (len > 0);
+                        }
+                    }
+                }
+            }
+            catch (Exception) { }
+            parent.fileDownloads.Remove(this);
+        }
+
+        private bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            using (SHA384 sha384Hash = SHA384.Create()) { if (BitConverter.ToString(sha384Hash.ComputeHash(certificate.GetRawCertData())).Replace("-", "").ToLower().Equals(certhash.ToLower())) return true; }
+            return false;
+        }
+
+    }
+
 }
