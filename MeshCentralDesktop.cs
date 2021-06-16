@@ -343,9 +343,9 @@ namespace MeshAssistant
                         int w = 0;
                         if (cmdlen >= 12) { w = (int)((data[off + 10] << 8) + data[off + 11]); if (w > 32768) { w -= 65535; } }
                         Cursor.Position = new Point(x, y);
-                        if ((b &  2) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_LEFTDOWN), x, y, 0, 0); }
-                        if ((b &  4) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_LEFTUP), x, y, 0, 0); }
-                        if ((b &  8) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_RIGHTDOWN), x, y, 0, 0); }
+                        if ((b & 2) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_LEFTDOWN), x, y, 0, 0); }
+                        if ((b & 4) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_LEFTUP), x, y, 0, 0); }
+                        if ((b & 8) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_RIGHTDOWN), x, y, 0, 0); }
                         if ((b & 16) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_RIGHTUP), x, y, 0, 0); }
                         if ((b & 32) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_MIDDLEDOWN), x, y, 0, 0); }
                         if ((b & 64) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_MIDDLEUP), x, y, 0, 0); }
@@ -406,7 +406,7 @@ namespace MeshAssistant
                             if (selectedDisplay < 1) break;
                             if (selectedDisplay > Screen.AllScreens.Length) break;
                             currentDisplay = (selectedDisplay - 1);
-                        }                        
+                        }
                         break;
                     }
                 case 15: // Touch
@@ -588,7 +588,7 @@ namespace MeshAssistant
                     }
 
                     // If the size of the screen does not match the current client set size, update the client
-                    if ((ScreenSize.Width != tscreensize.Width) || (ScreenSize.Height != tscreensize.Height) || (captureBitmap == null) || (encoderScalingChanged == true)) 
+                    if ((ScreenSize.Width != tscreensize.Width) || (ScreenSize.Height != tscreensize.Height) || (captureBitmap == null) || (encoderScalingChanged == true))
                     {
                         encoderScaling = newEncoderScaling;
                         encoderScalingChanged = false;
@@ -648,23 +648,8 @@ namespace MeshAssistant
                     }
                     else
                     {
-                        /*
                         // Send all changed tiles
-                        // This version has no optimizations, each time change is one JPEG
-                        for (int i = 0; i < tilesHigh; i++) {
-                            for (int j = 0; j < tilesWide; j++) {
-                                int tileNumber = (i * tilesWide) + j;
-                                if (oldcrcs[tileNumber] != newcrcs[tileNumber]) {
-                                    // Check if tiles on the right are also invalid
-                                    oldcrcs[tileNumber] = newcrcs[tileNumber];
-                                    SendSubBitmap(scaledCaptureBitmap, (j * 64), (i * 64), 64, 64);
-                                }
-                            }
-                        }
-                        */
-
-                        // Send all changed tiles
-                        // This version has horizontal optimization, JPEG as wide as possible
+                        // This version has horizontal & vertial optimization, JPEG as wide as possible then as high as possible
                         int sendx = -1;
                         int sendy = 0;
                         int sendw = 0;
@@ -676,16 +661,16 @@ namespace MeshAssistant
                                 if (oldcrcs[tileNumber] != newcrcs[tileNumber])
                                 {
                                     oldcrcs[tileNumber] = newcrcs[tileNumber];
-                                    if (sendx == -1) { sendx = (j * 64); sendy = (i * 64); sendw = 64; } else { sendw += 64; }
+                                    if (sendx == -1) { sendx = j; sendy = i; sendw = 1; } else { sendw += 1; }
                                 }
                                 else
                                 {
-                                    if (sendx != -1) { SendSubBitmap(scaledCaptureBitmap, sendx, sendy, sendw, 64); sendx = -1; }
+                                    if (sendx != -1) { SendSubBitmapRow(scaledCaptureBitmap, sendx, sendy, sendw); sendx = -1; }
                                 }
                             }
-                            if (sendx != -1) { SendSubBitmap(scaledCaptureBitmap, sendx, sendy, sendw, 64); sendx = -1; }
+                            if (sendx != -1) { SendSubBitmapRow(scaledCaptureBitmap, sendx, sendy, sendw); sendx = -1; }
                         }
-                        if (sendx != -1) { SendSubBitmap(scaledCaptureBitmap, sendx, sendy, sendw, 64); sendx = -1; }
+                        if (sendx != -1) { SendSubBitmapRow(scaledCaptureBitmap, sendx, sendy, sendw); sendx = -1; }
                     }
 
                     // Everything went ok
@@ -694,6 +679,22 @@ namespace MeshAssistant
                 }
                 catch (Exception ex) { if (exceptionLogState == 0) { Log(ex.ToString()); exceptionLogState++; } }
             }
+        }
+
+        // See if we can expand a row downwards
+        private void SendSubBitmapRow(Bitmap image, int x, int y, int w) {
+            int h;
+            bool exit = false;
+            for (h = (y + 1); h < tilesHigh; h++)
+            {
+                // Check if the row is all different
+                for (int xx = x; xx < (x + w); xx++) { int tileNumber = (h * tilesWide) + xx; if (oldcrcs[tileNumber] != newcrcs[tileNumber]) { exit = true; break; } }
+                // If all different set the CRC's to the same, otherwise exit.
+                if (!exit) { for (int xx = x; xx < (x + w); xx++) { int tileNumber = (h * tilesWide) + xx; oldcrcs[tileNumber] = newcrcs[tileNumber]; } } else break;
+            }
+            h -= y;
+            //Console.WriteLine("SendSubBitmapRow: " + x + ", " + y + ", " + w + ", " + h);
+            SendSubBitmap(image, x * 64, y * 64, w * 64, h * 64);
         }
 
         private void computeAllCRCs(Bitmap image)
