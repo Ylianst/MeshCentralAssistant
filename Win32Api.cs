@@ -206,6 +206,47 @@ namespace MeshAssistant
         [DllImport("kernel32.dll")]
         public static extern int GetLastError();
 
+        // Remote desktop pinvoke
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr GetThreadDesktop(uint dwThreadId);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetThreadDesktop(IntPtr hDesktop);
+
+        public const uint DESKTOP_Readobjects = 0x0001;
+        public const uint DESKTOP_Createwindow = 0x0002;
+        public const uint DESKTOP_Createmenu = 0x0004;
+        public const uint DESKTOP_Hookcontrol = 0x0008;
+        public const uint DESKTOP_Journalrecord = 0x0010;
+        public const uint DESKTOP_Journalplayback = 0x0020;
+        public const uint DESKTOP_Enumerate = 0x0040;
+        public const uint DESKTOP_Writeobjects = 0x0080;
+        public const uint DESKTOP_Switchdesktop = 0x0100;
+        public const uint GENERIC_READ = 0x80000000;
+        public const uint GENERIC_WRITE = 0x40000000;
+        public const uint GENERIC_EXECUTE = 0x20000000;
+        public const uint GENERIC_ALL = 0x10000000;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr OpenInputDesktop(uint dwFlags, bool fInherit, uint dwDesiredAccess);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool CloseDesktop(IntPtr hDesktop);
+
+        public const int UOI_FLAGS = 1;
+        public const int UOI_NAME = 2;
+        public const int UOI_TYPE = 3;
+        public const int UOI_USER_SID = 4;
+        public const int UOI_HEAPSIZE = 5; // Windows Server 2003 and Windows XP/2000:  This value is not supported.
+        public const int UOI_IO = 6;       // Windows Server 2003 and Windows XP/2000:  This value is not supported.
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool GetUserObjectInformation(IntPtr hObj, int nIndex, [Out] byte[] pvInfo, uint nLength, out uint lpnLengthNeeded);
+
+        [DllImport("kernel32.dll")]
+        public static extern uint GetCurrentThreadId();
+
         public static Uri GetProxy(Uri url)
         {
             // Check if we need to use a HTTP proxy (Auto-proxy way)

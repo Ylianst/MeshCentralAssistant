@@ -627,9 +627,12 @@ namespace MeshAssistant
                     }
                     catch (Exception)
                     {
+                        // Attempt to switch desktop display
                         if (UnableToCaptureShowing == false) { parent.setConsoleText("Unable to capture display", 6, null, 0); UnableToCaptureShowing = true; }
+                        SwitchToActiveDesktop(); // Attempt to switch desktops
                         continue;
                     }
+
                     Bitmap scaledCaptureBitmap = captureBitmap;
                     if (encoderScaling != 1024) { scaledCaptureBitmap = new Bitmap(captureBitmap, screenScaleWidth, screenScaleHeight); }
 
@@ -678,6 +681,34 @@ namespace MeshAssistant
                     if (UnableToCaptureShowing == true) { parent.clearConsoleText(); UnableToCaptureShowing = false; }
                 }
                 catch (Exception ex) { if (exceptionLogState == 0) { Log(ex.ToString()); exceptionLogState++; } }
+            }
+        }
+
+        private void SwitchToActiveDesktop()
+        {
+            try
+            {
+                IntPtr inputDesktop = Win32Api.OpenInputDesktop(0, true, Win32Api.DESKTOP_Createmenu | Win32Api.DESKTOP_Createwindow | Win32Api.DESKTOP_Enumerate | Win32Api.DESKTOP_Hookcontrol | Win32Api.DESKTOP_Writeobjects | Win32Api.DESKTOP_Readobjects | Win32Api.DESKTOP_Switchdesktop | Win32Api.GENERIC_WRITE);
+                if (inputDesktop == IntPtr.Zero) return;
+                if (Win32Api.SetThreadDesktop(inputDesktop))
+                {
+                    byte[] desktopNameBuffer = new byte[1024];
+                    uint desktopNameBufferNeeded = 0;
+                    if (Win32Api.GetUserObjectInformation(inputDesktop, Win32Api.UOI_NAME, desktopNameBuffer, (uint)desktopNameBuffer.Length, out desktopNameBufferNeeded))
+                    {
+                        string n = System.Text.UTF8Encoding.UTF8.GetString(desktopNameBuffer, 0, (int)desktopNameBufferNeeded);
+                        if (n.EndsWith("\0")) { n = n.Substring(0, n.Length - 1); }
+                        //Log("NewDesktopName: " + n);
+                    }
+                }
+                else
+                {
+                    //Log("SetThreadDesktop Fail: " + inputDesktop.ToString());
+                }
+                Win32Api.CloseDesktop(inputDesktop);
+            }
+            catch (Exception ex) {
+                Log("SwitchToActiveDesktop Exception: " + ex.ToString());
             }
         }
 
