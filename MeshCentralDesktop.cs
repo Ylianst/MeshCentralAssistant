@@ -639,41 +639,43 @@ namespace MeshAssistant
                     // Compute all tile CRC's
                     computeAllCRCs(scaledCaptureBitmap);
 
-                    // Compute how many tiles have changed
+                    // Compute how many tiles have changed, do nothing if no changes
                     int changedTiles = 0;
                     for (var i = 0; i < tilesCount; i++) { if (oldcrcs[i] != newcrcs[i]) { changedTiles++; } }
-
-                    // If 85% of the all tiles have changed, send the entire screen
-                    if ((changedTiles * 100) >= (tilesCount * 85))
+                    if (changedTiles > 0)
                     {
-                        SendBitmap(0, 0, scaledCaptureBitmap);
-                        for (var i = 0; i < tilesCount; i++) { oldcrcs[i] = newcrcs[i]; }
-                    }
-                    else
-                    {
-                        // Send all changed tiles
-                        // This version has horizontal & vertial optimization, JPEG as wide as possible then as high as possible
-                        int sendx = -1;
-                        int sendy = 0;
-                        int sendw = 0;
-                        for (int i = 0; i < tilesHigh; i++)
+                        // If 85% of the all tiles have changed, send the entire screen
+                        if ((changedTiles * 100) >= (tilesCount * 85))
                         {
-                            for (int j = 0; j < tilesWide; j++)
+                            SendBitmap(0, 0, scaledCaptureBitmap);
+                            for (var i = 0; i < tilesCount; i++) { oldcrcs[i] = newcrcs[i]; }
+                        }
+                        else
+                        {
+                            // Send all changed tiles
+                            // This version has horizontal & vertial optimization, JPEG as wide as possible then as high as possible
+                            int sendx = -1;
+                            int sendy = 0;
+                            int sendw = 0;
+                            for (int i = 0; i < tilesHigh; i++)
                             {
-                                int tileNumber = (i * tilesWide) + j;
-                                if (oldcrcs[tileNumber] != newcrcs[tileNumber])
+                                for (int j = 0; j < tilesWide; j++)
                                 {
-                                    oldcrcs[tileNumber] = newcrcs[tileNumber];
-                                    if (sendx == -1) { sendx = j; sendy = i; sendw = 1; } else { sendw += 1; }
+                                    int tileNumber = (i * tilesWide) + j;
+                                    if (oldcrcs[tileNumber] != newcrcs[tileNumber])
+                                    {
+                                        oldcrcs[tileNumber] = newcrcs[tileNumber];
+                                        if (sendx == -1) { sendx = j; sendy = i; sendw = 1; } else { sendw += 1; }
+                                    }
+                                    else
+                                    {
+                                        if (sendx != -1) { SendSubBitmapRow(scaledCaptureBitmap, sendx, sendy, sendw); sendx = -1; }
+                                    }
                                 }
-                                else
-                                {
-                                    if (sendx != -1) { SendSubBitmapRow(scaledCaptureBitmap, sendx, sendy, sendw); sendx = -1; }
-                                }
+                                if (sendx != -1) { SendSubBitmapRow(scaledCaptureBitmap, sendx, sendy, sendw); sendx = -1; }
                             }
                             if (sendx != -1) { SendSubBitmapRow(scaledCaptureBitmap, sendx, sendy, sendw); sendx = -1; }
                         }
-                        if (sendx != -1) { SendSubBitmapRow(scaledCaptureBitmap, sendx, sendy, sendw); sendx = -1; }
                     }
 
                     // Everything went ok
@@ -719,12 +721,13 @@ namespace MeshAssistant
             for (h = (y + 1); h < tilesHigh; h++)
             {
                 // Check if the row is all different
-                for (int xx = x; xx < (x + w); xx++) { int tileNumber = (h * tilesWide) + xx; if (oldcrcs[tileNumber] != newcrcs[tileNumber]) { exit = true; break; } }
+                for (int xx = x; xx < (x + w); xx++) { int tileNumber = (h * tilesWide) + xx; if (oldcrcs[tileNumber] == newcrcs[tileNumber]) { exit = true; break; } }
                 // If all different set the CRC's to the same, otherwise exit.
                 if (!exit) { for (int xx = x; xx < (x + w); xx++) { int tileNumber = (h * tilesWide) + xx; oldcrcs[tileNumber] = newcrcs[tileNumber]; } } else break;
             }
             h -= y;
             //Console.WriteLine("SendSubBitmapRow: " + x + ", " + y + ", " + w + ", " + h);
+
             SendSubBitmap(image, x * 64, y * 64, w * 64, h * 64);
         }
 
