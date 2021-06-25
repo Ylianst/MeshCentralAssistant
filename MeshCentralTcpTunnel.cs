@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 using System;
+using System.Text;
 using System.Net.Sockets;
 using System.Collections.Generic;
 
@@ -28,6 +29,7 @@ namespace MeshAssistant
         public webSocketClient WebSocket = null;
         private string extraLogStr = "";
         private string sessionUserName = null;
+        public string sessionLoggingUserName = null;
         public long userRights = 0;
         private string tcpaddr = null;
         private int tcpport = 0;
@@ -35,7 +37,8 @@ namespace MeshAssistant
         private NetworkStream tcpstream = null;
         private byte[] tcpReadBuffer = new byte[65535];
         private bool tcpstreamShouldRead = false;
-        public string userid;
+        public string userid = null;
+        public string guestname = null;
 
         public MeshCentralTcpTunnel(MeshCentralAgent parent, Uri uri, string serverHash, Dictionary<string, object> creationArgs, string tcpaddr, int tcpport)
         {
@@ -57,6 +60,7 @@ namespace MeshAssistant
             {
                 if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { extraLogStr += ",\"userid\":\"" + escapeJsonString((string)creationArgs["userid"]) + "\""; userid = (string)creationArgs["userid"]; }
                 if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { extraLogStr += ",\"username\":\"" + escapeJsonString((string)creationArgs["username"]) + "\""; }
+                if (creationArgs.ContainsKey("guestname") && (creationArgs["guestname"].GetType() == typeof(string))) { extraLogStr += ",\"guestname\":\"" + escapeJsonString((string)creationArgs["guestname"]) + "\""; guestname = (string)creationArgs["guestname"]; }
                 if (creationArgs.ContainsKey("remoteaddr") && (creationArgs["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)creationArgs["remoteaddr"]) + "\""; }
                 if (creationArgs.ContainsKey("sessionid") && (creationArgs["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)creationArgs["sessionid"]) + "\""; }
                 if (creationArgs.ContainsKey("rights") && ((creationArgs["rights"].GetType() == typeof(System.Int32)) || (creationArgs["rights"].GetType() == typeof(System.Int64)))) { userRights = (long)creationArgs["rights"]; }
@@ -98,6 +102,7 @@ namespace MeshAssistant
                     parent.fireSessionChanged(2);
                 }
                 sessionUserName = null;
+                sessionLoggingUserName = null;
             }
 
             parent.Event(userid, "Closed TCP tunnel");
@@ -155,7 +160,17 @@ namespace MeshAssistant
                 {
                     //if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["username"]; }
                     //if (creationArgs.ContainsKey("realname") && (creationArgs["realname"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["realname"]; }
-                    if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["userid"]; }
+
+                    if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string)))
+                    {
+                        sessionLoggingUserName = sessionUserName = (string)creationArgs["userid"];
+                        if (creationArgs.ContainsKey("guestname") && (creationArgs["guestname"].GetType() == typeof(string)))
+                        {
+                            sessionUserName += "/guest:" + Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes((string)creationArgs["guestname"]));
+                            sessionLoggingUserName += " - " + (string)creationArgs["guestname"];
+                        }
+                    }
+
                     if (sessionUserName != null)
                     {
                         if (parent.TcpSessions == null) { parent.TcpSessions = new Dictionary<string, object>(); }

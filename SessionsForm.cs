@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using System;
+using System.Text;
 using System.Windows.Forms;
 
 namespace MeshAssistant
@@ -47,14 +49,22 @@ namespace MeshAssistant
 
         private string getUserName(string userid)
         {
-            if ((parent.mcagent != null) && (parent.mcagent.userrealname != null) && (parent.mcagent.userrealname.ContainsKey(userid))) { return (string)parent.mcagent.userrealname[userid]; }
-            return formatUserName(userid);
+            string[] useridsplit = userid.Split('/');
+            userid = useridsplit[0] + '/' + useridsplit[1] + '/' + useridsplit[2];
+            string guestname = "";
+            if ((useridsplit.Length == 4) && (useridsplit[3].StartsWith("guest:"))) { guestname = " - " + UTF8Encoding.UTF8.GetString(Convert.FromBase64String(useridsplit[3].Substring(6))); }
+            if ((parent.mcagent != null) && (parent.mcagent.userrealname != null) && (parent.mcagent.userrealname.ContainsKey(userid))) { return (string)parent.mcagent.userrealname[userid] + guestname; }
+            return useridsplit[2] + guestname;
         }
 
         private string getUserName2(string userid)
         {
-            if ((parent.agent != null) && (parent.agent.userrealname != null) && (parent.agent.userrealname.ContainsKey(userid))) { return (string)parent.agent.userrealname[userid]; }
-            return formatUserName(userid);
+            string[] useridsplit = userid.Split('/');
+            userid = useridsplit[0] + '/' + useridsplit[1] + '/' + useridsplit[2];
+            string guestname = "";
+            if ((useridsplit.Length == 4) && (useridsplit[3].StartsWith("guest:"))) { guestname = " - " + UTF8Encoding.UTF8.GetString(Convert.FromBase64String(useridsplit[3].Substring(6))); }
+            if ((parent.agent != null) && (parent.agent.userrealname != null) && (parent.agent.userrealname.ContainsKey(userid))) { return (string)parent.agent.userrealname[userid] + guestname; }
+            return useridsplit[2] + guestname;
         }
 
         public void UpdateInfo()

@@ -43,10 +43,12 @@ namespace MeshAssistant
         private int fileRecvId = 0;
         private string extraLogStr = "";
         public string sessionUserName = null;
+        public string sessionLoggingUserName = null;
         public bool consentRequested = false;
         private ArrayList commandsOnHold = null;
         public long userRights = 0;
         public string userid = null;
+        public string guestname = null;
         public bool disconnected = false;
 
         public enum MeshRights : long
@@ -90,6 +92,7 @@ namespace MeshAssistant
             {
                 if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { extraLogStr += ",\"userid\":\"" + escapeJsonString((string)creationArgs["userid"]) + "\""; userid = (string)creationArgs["userid"]; }
                 if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { extraLogStr += ",\"username\":\"" + escapeJsonString((string)creationArgs["username"]) + "\""; }
+                if (creationArgs.ContainsKey("guestname") && (creationArgs["guestname"].GetType() == typeof(string))) { extraLogStr += ",\"guestname\":\"" + escapeJsonString((string)creationArgs["guestname"]) + "\""; guestname = (string)creationArgs["guestname"]; }
                 if (creationArgs.ContainsKey("remoteaddr") && (creationArgs["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)creationArgs["remoteaddr"]) + "\""; }
                 if (creationArgs.ContainsKey("sessionid") && (creationArgs["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)creationArgs["sessionid"]) + "\""; }
                 if (creationArgs.ContainsKey("rights") && ((creationArgs["rights"].GetType() == typeof(System.Int32)) || (creationArgs["rights"].GetType() == typeof(System.Int64)))) { userRights = (long)creationArgs["rights"]; }
@@ -168,6 +171,7 @@ namespace MeshAssistant
                     }
                 }
                 sessionUserName = null;
+                sessionLoggingUserName = null;
             }
 
             // Update event log
@@ -242,7 +246,15 @@ namespace MeshAssistant
                 {
                     //if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["username"]; }
                     //if (creationArgs.ContainsKey("realname") && (creationArgs["realname"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["realname"]; }
-                    if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["userid"]; }
+                    if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) {
+                        sessionLoggingUserName = sessionUserName = (string)creationArgs["userid"];
+                        if (creationArgs.ContainsKey("guestname") && (creationArgs["guestname"].GetType() == typeof(string))) {
+                            sessionUserName += "/guest:" + Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes((string)creationArgs["guestname"]));
+                            sessionLoggingUserName += " - " + (string)creationArgs["guestname"];
+                        }
+                    }
+
+
                     if (sessionUserName != null)
                     {
                         if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal: 1 = Admin Shell, 8 = User Shell, 9 = User PowerShell
@@ -282,7 +294,7 @@ namespace MeshAssistant
                     {
                         consentRequested = true;
                         setConsoleText("Waiting for user to grant access...", 1, null, 0);
-                        parent.askForConsent(this, "User \"{0}\" is requesting remote terminal control of this computer. Click allow to grant access.", protocol, sessionUserName);
+                        parent.askForConsent(this, "User \"{0}\" is requesting remote terminal control of this computer. Click allow to grant access.", protocol, sessionLoggingUserName);
                         parent.Event(userid, "Requesting user consent for terminal session");
                     }
                     else
@@ -303,7 +315,7 @@ namespace MeshAssistant
                     {
                         consentRequested = true;
                         setConsoleText("Waiting for user to grant access...", 1, null, 0);
-                        parent.askForConsent(this, "User \"{0}\" is requesting remote desktop control of this computer. Click allow to grant access.", protocol, sessionUserName);
+                        parent.askForConsent(this, "User \"{0}\" is requesting remote desktop control of this computer. Click allow to grant access.", protocol, sessionLoggingUserName);
                         parent.Event(userid, "Requesting user consent for desktop session");
                     }
                     else
@@ -317,7 +329,7 @@ namespace MeshAssistant
                     {
                         consentRequested = true;
                         setConsoleText("Waiting for user to grant access...", 1, null, 0);
-                        parent.askForConsent(this, "User \"{0}\" is requesting access to all files on this computer. Click allow to grant access.", protocol, sessionUserName);
+                        parent.askForConsent(this, "User \"{0}\" is requesting access to all files on this computer. Click allow to grant access.", protocol, sessionLoggingUserName);
                         parent.Event(userid, "Requesting user consent for files session");
                     }
                 }
