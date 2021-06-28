@@ -514,10 +514,14 @@ namespace MeshAssistant
             if (userids.Length == 1)
             {
                 string userid = userids[0];
-                string realname = userid.Split('/')[2];
+                string[] useridsplit = userid.Split('/');
+                string realname = useridsplit[2];
+                userid = useridsplit[0] + '/' + useridsplit[1] + '/' + useridsplit[2];
                 if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
                 else if ((mcagent.usernames != null) && mcagent.usernames.ContainsKey(userid) && (mcagent.usernames[userid] != null)) { realname = mcagent.usernames[userid]; }
-                stateLabel.Text = realname;
+                string guestname = "";
+                if ((useridsplit.Length == 4) && (useridsplit[3].StartsWith("guest:"))) { guestname = " - " + UTF8Encoding.UTF8.GetString(Convert.FromBase64String(useridsplit[3].Substring(6))); }
+                stateLabel.Text = realname + guestname;
                 Image userImage = null;
                 if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
                 if (userImage == null) { setUiImage(uiImage.User); } else { setUiImage(userImage); }
