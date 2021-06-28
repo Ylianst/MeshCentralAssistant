@@ -63,7 +63,8 @@ namespace MeshAssistant
         private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>(); // List of active tunnels
         private List<MeshCentralTcpTunnel> tcptunnels = new List<MeshCentralTcpTunnel>(); // List of active TCP tunnels
         public Dictionary<string, Image> userimages = new Dictionary<string, Image>(); // UserID --> Image
-        public Dictionary<string, string> userrealname = new Dictionary<string, string>(); // UserID --> Realname
+        public Dictionary<string, string> usernames = new Dictionary<string, string>(); // UserID --> User name
+        public Dictionary<string, string> userrealname = new Dictionary<string, string>(); // UserID --> User real name
         private string softwareName = null;
         private string selfExecutableHashHex = null;
         public string privacyBarText = null;
@@ -416,7 +417,8 @@ namespace MeshAssistant
             if (WebSocket != null) return false;
             Log(string.Format("Attempting connection to {0}", ServerUrl));
             userimages = new Dictionary<string, Image>(); // UserID --> Image
-            userrealname = new Dictionary<string, string>(); // UserID --> Realname
+            usernames = new Dictionary<string, string>(); // UserID --> User names
+            userrealname = new Dictionary<string, string>(); // UserID --> User real name
             WebSocket = new webSocketClient();
             WebSocket.pongTimeSeconds = 120; // Send a websocket pong every 2 minutes.
             WebSocket.debug = debug;
@@ -797,6 +799,9 @@ namespace MeshAssistant
                 case "getUserImage":
                     {
                         if (userid == null) return;
+
+                        // Get username
+                        if (jsonAction.ContainsKey("name") && (jsonAction["name"].GetType() == typeof(string))) { usernames[userid] = (string)jsonAction["name"]; }
 
                         // Get the image
                         string imagestr = null;

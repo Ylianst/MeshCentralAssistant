@@ -47,7 +47,8 @@ namespace MeshAssistant
         private string serviceName = null;
         private string[] nodeids = null;
         public Dictionary<string, Image> userimages = new Dictionary<string, Image>(); // UserID --> Image
-        public Dictionary<string, string> userrealname = new Dictionary<string, string>(); // UserID --> Realname
+        public Dictionary<string, string> userrealname = new Dictionary<string, string>(); // UserID --> User real name
+        public Dictionary<string, string> usernames = new Dictionary<string, string>(); // UserID --> User name
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -538,9 +539,11 @@ namespace MeshAssistant
                         {
                             string userid = null;
                             string realname = null;
+                            string username = null;
                             string imagestr = null;
                             if (jsonAction.ContainsKey("userid")) { userid = jsonAction["userid"].ToString(); } // UserID
                             if (jsonAction.ContainsKey("realname")) { realname = jsonAction["realname"].ToString(); } // User's realname
+                            if (jsonAction.ContainsKey("name")) { username = jsonAction["name"].ToString(); } // User's realname
                             if (jsonAction.ContainsKey("image")) { imagestr = jsonAction["image"].ToString(); } // User image
 
                             if (userid != null)
@@ -551,6 +554,13 @@ namespace MeshAssistant
                                 if ((realname != null) && ((!userrealname.ContainsKey(userid)) || (!userrealname[userid].Equals(realname)))) {
                                     userrealname[userid] = realname;
                                     change += 2;
+                                }
+
+                                // Get the user name if present
+                                if ((username != null) && ((!usernames.ContainsKey(userid)) || (!usernames[userid].Equals(username))))
+                                {
+                                    usernames[userid] = username;
+                                    change += 4;
                                 }
 
                                 // Get the image

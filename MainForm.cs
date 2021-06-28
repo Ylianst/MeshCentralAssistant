@@ -302,6 +302,7 @@ namespace MeshAssistant
             {
                 Log("Opening consent form");
                 string realname = userid.Split('/')[2];
+                if ((mcagent.usernames != null) && mcagent.usernames.ContainsKey(userid) && (mcagent.usernames[userid] != null)) { realname = mcagent.usernames[userid]; }
                 if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
                 Image userImage = null;
                 if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
@@ -324,6 +325,7 @@ namespace MeshAssistant
             if (this.InvokeRequired) { this.Invoke(new ShowNotificationHandler(ShowNotification), userid, title, message); return; }
             Log("Show notification");
             string realname = userid.Split('/')[2];
+            if ((mcagent.usernames != null) && mcagent.usernames.ContainsKey(userid) && (mcagent.usernames[userid] != null)) { realname = mcagent.usernames[userid]; }
             if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
             Image userImage = null;
             if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
@@ -356,11 +358,13 @@ namespace MeshAssistant
             {
                 if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { notifyForm.UserImage = mcagent.userimages[userid]; }
                 if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { notifyForm.UserName = mcagent.userrealname[userid]; }
+                else if ((mcagent.usernames != null) && mcagent.usernames.ContainsKey(userid) && (mcagent.usernames[userid] != null)) { notifyForm.UserName = mcagent.usernames[userid]; }
             }
             if ((consentForm != null) && (consentForm.userid == userid))
             {
                 if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { consentForm.UserImage = mcagent.userimages[userid]; }
                 if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { consentForm.UserName = mcagent.userrealname[userid]; }
+                else if ((mcagent.usernames != null) && mcagent.usernames.ContainsKey(userid) && (mcagent.usernames[userid] != null)) { notifyForm.UserName = mcagent.usernames[userid]; }
             }
         }
 
@@ -512,6 +516,7 @@ namespace MeshAssistant
                 string userid = userids[0];
                 string realname = userid.Split('/')[2];
                 if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
+                else if ((mcagent.usernames != null) && mcagent.usernames.ContainsKey(userid) && (mcagent.usernames[userid] != null)) { realname = mcagent.usernames[userid]; }
                 stateLabel.Text = realname;
                 Image userImage = null;
                 if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
@@ -695,6 +700,8 @@ namespace MeshAssistant
                 string u = userids[i];
                 if ((mcagent.userrealname != null) && (mcagent.userrealname.ContainsKey(u)) && (mcagent.userrealname[u] != null)) {
                     r[i] = mcagent.userrealname[u];
+                } else if ((mcagent.usernames != null) && (mcagent.usernames.ContainsKey(u)) && (mcagent.usernames[u] != null)) {
+                    r[i] = mcagent.usernames[u];
                 } else {
                     string[] uu = u.Split('/');
                     r[i] = ((uu.Length == 3) ? uu[2] : u);
@@ -757,6 +764,7 @@ namespace MeshAssistant
                     string userid = userids[0];
                     string realname = userid.Split('/')[2];
                     if ((agent.userrealname != null) && (agent.userrealname.ContainsKey(userid)) && (agent.userrealname[userid] != null)) { realname = agent.userrealname[userid]; }
+                    else if ((agent.usernames != null) && (agent.usernames.ContainsKey(userid)) && (agent.usernames[userid] != null)) { realname = agent.usernames[userid]; }
                     stateLabel.Text = realname;
                     Image userImage = null;
                     if ((agent.userimages != null) && agent.userimages.ContainsKey(userid) && (agent.userimages[userid] != null)) { userImage = agent.userimages[userid]; }
