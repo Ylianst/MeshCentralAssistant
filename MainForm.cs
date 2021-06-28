@@ -762,10 +762,14 @@ namespace MeshAssistant
                 if (userids.Length == 1)
                 {
                     string userid = userids[0];
-                    string realname = userid.Split('/')[2];
+                    string[] useridsplit = userid.Split('/');
+                    if (useridsplit.Length > 3) { userid = useridsplit[0] + '/' + useridsplit[1] + '/' + useridsplit[2]; }
+                    string realname = useridsplit[2];
+                    string guestname = "";
+                    if ((useridsplit.Length == 4) && (useridsplit[3].StartsWith("guest:"))) { guestname = " - " + UTF8Encoding.UTF8.GetString(Convert.FromBase64String(useridsplit[3].Substring(6))); }
                     if ((agent.userrealname != null) && (agent.userrealname.ContainsKey(userid)) && (agent.userrealname[userid] != null)) { realname = agent.userrealname[userid]; }
                     else if ((agent.usernames != null) && (agent.usernames.ContainsKey(userid)) && (agent.usernames[userid] != null)) { realname = agent.usernames[userid]; }
-                    stateLabel.Text = realname;
+                    stateLabel.Text = realname + guestname;
                     Image userImage = null;
                     if ((agent.userimages != null) && agent.userimages.ContainsKey(userid) && (agent.userimages[userid] != null)) { userImage = agent.userimages[userid]; }
                     if (userImage == null) { setUiImage(uiImage.User); } else { setUiImage(userImage); }

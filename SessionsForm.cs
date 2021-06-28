@@ -54,6 +54,7 @@ namespace MeshAssistant
             string guestname = "";
             if ((useridsplit.Length == 4) && (useridsplit[3].StartsWith("guest:"))) { guestname = " - " + UTF8Encoding.UTF8.GetString(Convert.FromBase64String(useridsplit[3].Substring(6))); }
             if ((parent.mcagent != null) && (parent.mcagent.userrealname != null) && (parent.mcagent.userrealname.ContainsKey(userid))) { return (string)parent.mcagent.userrealname[userid] + guestname; }
+            if ((parent.mcagent != null) && (parent.mcagent.usernames != null) && (parent.mcagent.usernames.ContainsKey(userid))) { return (string)parent.mcagent.usernames[userid] + guestname; }
             return useridsplit[2] + guestname;
         }
 
@@ -64,6 +65,7 @@ namespace MeshAssistant
             string guestname = "";
             if ((useridsplit.Length == 4) && (useridsplit[3].StartsWith("guest:"))) { guestname = " - " + UTF8Encoding.UTF8.GetString(Convert.FromBase64String(useridsplit[3].Substring(6))); }
             if ((parent.agent != null) && (parent.agent.userrealname != null) && (parent.agent.userrealname.ContainsKey(userid))) { return (string)parent.agent.userrealname[userid] + guestname; }
+            if ((parent.agent != null) && (parent.agent.usernames != null) && (parent.agent.usernames.ContainsKey(userid))) { return (string)parent.agent.usernames[userid] + guestname; }
             return useridsplit[2] + guestname;
         }
 

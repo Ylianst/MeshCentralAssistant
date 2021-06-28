@@ -274,6 +274,10 @@ namespace MeshAssistant
         {
             if ((pipeClient == null) || (pipeClient.IsConnected == false) || (softwareName == null) || (selfExecutableHashHex == null)) return false;
             Log(string.Format("SendUserImageQuery userid=\"{0}\"", userid));
+
+            string[] useridsplit = userid.Split('/');
+            if (useridsplit.Length > 3) { userid = useridsplit[0] + '/' + useridsplit[1] + '/' + useridsplit[2]; }
+
             string data = "{\"cmd\":\"getUserImage\",\"userid\":\"" + userid + "\"}";
             byte[] buf2 = UTF8Encoding.UTF8.GetBytes(data);
             byte[] buf1 = BitConverter.GetBytes(buf2.Length + 4);
