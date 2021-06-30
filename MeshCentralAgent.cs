@@ -34,6 +34,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Reflection;
 using System.Net.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections;
 
@@ -187,16 +188,28 @@ namespace MeshAssistant
             if (msh.ContainsKey("Image")) { try { CustomizationLogo = new Bitmap(new MemoryStream(Convert.FromBase64String(msh["Image"]))); } catch (Exception) { } }
             if ((CustomizationLogo == null) && (File.Exists("logo.png"))) { try { CustomizationLogo = new Bitmap(new MemoryStream(File.ReadAllBytes("logo.png"))); } catch (Exception) { } }
 
-            if (ServerUrl == null)
-            {
-                scanner = new MeshDiscovery(discoveryKey);
-                scanner.OnNotify += Discovery_OnNotify;
-                scanner.MulticastPing();
-            }
+            // Continue setup on a different thread
+            Thread t = new Thread(new ThreadStart(MeshCentralAgentEx));
+            t.Start();
+        }
 
-            // Setup perfromance counters
-            cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-            ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+        private void MeshCentralAgentEx()
+        {
+            try
+            {
+                // Setup scanner that finds the MeshCentral server
+                if (ServerUrl == null)
+                {
+                    scanner = new MeshDiscovery(discoveryKey);
+                    scanner.OnNotify += Discovery_OnNotify;
+                    scanner.MulticastPing();
+                }
+
+                // Setup perfromance counters (There two calls take time, this is why we do these on a different thread).
+                cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+                ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+            }
+            catch (Exception) { }
         }
 
         private void Discovery_OnNotify(MeshDiscovery sender, IPEndPoint source, IPEndPoint local, string agentCertHash, string url, string name, string info)
@@ -834,53 +847,16 @@ namespace MeshAssistant
                         {
                             case "cpuinfo":
                                 {
-                                    if ((!jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() != typeof(string))) break;
-                                    string sessionid = (string)jsonAction["sessionid"];
-                                    string tag = null;
-                                    if ((jsonAction.ContainsKey("tag")) && (jsonAction["tag"].GetType() == typeof(string))) { tag = (string)jsonAction["tag"]; }
-
-                                    try
-                                    {
-                                        string r = "{\"action\":\"msg\",\"type\":\"cpuinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\"";
-                                        if (tag != null) { r += "\"tag\":\"" + escapeJsonString(tag) + "\""; }
-                                        r += ",\"cpu\":{\"total\":" + cpuCounter.NextValue() + "}";
-                                        r += ",\"memory\":{\"percentConsumed\":" + GetUsedMemory() + "}";
-                                        try
-                                        {
-                                            Dictionary<string, double> temps = new Dictionary<string, double>();
-                                            using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM MSAcpi_ThermalZoneTemperature"))
-                                            {
-                                                foreach (ManagementObject queryObj in searcher.Get())
-                                                {
-                                                    double temperature = Convert.ToDouble(queryObj["CurrentTemperature"].ToString());
-                                                    // Convert the value to celsius degrees
-                                                    temps.Add(queryObj["InstanceName"].ToString(), (temperature - 2732) / 10.0);
-                                                }
-                                            }
-                                            if (temps.Count > 0)
-                                            {
-                                                r += ",\"thermals\":[";
-                                                bool first = true;
-                                                foreach (string key in temps.Keys) { if (first) { first = false; } else { r += ","; } r += "\"" + temps[key] + "\""; }
-                                                r += "]";
-                                            }
-                                        }
-                                        catch (Exception) { }
-
-                                        r += "}";
-                                        if (WebSocket != null) WebSocket.SendString(r);
-                                    }
-                                    catch (Exception) { }
-
+                                    // Continue sysinfo on a different thread
+                                    Thread t = new Thread(new ParameterizedThreadStart(taskcpuinfo));
+                                    t.Start(jsonAction);
                                     break;
                                 }
                             case "sysinfo":
                                 {
-                                    if ((!jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() != typeof(string))) break;
-                                    string sessionid = (string)jsonAction["sessionid"];
-                                    string tag = null;
-                                    if ((jsonAction.ContainsKey("tag")) && (jsonAction["tag"].GetType() == typeof(string))) { tag = (string)jsonAction["tag"]; }
-                                    sendSysInfoMsg(sessionid, tag);
+                                    // Continue sysinfo on a different thread
+                                    Thread t = new Thread(new ParameterizedThreadStart(tasksysinfo));
+                                    t.Start(jsonAction);
                                     break;
                                 }
                             case "console": {
@@ -983,52 +959,16 @@ namespace MeshAssistant
                                     break;
                                 }
                             case "ps": {
-                                    string sessionid = null;
-                                    if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string))) { sessionid = (string)jsonAction["sessionid"]; }
-                                    string ps = getAllProcesses();
-                                    if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"ps\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"value\":\"" + escapeJsonString(ps) + "\"}");
+                                    // Continue ps on a different thread
+                                    Thread t = new Thread(new ParameterizedThreadStart(taskps));
+                                    t.Start(jsonAction);
                                     break;
                                 }
                             case "psinfo":
                                 {
-                                    string sessionid = null;
-                                    if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string))) { sessionid = (string)jsonAction["sessionid"]; }
-                                    int pid = -1;
-                                    if ((jsonAction.ContainsKey("pid")) && (jsonAction["pid"].GetType() == typeof(int))) { pid = (int)jsonAction["pid"]; }
-                                    if (pid < 0) break;
-                                    Process p = Process.GetProcessById(pid);
-                                    if (p == null) {
-                                        if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"psinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"pid\":" + pid + ",\"value\":null}");
-                                    } else {
-                                        string processUser = null;
-                                        string processDomain = null;
-                                        string processCmd = null;
-                                        try { GetProcessOwnerByProcessId(pid, out processUser, out processDomain, out processCmd); } catch (Exception) { }
-                                        string x = "";
-                                        try { x += "\"processName\":\"" + escapeJsonString(p.ProcessName) + "\""; } catch (Exception) { }
-                                        try { if (processUser != null) { x += ",\"processUser\":\"" + escapeJsonString(processUser) + "\""; } } catch (Exception) { }
-                                        try { if (processDomain != null) { x += ",\"processDomain\":\"" + escapeJsonString(processDomain) + "\""; } } catch (Exception) { }
-                                        try { if (processCmd != null) { x += ",\"cmd\":\"" + escapeJsonString(processCmd) + "\""; } } catch (Exception) { }
-                                        try { x += ",\"privateMemorySize\":" + p.PrivateMemorySize64.ToString(); } catch (Exception) { }
-                                        try { x += ",\"virtualMemorySize\":" + p.VirtualMemorySize64.ToString(); } catch (Exception) { }
-                                        try { x += ",\"workingSet\":" + p.WorkingSet64.ToString(); } catch (Exception) { }
-                                        try { x += ",\"totalProcessorTime\":" + p.TotalProcessorTime.TotalSeconds.ToString(); } catch (Exception) { }
-                                        try { x += ",\"userProcessorTime\":" + p.UserProcessorTime.TotalSeconds.ToString(); } catch (Exception) { }
-                                        try { x += ",\"startTime\":\"" + escapeJsonString(p.StartTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")) + "\""; } catch (Exception) { }
-                                        try { x += ",\"sessionId\":" + p.SessionId.ToString(); } catch (Exception) { }
-                                        try { x += ",\"privilegedProcessorTime\":" + p.PrivilegedProcessorTime.TotalSeconds.ToString(); } catch (Exception) { }
-                                        try { if (p.PriorityBoostEnabled) { x += ",\"PriorityBoostEnabled\":true"; } } catch (Exception) { }
-                                        try { x += ",\"peakWorkingSet\":" + p.PeakWorkingSet64.ToString(); } catch (Exception) { }
-                                        try { x += ",\"peakVirtualMemorySize\":" + p.PeakVirtualMemorySize64.ToString(); } catch (Exception) { }
-                                        try { x += ",\"peakPagedMemorySize\":" + p.PeakPagedMemorySize64.ToString(); } catch (Exception) { }
-                                        try { x += ",\"pagedSystemMemorySize\":" + p.PagedSystemMemorySize64.ToString(); } catch (Exception) { }
-                                        try { x += ",\"pagedMemorySize\":" + p.PagedMemorySize64.ToString(); } catch (Exception) { }
-                                        try { x += ",\"nonpagedSystemMemorySize\":" + p.NonpagedSystemMemorySize64.ToString(); } catch (Exception) { }
-                                        try { x += ",\"mainWindowTitle\":\"" + escapeJsonString(p.MainWindowTitle) + "\""; } catch (Exception) { }
-                                        try { if ((p.MachineName != null) && (p.MachineName != ".")) { x += ",\"machineName\":\"" + escapeJsonString(p.MachineName) + "\""; } } catch (Exception) { }
-                                        try { x += ",\"handleCount\":" + p.HandleCount.ToString(); } catch (Exception) { }
-                                        if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"psinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"pid\":" + pid + ",\"value\":{" + x + "}}");
-                                    }
+                                    // Continue psinfo on a different thread
+                                    Thread t = new Thread(new ParameterizedThreadStart(taskpsinfo));
+                                    t.Start(jsonAction);
                                     break;
                                 }
                             case "pskill":
@@ -1132,6 +1072,115 @@ namespace MeshAssistant
                         Log("Unprocessed command: " + action);
                         break;
                     }
+            }
+        }
+
+        private void taskps(object obj)
+        {
+            Dictionary<string, object> jsonAction = (Dictionary<string, object>)obj;
+            string sessionid = null;
+            if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string))) { sessionid = (string)jsonAction["sessionid"]; }
+            string ps = getAllProcesses();
+            if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"ps\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"value\":\"" + escapeJsonString(ps) + "\"}");
+        }
+
+        private void taskcpuinfo(object obj)
+        {
+            Dictionary<string, object> jsonAction = (Dictionary<string, object>)obj;
+
+            if ((!jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() != typeof(string))) return;
+            string sessionid = (string)jsonAction["sessionid"];
+            string tag = null;
+            if ((jsonAction.ContainsKey("tag")) && (jsonAction["tag"].GetType() == typeof(string))) { tag = (string)jsonAction["tag"]; }
+
+            try
+            {
+                string r = "{\"action\":\"msg\",\"type\":\"cpuinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\"";
+                if (tag != null) { r += "\"tag\":\"" + escapeJsonString(tag) + "\""; }
+                r += ",\"cpu\":{\"total\":" + cpuCounter.NextValue() + "}";
+                r += ",\"memory\":{\"percentConsumed\":" + GetUsedMemory() + "}";
+                try
+                {
+                    Dictionary<string, double> temps = new Dictionary<string, double>();
+                    using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT * FROM MSAcpi_ThermalZoneTemperature"))
+                    {
+                        foreach (ManagementObject queryObj in searcher.Get())
+                        {
+                            double temperature = Convert.ToDouble(queryObj["CurrentTemperature"].ToString());
+                            // Convert the value to celsius degrees
+                            temps.Add(queryObj["InstanceName"].ToString(), (temperature - 2732) / 10.0);
+                        }
+                    }
+                    if (temps.Count > 0)
+                    {
+                        r += ",\"thermals\":[";
+                        bool first = true;
+                        foreach (string key in temps.Keys) { if (first) { first = false; } else { r += ","; } r += "\"" + temps[key] + "\""; }
+                        r += "]";
+                    }
+                }
+                catch (Exception) { }
+
+                r += "}";
+                if (WebSocket != null) WebSocket.SendString(r);
+            }
+            catch (Exception) { }
+        }
+
+        private void tasksysinfo(object obj)
+        {
+            Dictionary<string, object> jsonAction = (Dictionary<string, object>)obj;
+            if ((!jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() != typeof(string))) return;
+            string sessionid = (string)jsonAction["sessionid"];
+            string tag = null;
+            if ((jsonAction.ContainsKey("tag")) && (jsonAction["tag"].GetType() == typeof(string))) { tag = (string)jsonAction["tag"]; }
+            sendSysInfoMsg(sessionid, tag);
+        }
+
+        private void taskpsinfo(object obj)
+        {
+            Dictionary<string, object> jsonAction = (Dictionary < string, object> )obj;
+
+            string sessionid = null;
+            if ((jsonAction.ContainsKey("sessionid")) && (jsonAction["sessionid"].GetType() == typeof(string))) { sessionid = (string)jsonAction["sessionid"]; }
+            int pid = -1;
+            if ((jsonAction.ContainsKey("pid")) && (jsonAction["pid"].GetType() == typeof(int))) { pid = (int)jsonAction["pid"]; }
+            if (pid < 0) return;
+            Process p = Process.GetProcessById(pid);
+            if (p == null)
+            {
+                if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"psinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"pid\":" + pid + ",\"value\":null}");
+            }
+            else
+            {
+                string processUser = null;
+                string processDomain = null;
+                string processCmd = null;
+                try { GetProcessOwnerByProcessId(pid, out processUser, out processDomain, out processCmd); } catch (Exception) { }
+                string x = "";
+                try { x += "\"processName\":\"" + escapeJsonString(p.ProcessName) + "\""; } catch (Exception) { }
+                try { if (processUser != null) { x += ",\"processUser\":\"" + escapeJsonString(processUser) + "\""; } } catch (Exception) { }
+                try { if (processDomain != null) { x += ",\"processDomain\":\"" + escapeJsonString(processDomain) + "\""; } } catch (Exception) { }
+                try { if (processCmd != null) { x += ",\"cmd\":\"" + escapeJsonString(processCmd) + "\""; } } catch (Exception) { }
+                try { x += ",\"privateMemorySize\":" + p.PrivateMemorySize64.ToString(); } catch (Exception) { }
+                try { x += ",\"virtualMemorySize\":" + p.VirtualMemorySize64.ToString(); } catch (Exception) { }
+                try { x += ",\"workingSet\":" + p.WorkingSet64.ToString(); } catch (Exception) { }
+                try { x += ",\"totalProcessorTime\":" + p.TotalProcessorTime.TotalSeconds.ToString(); } catch (Exception) { }
+                try { x += ",\"userProcessorTime\":" + p.UserProcessorTime.TotalSeconds.ToString(); } catch (Exception) { }
+                try { x += ",\"startTime\":\"" + escapeJsonString(p.StartTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'")) + "\""; } catch (Exception) { }
+                try { x += ",\"sessionId\":" + p.SessionId.ToString(); } catch (Exception) { }
+                try { x += ",\"privilegedProcessorTime\":" + p.PrivilegedProcessorTime.TotalSeconds.ToString(); } catch (Exception) { }
+                try { if (p.PriorityBoostEnabled) { x += ",\"PriorityBoostEnabled\":true"; } } catch (Exception) { }
+                try { x += ",\"peakWorkingSet\":" + p.PeakWorkingSet64.ToString(); } catch (Exception) { }
+                try { x += ",\"peakVirtualMemorySize\":" + p.PeakVirtualMemorySize64.ToString(); } catch (Exception) { }
+                try { x += ",\"peakPagedMemorySize\":" + p.PeakPagedMemorySize64.ToString(); } catch (Exception) { }
+                try { x += ",\"pagedSystemMemorySize\":" + p.PagedSystemMemorySize64.ToString(); } catch (Exception) { }
+                try { x += ",\"pagedMemorySize\":" + p.PagedMemorySize64.ToString(); } catch (Exception) { }
+                try { x += ",\"nonpagedSystemMemorySize\":" + p.NonpagedSystemMemorySize64.ToString(); } catch (Exception) { }
+                try { x += ",\"mainWindowTitle\":\"" + escapeJsonString(p.MainWindowTitle) + "\""; } catch (Exception) { }
+                try { if ((p.MachineName != null) && (p.MachineName != ".")) { x += ",\"machineName\":\"" + escapeJsonString(p.MachineName) + "\""; } } catch (Exception) { }
+                try { x += ",\"handleCount\":" + p.HandleCount.ToString(); } catch (Exception) { }
+                if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"psinfo\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"pid\":" + pid + ",\"value\":{" + x + "}}");
             }
         }
 
