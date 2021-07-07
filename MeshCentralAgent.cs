@@ -81,6 +81,7 @@ namespace MeshAssistant
         public List<HttpFileDownload> fileDownloads = new List<HttpFileDownload>();
         public List<string> pendingWakeOnLan = new List<string>();
         private System.Threading.Timer pendingWakeOnLanTimer = null;
+        private string agentTag = null;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -187,6 +188,20 @@ namespace MeshAssistant
             // Load customization image
             if (msh.ContainsKey("Image")) { try { CustomizationLogo = new Bitmap(new MemoryStream(Convert.FromBase64String(msh["Image"]))); } catch (Exception) { } }
             if ((CustomizationLogo == null) && (File.Exists("logo.png"))) { try { CustomizationLogo = new Bitmap(new MemoryStream(File.ReadAllBytes("logo.png"))); } catch (Exception) { } }
+
+            // Load agent tag
+            string strExeFilePath = Assembly.GetExecutingAssembly().Location;
+            if (strExeFilePath.ToLower().EndsWith(".exe"))
+            {
+                // if the agent tag file exists, load it.
+                strExeFilePath = strExeFilePath.Substring(0, strExeFilePath.Length - 4) + ".tag";
+                if (File.Exists(strExeFilePath))
+                {
+                    string tagFileData = File.ReadAllText(strExeFilePath);
+                    if (tagFileData.Length > 1000) { tagFileData = tagFileData.Substring(0, 1000); } // Only keep the first 1000 characters of the tag file.
+                    agentTag = tagFileData;
+                }
+            }
 
             // Continue setup on a different thread
             Thread t = new Thread(new ThreadStart(MeshCentralAgentEx));
@@ -528,6 +543,9 @@ namespace MeshAssistant
         {
             Log("Server Connected");
             autoConnectTime = 5;
+
+            // Send agent tag
+            sendAgentTag();
 
             // Send core information
             SendCoreInfo();
@@ -1512,6 +1530,14 @@ namespace MeshAssistant
         {
             // Process JSON data
             if ((ConnectionState == 15) && (data.Length > 2) && (data[0] == '{')) { processServerJsonData(data); }
+        }
+
+        private void sendAgentTag()
+        {
+            BinaryWriter bw = new BinaryWriter(new MemoryStream());
+            bw.Write(Convert.ToInt16(IPAddress.HostToNetworkOrder((short)15))); // MeshCommand_AgentTag
+            if ((agentTag != null) && (agentTag.Length > 0)) bw.Write(UTF8Encoding.UTF8.GetBytes(agentTag)); // Agent tag in UTF8 format
+            if (WebSocket != null) WebSocket.SendBinary(((MemoryStream)bw.BaseStream).ToArray());
         }
 
         private void WebSocket_onBinaryData(webSocketClient sender, byte[] data, int off, int len, int orglen)
