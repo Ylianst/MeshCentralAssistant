@@ -938,7 +938,7 @@ namespace MeshAssistant
                                                 string url = (string)jsonAction["value"];
                                                 string hash = null;
                                                 if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = (string)jsonAction["servertlshash"]; }
-                                                if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
+                                                if (url.StartsWith("*/")) { url = "wss://" + ServerUrl.Authority + url.Substring(1); }
                                                 Event(userid, string.Format("Started TCP tunnel to {0}:{1}", tcpaddr, tcpport));
                                                 MeshCentralTcpTunnel tunnel = new MeshCentralTcpTunnel(this, new Uri(url), hash, jsonAction, tcpaddr, tcpport);
                                                 tcptunnels.Add(tunnel);
@@ -953,7 +953,7 @@ namespace MeshAssistant
                                                 string url = jsonAction["value"].ToString();
                                                 string hash = null;
                                                 if ((jsonAction.ContainsKey("servertlshash")) && (jsonAction["servertlshash"].GetType() == typeof(string))) { hash = (string)jsonAction["servertlshash"]; }
-                                                if (url.StartsWith("*/")) { string su = ServerUrl.ToString(); url = su.Substring(0, su.Length - 11) + url.Substring(1); }
+                                                if (url.StartsWith("*/")) { url = "wss://" + ServerUrl.Authority + url.Substring(1); }
                                                 MeshCentralTunnel tunnel = new MeshCentralTunnel(this, new Uri(url), hash, jsonAction);
                                                 tunnels.Add(tunnel);
                                             }
@@ -1021,7 +1021,7 @@ namespace MeshAssistant
                         if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); } // Server url
                         if (jsonAction.ContainsKey("serverhash")) { serverhash = jsonAction["serverhash"].ToString(); } // Server TLS certificate hash
                         if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) {
-                            if (url.StartsWith("*/")) { url = ServerUrl.ToString().Replace("/agent.ashx", "") + url.Substring(1); }
+                            if (url.StartsWith("*/")) { url = "wss://" + ServerUrl.Authority + url.Substring(1); }
                             url += ("&meshid=" + MeshIdMB64 + "&ac=" + autoConnectFlags);
                             onSelfUpdate(name, hash, url, serverhash);
                         }
