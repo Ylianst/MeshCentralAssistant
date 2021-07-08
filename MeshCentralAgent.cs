@@ -1512,10 +1512,29 @@ namespace MeshAssistant
                 if (jsonAction.ContainsKey("remoteaddr") && (jsonAction["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)jsonAction["remoteaddr"]) + "\""; }
                 if (jsonAction.ContainsKey("sessionid") && (jsonAction["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)jsonAction["sessionid"]) + "\""; }
 
-                string clipboardData = (string)jsonAction["data"];
-                Clipboard.SetText(clipboardData);
-                string sessionid = (string)jsonAction["sessionid"];
-                if (WebSocket != null) WebSocket.SendString("{\"action\":\"msg\",\"type\":\"setclip\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"success\":true}");
+                bool ok = false;
+                if (jsonAction.ContainsKey("data") && (jsonAction["data"].GetType() == typeof(string)))
+                {
+                    try
+                    {
+                        Clipboard.SetText((string)jsonAction["data"]);
+                        ok = true;
+                    }
+                    catch (Exception) { }
+                }
+
+                if (WebSocket != null)
+                {
+                    string sessionid = (string)jsonAction["sessionid"];
+                    if (ok)
+                    {
+                        WebSocket.SendString("{\"action\":\"msg\",\"type\":\"setclip\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"success\":true}");
+                    }
+                    else
+                    {
+                        WebSocket.SendString("{\"action\":\"msg\",\"type\":\"setclip\",\"sessionid\":\"" + escapeJsonString(sessionid) + "\",\"success\":false}");
+                    }
+                }
             }
         }
 
