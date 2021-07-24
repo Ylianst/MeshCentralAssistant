@@ -20,13 +20,14 @@ using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace MeshAssistant
 {
     class MeshCentralDesktop
     {
-        private MeshCentralTunnel parent;
+        private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>();
         private Thread mainThread = null;
         private int currentDisplay = -1;
         private Size ScreenSize = Size.Empty;
@@ -56,6 +57,20 @@ namespace MeshAssistant
         private int screenScaleHeight = 0;
         private int exceptionLogState = 0;
         private bool UnableToCaptureShowing = false;
+        private bool tunnelAdded = true;
+
+        // Global desktop control
+        public static MeshCentralDesktop globalDesktop = null;
+        public static MeshCentralDesktop AddDesktopTunnel(MeshCentralTunnel tunnel)
+        {
+            if (globalDesktop == null) { globalDesktop = new MeshCentralDesktop(tunnel); } else { globalDesktop.AddTunnel(tunnel); }
+            return globalDesktop;
+        }
+        public static void RemoveDesktopTunnel(MeshCentralTunnel tunnel)
+        {
+            if (globalDesktop == null) return;
+            if (globalDesktop.RemoveTunnel(tunnel)) { globalDesktop.Dispose(); globalDesktop = null; }
+        }
 
         public void Log(string msg)
         {
@@ -249,9 +264,15 @@ namespace MeshAssistant
         [DllImport("user32.dll")]
         static extern bool GetCursorInfo(out CURSORINFO pci);
 
-        public MeshCentralDesktop(MeshCentralTunnel parent)
+        public MeshCentralDesktop(MeshCentralTunnel tunnel)
         {
-            this.parent = parent;
+            lock (tunnels) { tunnels.Add(tunnel); tunnelAdded = true; }
+
+            // Send displays
+            SendDisplays(tunnel);
+
+            // Send display locations and sizes
+            SendDisplayInfo(tunnel);
 
             // Setup the JPEG encoder
             jgpEncoder = GetEncoder(ImageFormat.Jpeg);
@@ -259,24 +280,35 @@ namespace MeshAssistant
             EncoderParameter myEncoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, encoderCompression);
             myEncoderParameters.Param[0] = myEncoderParameter;
 
-            // Send displays
-            SendDisplays();
-
-            // Send display locations and sizes
-            SendDisplayInfo();
-
             // Start the capture thread
             mainThread = new Thread(new ThreadStart(MainDesktopLoop));
             mainThread.Start();
         }
 
+        public void AddTunnel(MeshCentralTunnel tunnel)
+        {
+            lock (tunnels) { tunnels.Add(tunnel); tunnelAdded = true; }
+
+            // Send displays
+            SendDisplays(tunnel);
+
+            // Send display locations and sizes
+            SendDisplayInfo(tunnel);
+        }
+
+        public bool RemoveTunnel(MeshCentralTunnel tunnel)
+        {
+            lock (tunnels) { tunnels.Remove(tunnel); }
+            return (tunnels.Count == 0);
+        }
+
         public void Dispose()
         {
             mainThread = null;
-            parent = null;
+            tunnels.Clear();
         }
 
-        public void onBinaryData(byte[] data, int off, int len)
+        public void onBinaryData(MeshCentralTunnel tunnel, byte[] data, int off, int len)
         {
             if (len < 4) return;
             int cmd = ((data[off + 0] << 8) + data[off + 1]);
@@ -290,9 +322,9 @@ namespace MeshAssistant
                         if (cmdlen < 6) break;
 
                         // Check user rights. If view only, ignore this command
-                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
                         bool limitedinput = false;
-                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
+                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
 
                         // Decode the command
                         int action = data[off + 4];
@@ -334,7 +366,7 @@ namespace MeshAssistant
                         if (cmdlen < 10) break;
 
                         // Check user rights. If view only, ignore this command
-                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
 
                         int b = ((data[off + 4] << 8) + data[off + 5]);
                         int x = (1024 * ((data[off + 6] << 8) + data[off + 7])) / encoderScaling;
@@ -386,14 +418,14 @@ namespace MeshAssistant
                 case 10: // Ctrl-Alt-Del
                     {
                         // Check user rights. If view only, ignore this command
-                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
-                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) break;
+                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) break;
                         // This is not supported since we are not running as a admin service
                         break;
                     }
                 case 11: // Query displays
                     {
-                        SendDisplays();
+                        SendDisplays(tunnel);
                         break;
                     }
                 case 12: // Set display
@@ -412,13 +444,13 @@ namespace MeshAssistant
                 case 15: // Touch
                     {
                         // Check user rights. If view only, ignore this command
-                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
 
                         break;
                     }
                 case 82: // Display location and size
                     {
-                        SendDisplayInfo();
+                        SendDisplayInfo(tunnel);
                         break;
                     }
                 case 85: // Unicode Key
@@ -426,9 +458,9 @@ namespace MeshAssistant
                         if (cmdlen < 7) break;
 
                         // Check user rights. If view only, ignore this command
-                        if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
                         //bool limitedinput = false;
-                        //if ((parent.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((parent.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
+                        //if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
 
                         // Decode the command
                         int action = data[off + 4];
@@ -473,7 +505,7 @@ namespace MeshAssistant
             }
         }
 
-        private void SendDisplayInfo()
+        private void SendDisplayInfo(MeshCentralTunnel tunnel)
         {
             Screen[] screens = Screen.AllScreens;
             byte[] buf = new byte[4 + (screens.Length * 10)];
@@ -498,10 +530,10 @@ namespace MeshAssistant
                 ptr += 10;
             }
             //string hex = BitConverter.ToString(buf).Replace("-", string.Empty);
-            parent.WebSocket.SendBinary(buf, 0, buf.Length);
+            tunnel.WebSocket.SendBinary(buf, 0, buf.Length);
         }
 
-        private void SendDisplays()
+        private void SendDisplays(MeshCentralTunnel tunnel)
         {
             Screen[] screens = Screen.AllScreens;
             int screenCount = screens.Length;
@@ -516,7 +548,31 @@ namespace MeshAssistant
             if (screens.Length > 1) { buf[ptr] = 255; buf[ptr + 1] = 255; }
 
             // Send normal command
-            parent.WebSocket.SendBinary(buf, 0, buf.Length);
+            tunnel.WebSocket.SendBinary(buf, 0, buf.Length);
+        }
+
+        // Send binary data to all tunnels
+        private void SendBinaryAllTunnels(byte[] buf)
+        {
+            lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.WebSocket.SendBinary(buf); } }
+        }
+
+        // Send binary data to all tunnels
+        private void SendBinaryAllTunnels(byte[] buf, int off, int len)
+        {
+            lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.WebSocket.SendBinary(buf, off, len); } }
+        }
+
+        // Set console text for all tunnels
+        private void SetConsoleTextAllTunnels(string msg, int msgid, string msgargs, int timeout)
+        {
+            lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.setConsoleText(msg, msgid, msgargs, timeout); } }
+        }
+
+        // Clear console text for all tunnels
+        private void ClearConsoleTextAllTunnels()
+        {
+            lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.clearConsoleText(); } }
         }
 
         private void MainDesktopLoop()
@@ -526,7 +582,17 @@ namespace MeshAssistant
                 if (mainThread == null) return;
                 Thread.Sleep(encoderFrameRate);
                 if (mainThread == null) return;
-                if (parent.WebSocket.PendingSendLength > 1024) continue; // If there is data pending in the outbound buffer, skip this round.
+
+                // Look to see that is the tunnel with the maximum number of pending bytes in the outbound buffer
+                long maxPendingOutboundBytes = 0;
+                lock (tunnels)
+                {
+                    foreach (MeshCentralTunnel tunnel in tunnels)
+                    {
+                        if (tunnel.WebSocket.PendingSendLength > maxPendingOutboundBytes) { maxPendingOutboundBytes = tunnel.WebSocket.PendingSendLength; }
+                    }
+                }
+                if (maxPendingOutboundBytes > 1024) continue; // If there is data pending in the outbound buffer, skip this round.
 
                 try
                 {
@@ -560,7 +626,7 @@ namespace MeshAssistant
                         mousePointerCmd[1] = 88;
                         mousePointerCmd[3] = 5;
                         mousePointerCmd[4] = (byte)pointerType;
-                        parent.WebSocket.SendBinary(mousePointerCmd, 0, 5);
+                        SendBinaryAllTunnels(mousePointerCmd, 0, 5);
                         mousePointer = pointerType;
                     }
 
@@ -588,8 +654,9 @@ namespace MeshAssistant
                     }
 
                     // If the size of the screen does not match the current client set size, update the client
-                    if ((ScreenSize.Width != tscreensize.Width) || (ScreenSize.Height != tscreensize.Height) || (captureBitmap == null) || (encoderScalingChanged == true))
+                    if ((ScreenSize.Width != tscreensize.Width) || (ScreenSize.Height != tscreensize.Height) || (captureBitmap == null) || (encoderScalingChanged == true) || (tunnelAdded == true))
                     {
+                        tunnelAdded = false;
                         encoderScaling = newEncoderScaling;
                         encoderScalingChanged = false;
                         ScreenSize = tscreensize;
@@ -603,7 +670,7 @@ namespace MeshAssistant
                         screenSizeCmd[5] = (byte)(screenScaleWidth & 0xFF);
                         screenSizeCmd[6] = (byte)(screenScaleHeight >> 8);
                         screenSizeCmd[7] = (byte)(screenScaleHeight & 0xFF);
-                        parent.WebSocket.SendBinary(screenSizeCmd);
+                        SendBinaryAllTunnels(screenSizeCmd);
 
                         // Update the main bitmap and setup the CRC's.
                         screenRect = new Rectangle(0, 0, screenScaleWidth, screenScaleHeight);
@@ -628,7 +695,7 @@ namespace MeshAssistant
                     catch (Exception)
                     {
                         // Attempt to switch desktop display
-                        if (UnableToCaptureShowing == false) { parent.setConsoleText("Unable to capture display", 6, null, 0); UnableToCaptureShowing = true; }
+                        if (UnableToCaptureShowing == false) { SetConsoleTextAllTunnels("Unable to capture display", 6, null, 0); UnableToCaptureShowing = true; }
                         SwitchToActiveDesktop(); // Attempt to switch desktops
                         continue;
                     }
@@ -680,7 +747,7 @@ namespace MeshAssistant
 
                     // Everything went ok
                     exceptionLogState = 0;
-                    if (UnableToCaptureShowing == true) { parent.clearConsoleText(); UnableToCaptureShowing = false; }
+                    if (UnableToCaptureShowing == true) { ClearConsoleTextAllTunnels(); UnableToCaptureShowing = false; }
                 }
                 catch (Exception ex) { if (exceptionLogState == 0) { Log(ex.ToString()); exceptionLogState++; } }
             }
@@ -833,7 +900,7 @@ namespace MeshAssistant
                 imageCmd[15] = (byte)(y & 0xFF); // Y
 
                 // Send with JUMBO command
-                if (parent.WebSocket != null) { parent.WebSocket.SendBinary(imageCmd, 0, cmdlen + 8); }
+                SendBinaryAllTunnels(imageCmd, 0, cmdlen + 8);
             }
             else
             {
@@ -848,7 +915,7 @@ namespace MeshAssistant
                 imageCmd[15] = (byte)(y & 0xFF); // Y
 
                 // Send normal command
-                if (parent.WebSocket != null) { parent.WebSocket.SendBinary(imageCmd, 8, cmdlen); }
+                SendBinaryAllTunnels(imageCmd, 8, cmdlen);
             }
         }
 

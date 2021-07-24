@@ -123,7 +123,7 @@ namespace MeshAssistant
             if (fileRecvTransfer != null) { fileRecvTransfer.Close(); fileRecvTransfer = null; }
             if (WebSocket != null) { WebSocket.Dispose(); WebSocket = null; }
             if (Terminal != null) { Terminal.Dispose(); Terminal = null; }
-            if (Desktop != null) { Desktop.Dispose(); Desktop = null; }
+            if (Desktop != null) { MeshCentralDesktop.RemoveDesktopTunnel(this); Desktop = null; }
 
             // Cancel the consent request if active
             if (consentRequested == true) {
@@ -320,7 +320,7 @@ namespace MeshAssistant
                     }
                     else
                     {
-                        Desktop = new MeshCentralDesktop(this);
+                        Desktop = MeshCentralDesktop.AddDesktopTunnel(this);
                     }
                 }
                 else if (protocol == 5) // Files
@@ -398,7 +398,7 @@ namespace MeshAssistant
             {
                 // Start remote desktop
                 parent.Event(userid, "Desktop consent approved");
-                Desktop = new MeshCentralDesktop(this);
+                Desktop = MeshCentralDesktop.AddDesktopTunnel(this);
             }
             else if (protocol == 5) // Files
             {
@@ -462,7 +462,7 @@ namespace MeshAssistant
             }
             else if (protocol == 2) // Desktop
             {
-                if (Desktop != null) { Desktop.onBinaryData(data, off, len); }
+                if (Desktop != null) { Desktop.onBinaryData(this, data, off, len); }
             }
             else if (protocol == 5) // Files
             {
