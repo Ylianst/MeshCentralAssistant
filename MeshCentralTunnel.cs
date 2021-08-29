@@ -37,6 +37,7 @@ namespace MeshAssistant
         private MeshCentralTerminal Terminal = null;
         private Dictionary<string, object> jsonOptions = null;
         private FileStream fileSendTransfer = null;
+        private string fileSendTransferId = null;
         private FileStream fileRecvTransfer = null;
         private string fileRecvTransferPath = null;
         private int fileRecvTransferSize = 0;
@@ -742,6 +743,107 @@ namespace MeshAssistant
                         }
                         break;
                     }
+                case "download": // Sent a file to the browser
+                    {
+                        string sub = null;
+                        string id = null;
+                        string path = null;
+                        if (jsonCommand.ContainsKey("sub") && (jsonCommand["sub"].GetType() == typeof(string))) { sub = (string)jsonCommand["sub"]; }
+                        if (jsonCommand.ContainsKey("id")) { id = jsonCommand["id"].ToString(); }
+                        if (jsonCommand.ContainsKey("path") && (jsonCommand["path"].GetType() == typeof(string))) { path = (string)jsonCommand["path"]; }
+                        if ((sub == null) || (id == null)) return;
+
+                        int sendNextBlock = 0;
+                        if (sub == "start")
+                        {
+                            // Setup the download
+                            //MeshServerLogEx((cmd.ask == 'coredump') ? 104 : 49, [cmd.path], 'Download: \"' + cmd.path + '\"', this.httprequest);
+                            if ((path == null) || (fileSendTransfer != null)) {
+                                WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"download\",\"sub\":\"cancel\",\"id\":" + fileSendTransferId + "}"));
+                                if (fileSendTransfer != null) { fileSendTransfer.Close(); fileSendTransfer = null; fileSendTransferId = null; }
+                            }
+                            try { fileSendTransfer = File.OpenRead(path); } catch (Exception) { }
+                            if (fileSendTransfer == null) {
+                                WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"download\",\"sub\":\"cancel\",\"id\":" + id + "}"));
+                            } else {
+                                fileSendTransferId = id;
+                                WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"download\",\"sub\":\"start\",\"id\":" + fileSendTransferId + "}"));
+                            }
+                        }
+                        else if ((fileSendTransfer != null) && (id == fileSendTransferId))
+                        {
+                            // Download commands
+                            if (sub == "startack") {
+                                sendNextBlock = 8;
+                                if (jsonCommand.ContainsKey("ack") && (jsonCommand["ack"].GetType() == typeof(System.Int32))) { sendNextBlock = (int)jsonCommand["ack"]; }
+                            } else if (sub == "stop") {
+                                fileSendTransfer.Close();
+                                fileSendTransfer = null;
+                                fileSendTransferId = null;
+                            } else if (sub == "ack") { sendNextBlock = 1; }
+                        }
+
+                        // Send the next download block(s)
+                        while (sendNextBlock > 0)
+                        {
+                            sendNextBlock--;
+                            byte[] buf = new byte[16384];
+                            buf[0] = 1;
+                            int len = fileSendTransfer.Read(buf, 4, buf.Length - 4);
+                            if (len < buf.Length - 4)
+                            {
+                                buf[3] = 1;
+                                fileSendTransfer.Close();
+                                fileSendTransfer = null;
+                                fileSendTransferId = null;
+                                sendNextBlock = 0;
+                            }
+                            WebSocket.SendBinary(buf, 0, len + 4);
+                        }
+
+                        break;
+                    }
+                    /*
+                case 'download':
+                    {
+                        // Download a file
+                        var sendNextBlock = 0;
+                        if (cmd.sub == 'start')
+                        { // Setup the download
+                            if ((cmd.path == null) && (cmd.ask == 'coredump'))
+                            { // If we are asking for the coredump file, set the right path.
+                                if (process.platform == 'win32')
+                                {
+                                    if (fs.existsSync(process.coreDumpLocation)) { cmd.path = process.coreDumpLocation; }
+                                }
+                                else
+                                {
+                                    if ((process.cwd() != '//') && fs.existsSync(process.cwd() + 'core')) { cmd.path = process.cwd() + 'core'; }
+                                }
+                            }
+                            MeshServerLogEx((cmd.ask == 'coredump') ? 104 : 49, [cmd.path], 'Download: \"' + cmd.path + '\"', this.httprequest);
+                            if ((cmd.path == null) || (this.filedownload != null)) { this.write({ action: 'download', sub: 'cancel', id: this.filedownload.id }); delete this.filedownload; }
+                            this.filedownload = { id: cmd.id, path: cmd.path, ptr: 0 }
+                            try { this.filedownload.f = fs.openSync(this.filedownload.path, 'rbN'); } catch (e) { this.write({ action: 'download', sub: 'cancel', id: this.filedownload.id }); delete this.filedownload; }
+                            if (this.filedownload) { this.write({ action: 'download', sub: 'start', id: cmd.id }); }
+                        }
+                        else if ((this.filedownload != null) && (cmd.id == this.filedownload.id))
+                        { // Download commands
+                            if (cmd.sub == 'startack') { sendNextBlock = ((typeof cmd.ack == 'number') ? cmd.ack : 8); } else if (cmd.sub == 'stop') { delete this.filedownload; } else if (cmd.sub == 'ack') { sendNextBlock = 1; }
+                        }
+                        // Send the next download block(s)
+                        while (sendNextBlock > 0)
+                        {
+                            sendNextBlock--;
+                            var buf = Buffer.alloc(16384);
+                            var len = fs.readSync(this.filedownload.f, buf, 4, 16380, null);
+                            this.filedownload.ptr += len;
+                            if (len < 16380) { buf.writeInt32BE(0x01000001, 0); fs.closeSync(this.filedownload.f); delete this.filedownload; sendNextBlock = 0; } else { buf.writeInt32BE(0x01000000, 0); }
+                            this.write(buf.slice(0, len + 4)); // Write as binary
+                        }
+                        break;
+                    }
+                    */
                 default: { break; }
             }
             if (response != null) { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(response)); }
