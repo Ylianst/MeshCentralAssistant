@@ -528,42 +528,49 @@ namespace MeshAssistant
                         if (jsonCommand["path"].GetType() == typeof(string)) { path = (string)jsonCommand["path"]; }
                         if (path == "")
                         {
-                            // Enumerate drives
-                            response = "{\"path\":\"" + path + "\"";
-                            if (reqid != 0) { response += ",\"reqid\":" + reqid; }
-                            response += ",\"dir\":[";
-                            bool firstDrive = true;
-                            foreach (var drive in DriveInfo.GetDrives())
+                            try
                             {
-                                if (drive.IsReady == false) continue;
-                                if (firstDrive) { firstDrive = false; } else { response += ","; }
-                                response += "{\"n\":\"" + escapeJsonString(drive.Name) + "\",\"t\":1}";
+                                // Enumerate drives
+                                response = "{\"path\":\"" + path + "\"";
+                                if (reqid != 0) { response += ",\"reqid\":" + reqid; }
+                                response += ",\"dir\":[";
+                                bool firstDrive = true;
+                                foreach (var drive in DriveInfo.GetDrives())
+                                {
+                                    if (drive.IsReady == false) continue;
+                                    if (firstDrive) { firstDrive = false; } else { response += ","; }
+                                    response += "{\"n\":\"" + escapeJsonString(drive.Name) + "\",\"t\":1}";
+                                }
+                                response += "]}";
                             }
-                            response += "]}";
+                            catch (Exception) { }
                         } else {
-                            // Enumerate folders
-                            response = "{\"path\":\"" + path + "\"";
-                            if (reqid != 0) { response += ",\"reqid\":" + reqid; }
-                            response += ",\"dir\":[";
-                            bool firstFile = true;
-                            if (path.EndsWith("\\") == false) { path += "\\";  }
-                            foreach (string folder in Directory.EnumerateDirectories(path))
+                            try
                             {
-                                DirectoryInfo d = new DirectoryInfo(folder);
-                                string t = d.CreationTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
-                                if (firstFile) { firstFile = false; } else { response += ","; }
-                                response += "{\"n\":\"" + escapeJsonString(d.Name) + "\",\"t\":2,\"d\":\"" + t + "\"}";
+                                // Enumerate folders
+                                response = "{\"path\":\"" + path + "\"";
+                                if (reqid != 0) { response += ",\"reqid\":" + reqid; }
+                                response += ",\"dir\":[";
+                                bool firstFile = true;
+                                if (path.EndsWith("\\") == false) { path += "\\";  }
+                                foreach (string folder in Directory.EnumerateDirectories(path))
+                                {
+                                    DirectoryInfo d = new DirectoryInfo(folder);
+                                    string t = d.CreationTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                                    if (firstFile) { firstFile = false; } else { response += ","; }
+                                    response += "{\"n\":\"" + escapeJsonString(d.Name) + "\",\"t\":2,\"d\":\"" + t + "\"}";
+                                }
+                                foreach (string folder in Directory.EnumerateFiles(path))
+                                {
+                                    FileInfo f = new FileInfo(folder);
+                                    //if (f.Attributes.HasFlag(FileAttributes.Hidden)) continue;
+                                    string t = f.CreationTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
+                                    if (firstFile) { firstFile = false; } else { response += ","; }
+                                    response += "{\"n\":\"" + escapeJsonString(f.Name) + "\",\"t\":3,\"s\":" + f.Length + ",\"d\":\"" + t + "\"}";
+                                }
+                                response += "]}";
                             }
-                            foreach (string folder in Directory.EnumerateFiles(path))
-                            {
-                                FileInfo f = new FileInfo(folder);
-                                //if (f.Attributes.HasFlag(FileAttributes.Hidden)) continue;
-                                string t = f.CreationTime.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff'Z'");
-                                if (firstFile) { firstFile = false; } else { response += ","; }
-                                response += "{\"n\":\"" + escapeJsonString(f.Name) + "\",\"t\":3,\"s\":" + f.Length + ",\"d\":\"" + t + "\"}";
-                            }
-                            response += "]}";
-
+                            catch (Exception) { }
                         }
                         break;
                     }
@@ -572,10 +579,14 @@ namespace MeshAssistant
                         string path = "";
                         if ((jsonCommand.ContainsKey("path")) && (jsonCommand["path"].GetType() == typeof(string))) { path = (string)jsonCommand["path"]; }
                         if (path != "") {
-                            path = path.Replace("/", "\\");
-                            Directory.CreateDirectory(path);
-                            parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":44,\"msgArgs\":[\"" + escapeJsonString(path) + "\"],\"msg\":\"Create folder: " + escapeJsonString(path) + "\"" + extraLogStr + "}"));
-                            parent.Event(userid, string.Format("Created folder: {0}", path));
+                            try
+                            {
+                                path = path.Replace("/", "\\");
+                                Directory.CreateDirectory(path);
+                                parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":44,\"msgArgs\":[\"" + escapeJsonString(path) + "\"],\"msg\":\"Create folder: " + escapeJsonString(path) + "\"" + extraLogStr + "}"));
+                                parent.Event(userid, string.Format("Created folder: {0}", path));
+                            }
+                            catch (Exception) { }
                         }
                         break;
                     }
@@ -777,8 +788,8 @@ namespace MeshAssistant
                                 sendNextBlock = 8;
                                 if (jsonCommand.ContainsKey("ack") && (jsonCommand["ack"].GetType() == typeof(System.Int32))) { sendNextBlock = (int)jsonCommand["ack"]; }
                             } else if (sub == "stop") {
-                                fileSendTransfer.Close();
-                                fileSendTransfer = null;
+                                try { fileSendTransfer.Close(); } catch (Exception) { }
+                            fileSendTransfer = null;
                                 fileSendTransferId = null;
                             } else if (sub == "ack") { sendNextBlock = 1; }
                         }
@@ -793,7 +804,7 @@ namespace MeshAssistant
                             if (len < buf.Length - 4)
                             {
                                 buf[3] = 1;
-                                fileSendTransfer.Close();
+                                try { fileSendTransfer.Close(); } catch (Exception) { }
                                 fileSendTransfer = null;
                                 fileSendTransferId = null;
                                 sendNextBlock = 0;
@@ -803,47 +814,6 @@ namespace MeshAssistant
 
                         break;
                     }
-                    /*
-                case 'download':
-                    {
-                        // Download a file
-                        var sendNextBlock = 0;
-                        if (cmd.sub == 'start')
-                        { // Setup the download
-                            if ((cmd.path == null) && (cmd.ask == 'coredump'))
-                            { // If we are asking for the coredump file, set the right path.
-                                if (process.platform == 'win32')
-                                {
-                                    if (fs.existsSync(process.coreDumpLocation)) { cmd.path = process.coreDumpLocation; }
-                                }
-                                else
-                                {
-                                    if ((process.cwd() != '//') && fs.existsSync(process.cwd() + 'core')) { cmd.path = process.cwd() + 'core'; }
-                                }
-                            }
-                            MeshServerLogEx((cmd.ask == 'coredump') ? 104 : 49, [cmd.path], 'Download: \"' + cmd.path + '\"', this.httprequest);
-                            if ((cmd.path == null) || (this.filedownload != null)) { this.write({ action: 'download', sub: 'cancel', id: this.filedownload.id }); delete this.filedownload; }
-                            this.filedownload = { id: cmd.id, path: cmd.path, ptr: 0 }
-                            try { this.filedownload.f = fs.openSync(this.filedownload.path, 'rbN'); } catch (e) { this.write({ action: 'download', sub: 'cancel', id: this.filedownload.id }); delete this.filedownload; }
-                            if (this.filedownload) { this.write({ action: 'download', sub: 'start', id: cmd.id }); }
-                        }
-                        else if ((this.filedownload != null) && (cmd.id == this.filedownload.id))
-                        { // Download commands
-                            if (cmd.sub == 'startack') { sendNextBlock = ((typeof cmd.ack == 'number') ? cmd.ack : 8); } else if (cmd.sub == 'stop') { delete this.filedownload; } else if (cmd.sub == 'ack') { sendNextBlock = 1; }
-                        }
-                        // Send the next download block(s)
-                        while (sendNextBlock > 0)
-                        {
-                            sendNextBlock--;
-                            var buf = Buffer.alloc(16384);
-                            var len = fs.readSync(this.filedownload.f, buf, 4, 16380, null);
-                            this.filedownload.ptr += len;
-                            if (len < 16380) { buf.writeInt32BE(0x01000001, 0); fs.closeSync(this.filedownload.f); delete this.filedownload; sendNextBlock = 0; } else { buf.writeInt32BE(0x01000000, 0); }
-                            this.write(buf.slice(0, len + 4)); // Write as binary
-                        }
-                        break;
-                    }
-                    */
                 default: { break; }
             }
             if (response != null) { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes(response)); }
