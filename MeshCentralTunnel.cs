@@ -20,6 +20,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Web.Script.Serialization;
 
 namespace MeshAssistant
@@ -727,19 +728,20 @@ namespace MeshAssistant
                         string path = null;
                         string name = null;
                         int size = 0;
+                        bool append = false;
                         if (jsonCommand.ContainsKey("path") && (jsonCommand["path"].GetType() == typeof(string))) { path = (string)jsonCommand["path"]; }
                         if (jsonCommand.ContainsKey("name") && (jsonCommand["name"].GetType() == typeof(string))) { name = (string)jsonCommand["name"]; }
                         if (jsonCommand.ContainsKey("size") && (jsonCommand["size"].GetType() == typeof(System.Int32))) { size = (int)jsonCommand["size"]; }
+                        if (jsonCommand.ContainsKey("append") && (jsonCommand["append"].GetType() == typeof(bool))) { append = (bool)jsonCommand["append"]; }
                         if ((path == null) || (name == null) || (size <= 0) || !Directory.Exists(path)) { disconnect(); return; }
 
                         string fullname = Path.Combine(path, name).Replace("/", "\\");
                         parent.Event(userid, string.Format("Uploading file {0} of size {1}", fullname, size));
-                        try { fileRecvTransfer = File.OpenWrite(fullname); } catch (Exception) { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploaderror\",\"reqid\":" + reqid + "}")); break; }
+                        try { fileRecvTransfer = File.Open(fullname, append ? FileMode.Append : FileMode.Create); } catch (Exception) { WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploaderror\",\"reqid\":" + reqid + "}")); break; }
                         fileRecvId = reqid;
                         fileRecvTransferPath = fullname;
                         fileRecvTransferSize = size;
                         WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploadstart\",\"reqid\":" + fileRecvId + "}"));
-
                         break;
                     }
                 case "uploaddone": // Received a file from the browser is done
@@ -752,6 +754,39 @@ namespace MeshAssistant
                             fileRecvId = 0;
                             parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":105,\"msgArgs\":[\"" + escapeJsonString(fileRecvTransferPath) + "\"," + fileRecvTransferSize + "],\"msg\":\"Download: " + escapeJsonString(fileRecvTransferPath) + ", Size: " + fileRecvTransferSize + "\"" + extraLogStr + "}"));
                         }
+                        break;
+                    }
+                case "uploadhash": // Hash a file
+                    {
+                        string path = null;
+                        string name = null;
+                        string tag = "null";
+                        if (jsonCommand.ContainsKey("path") && (jsonCommand["path"].GetType() == typeof(string))) { path = (string)jsonCommand["path"]; }
+                        if (jsonCommand.ContainsKey("name") && (jsonCommand["name"].GetType() == typeof(string))) { name = (string)jsonCommand["name"]; }
+                        if ((path == null) || (name == null) || !Directory.Exists(path)) { disconnect(); return; }
+                        if (jsonCommand.ContainsKey("tag"))
+                        {
+                            if (jsonCommand["tag"].GetType() == typeof(string)) { tag = "\"" + (string)jsonCommand["tag"] + "\""; }
+                            if (jsonCommand["tag"].GetType() == typeof(Dictionary<string, object>)) { tag = new JavaScriptSerializer().Serialize(jsonCommand["tag"]); }
+                        }
+                        string hash = "null";
+                        FileInfo fInfo = new FileInfo(Path.Combine(path, name));
+                        if (fInfo.Exists == true)
+                        {
+                            using (SHA384 hasher = SHA384.Create())
+                            {
+                                try
+                                {
+                                    FileStream fileStream = fInfo.Open(FileMode.Open);
+                                    fileStream.Position = 0;
+                                    byte[] hashValue = hasher.ComputeHash(fileStream);
+                                    hash = "\"" + BitConverter.ToString(hashValue).Replace("-", string.Empty) + "\"";
+                                    fileStream.Close();
+                                }
+                                catch (Exception) { }
+                            }
+                        }
+                        WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploadhash\",\"reqid\":" + reqid + ",\"path\":\"" + escapeJsonString(path) + "\",\"name\":\"" + escapeJsonString(name) + "\",\"tag\":" + tag + ",\"hash\":" + hash + "}"));
                         break;
                     }
                 case "download": // Sent a file to the browser
