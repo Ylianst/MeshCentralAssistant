@@ -170,9 +170,8 @@ namespace MeshAssistant
                 // No proxy in use
                 Log("Websocket noProxy");
                 proxyInUse = false;
-                wsclient = new TcpClient();
                 string h = url.Host;
-                if (h.StartsWith("[") && h.EndsWith("]")) { h = h.Substring(1, h.Length - 2); }
+                if (h.StartsWith("[") && h.EndsWith("]")) { h = h.Substring(1, h.Length - 2); wsclient = new TcpClient(AddressFamily.InterNetworkV6); } else { wsclient = new TcpClient(); }
                 wsclient.BeginConnect(h, url.Port, new AsyncCallback(OnConnectSink), this);
             }
 

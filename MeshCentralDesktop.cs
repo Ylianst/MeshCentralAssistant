@@ -636,18 +636,20 @@ namespace MeshAssistant
                     Screen[] screens = Screen.AllScreens;
                     if (currentDisplay == -1) // We are looking at all screens
                     {
-                        tscreensize = Size.Empty;
-                        int maxx = 0;
-                        int maxy = 0;
+                        Rectangle allScreens = Rectangle.Empty;
                         foreach (Screen s in screens)
                         {
-                            int xx = s.Bounds.Left + s.Bounds.Width;
-                            int yy = s.Bounds.Top + s.Bounds.Height;
-                            if (maxx < xx) { maxx = xx; }
-                            if (maxy < yy) { maxy = yy; }
+                            if (allScreens == Rectangle.Empty) {
+                                allScreens = s.Bounds;
+                            } else {
+                                allScreens = Rectangle.Union(allScreens, s.Bounds);
+                            }
                         }
-                        tscreensize = new Size(maxx, maxy);
-                        tscreenlocation = Point.Empty;
+                        if (allScreens != Rectangle.Empty)
+                        {
+                            tscreensize = new Size(allScreens.Width, allScreens.Height);
+                            tscreenlocation = new Point(allScreens.Left, allScreens.Top);
+                        }
                     } else if ((currentDisplay >= 0) && (currentDisplay < screens.Length)) { // We are looking at a specific screen
                         tscreensize = Screen.AllScreens[currentDisplay].Bounds.Size;
                         tscreenlocation = Screen.AllScreens[currentDisplay].Bounds.Location;
