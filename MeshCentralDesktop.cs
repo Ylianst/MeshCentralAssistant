@@ -368,9 +368,11 @@ namespace MeshAssistant
                         // Check user rights. If view only, ignore this command
                         if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
 
-                        int b = ((data[off + 4] << 8) + data[off + 5]);
+                        uint mouseFlags = (uint)((data[off + 4] << 8) + data[off + 5]);
                         int x = (1024 * ((data[off + 6] << 8) + data[off + 7])) / encoderScaling;
                         int y = (1024 * ((data[off + 8] << 8) + data[off + 9])) / encoderScaling;
+                        uint mouseWheel = 0;
+                        if (cmdlen >= 12) { mouseWheel = (uint)((data[off + 10] << 8) + data[off + 11]); if (mouseWheel > 32768) { mouseWheel -= 65535; } }
                         try
                         {
                             if (currentDisplay != -1)
@@ -389,16 +391,10 @@ namespace MeshAssistant
                             }
                         }
                         catch (Exception) { }
-                        int w = 0;
-                        if (cmdlen >= 12) { w = (int)((data[off + 10] << 8) + data[off + 11]); if (w > 32768) { w -= 65535; } }
+                        
                         Cursor.Position = new Point(x, y);
-                        if ((b & 2) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_LEFTDOWN), x, y, 0, 0); }
-                        if ((b & 4) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_LEFTUP), x, y, 0, 0); }
-                        if ((b & 8) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_RIGHTDOWN), x, y, 0, 0); }
-                        if ((b & 16) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_RIGHTUP), x, y, 0, 0); }
-                        if ((b & 32) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_MIDDLEDOWN), x, y, 0, 0); }
-                        if ((b & 64) != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_MIDDLEUP), x, y, 0, 0); }
-                        if (w != 0) { mouse_event((int)(MouseEventFlags.MOUSEEVENTF_WHEEL), x, y, (uint)w, 0); }
+                        if (mouseWheel != 0) { mouseFlags |= (uint)MouseEventFlags.MOUSEEVENTF_WHEEL; }
+                        mouse_event(mouseFlags, x, y, (uint)mouseWheel, 0);
                         break;
                     }
                 case 5: // Settings
