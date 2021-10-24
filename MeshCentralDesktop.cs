@@ -371,7 +371,24 @@ namespace MeshAssistant
                         int b = ((data[off + 4] << 8) + data[off + 5]);
                         int x = (1024 * ((data[off + 6] << 8) + data[off + 7])) / encoderScaling;
                         int y = (1024 * ((data[off + 8] << 8) + data[off + 9])) / encoderScaling;
-                        if (currentDisplay != -1) { try { Point tscreenlocation = Screen.AllScreens[currentDisplay].Bounds.Location; x += tscreenlocation.X; y += tscreenlocation.Y; } catch (Exception) { } }
+                        try
+                        {
+                            if (currentDisplay != -1)
+                            {
+                                Point tscreenlocation = Screen.AllScreens[currentDisplay].Bounds.Location;
+                                x += tscreenlocation.X;
+                                y += tscreenlocation.Y;
+                            }
+                            else
+                            {
+                                Screen[] screens = Screen.AllScreens;
+                                Rectangle allScreens = Rectangle.Empty;
+                                foreach (Screen s in screens) { if (allScreens == Rectangle.Empty) { allScreens = s.Bounds; } else { allScreens = Rectangle.Union(allScreens, s.Bounds); } }
+                                x += allScreens.Left;
+                                y += allScreens.Top;
+                            }
+                        }
+                        catch (Exception) { }
                         int w = 0;
                         if (cmdlen >= 12) { w = (int)((data[off + 10] << 8) + data[off + 11]); if (w > 32768) { w -= 65535; } }
                         Cursor.Position = new Point(x, y);
