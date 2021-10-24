@@ -1201,7 +1201,7 @@ namespace MeshAssistant
                 {
                     PrivacyBarForm f = new PrivacyBarForm(this, s);
                     f.privacyText = msg;
-                    f.Show(this);
+                    f.Show();
                     privacyBars.Add(f);
                 }
             }
