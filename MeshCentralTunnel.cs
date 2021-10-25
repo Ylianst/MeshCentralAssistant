@@ -53,6 +53,11 @@ namespace MeshAssistant
         public string guestname = null;
         public bool disconnected = false;
 
+        public void Log(string msg)
+        {
+            try { File.AppendAllText("debug.log", DateTime.Now.ToString("HH:mm:tt.ffff") + ": MCAgent: " + msg + "\r\n"); } catch (Exception) { }
+        }
+
         public enum MeshRights : long
         {
             EDITMESH            = 0x00000001,
@@ -227,154 +232,161 @@ namespace MeshAssistant
 
         private void WebSocket_onStringData(webSocketClient sender, string data, int orglen)
         {
-            if (state == 0) // Waitting for browser connection
+            try
             {
-                if (data.Equals("c")) { state = 1; connectedToServer(); }
-                else if (data.Equals("cr")) { state = 1; /* serverRecording = true; */ connectedToServer(); }
-                return;
-            }
-            else if (state == 1) // Waitting for protocol
-            {
-                // Parse the received JSON options
-                if (data.StartsWith("{")) {
-                    try { jsonOptions = JSON.Deserialize<Dictionary<string, object>>(data); } catch (Exception) { }
-                    if ((!jsonOptions.ContainsKey("type")) || (jsonOptions["type"].GetType() != typeof(string)) || (!((string)jsonOptions["type"]).Equals("options"))) { jsonOptions = null; }
+                if (state == 0) // Waitting for browser connection
+                {
+                    if (data.Equals("c")) { state = 1; connectedToServer(); }
+                    else if (data.Equals("cr")) { state = 1; /* serverRecording = true; */ connectedToServer(); }
                     return;
                 }
-                if (int.TryParse(data, out protocol)) { state = 2; }
-
-                // Add this session
-                if (creationArgs != null)
+                else if (state == 1) // Waitting for protocol
                 {
-                    //if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["username"]; }
-                    //if (creationArgs.ContainsKey("realname") && (creationArgs["realname"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["realname"]; }
-                    if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) {
-                        sessionLoggingUserName = sessionUserName = (string)creationArgs["userid"];
-                        if (creationArgs.ContainsKey("guestname") && (creationArgs["guestname"].GetType() == typeof(string))) {
-                            sessionUserName += "/guest:" + Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes((string)creationArgs["guestname"]));
-                            sessionLoggingUserName += " - " + (string)creationArgs["guestname"];
-                        }
+                    // Parse the received JSON options
+                    if (data.StartsWith("{")) {
+                        try { jsonOptions = JSON.Deserialize<Dictionary<string, object>>(data); } catch (Exception) { }
+                        if ((!jsonOptions.ContainsKey("type")) || (jsonOptions["type"].GetType() != typeof(string)) || (!((string)jsonOptions["type"]).Equals("options"))) { jsonOptions = null; }
+                        return;
                     }
+                    if (int.TryParse(data, out protocol)) { state = 2; }
 
-
-                    if (sessionUserName != null)
+                    // Add this session
+                    if (creationArgs != null)
                     {
-                        if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal: 1 = Admin Shell, 8 = User Shell, 9 = User PowerShell
-                        {
-                            if (parent.terminalSupport == false) { disconnect(); return; } // Terminal not supported
-                            if (parent.TerminalSessions == null) { parent.TerminalSessions = new Dictionary<string, object>(); }
-                            if (parent.TerminalSessions.ContainsKey(sessionUserName)) { parent.TerminalSessions[sessionUserName] = (int)parent.TerminalSessions[sessionUserName] + 1; } else { parent.TerminalSessions[sessionUserName] = 1; }
-                            parent.fireSessionChanged(2);
-                            parent.Event(userid, "Started terminal session");
-                        }
-                        if (protocol == 2) // Desktop
-                        {
-                            if (parent.DesktopSessions == null) { parent.DesktopSessions = new Dictionary<string, object>(); }
-                            if (parent.DesktopSessions.ContainsKey(sessionUserName)) { parent.DesktopSessions[sessionUserName] = (int)parent.DesktopSessions[sessionUserName] + 1; } else { parent.DesktopSessions[sessionUserName] = 1; }
-                            parent.fireSessionChanged(2);
-                            parent.Event(userid, "Started desktop session");
-                        }
-                        if (protocol == 5) // Files
-                        {
-                            if (parent.FilesSessions == null) { parent.FilesSessions = new Dictionary<string, object>(); }
-                            if (parent.FilesSessions.ContainsKey(sessionUserName)) { parent.FilesSessions[sessionUserName] = (int)parent.FilesSessions[sessionUserName] + 1; } else { parent.FilesSessions[sessionUserName] = 1; }
-                            parent.fireSessionChanged(5);
-                            parent.Event(userid, "Started files session");
-                        }
-                    }
-                }
-
-                int consent = 0;
-                if (creationArgs.ContainsKey("consent") && (creationArgs["consent"].GetType() == typeof(int))) { consent = (int)creationArgs["consent"]; }
-                if (creationArgs.ContainsKey("privacybartext") && (creationArgs["privacybartext"].GetType() == typeof(string))) {
-                    if (parent.privacyBarText != (string)creationArgs["privacybartext"]) { parent.privacyBarText = (string)creationArgs["privacybartext"]; parent.PrivacyTextChanged(); }
-                }
-
-                if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal
-                {
-                    if (((consent & 0x10) != 0) || parent.autoConnect) // Remote Terminal Consent Prompt
-                    {
-                        consentRequested = true;
-                        setConsoleText("Waiting for user to grant access...", 1, null, 0);
-                        parent.askForConsent(this, "User \"{0}\" is requesting remote terminal control of this computer. Click allow to grant access.", protocol, sessionLoggingUserName);
-                        parent.Event(userid, "Requesting user consent for terminal session");
-                    }
-                    else
-                    {
-                        int cols = 80;
-                        int rows = 25;
-                        if (jsonOptions != null)
-                        {
-                            if (jsonOptions.ContainsKey("cols") && (jsonOptions["cols"].GetType() == typeof(int))) { cols = (int)jsonOptions["cols"]; }
-                            if (jsonOptions.ContainsKey("rows") && (jsonOptions["rows"].GetType() == typeof(int))) { rows = (int)jsonOptions["rows"]; }
-                        }
-                        Terminal = new MeshCentralTerminal(this, protocol, cols, rows);
-                    }
-                }
-                else if (protocol == 2) // Desktop
-                {
-                    if (((consent & 8) != 0) || parent.autoConnect) // Remote Desktop Consent Prompt
-                    {
-                        consentRequested = true;
-                        setConsoleText("Waiting for user to grant access...", 1, null, 0);
-                        parent.askForConsent(this, "User \"{0}\" is requesting remote desktop control of this computer. Click allow to grant access.", protocol, sessionLoggingUserName);
-                        parent.Event(userid, "Requesting user consent for desktop session");
-                    }
-                    else
-                    {
-                        Desktop = MeshCentralDesktop.AddDesktopTunnel(this);
-                    }
-                }
-                else if (protocol == 5) // Files
-                {
-                    if (((consent & 32) != 0) || parent.autoConnect) // Remote Files Consent Prompt
-                    {
-                        consentRequested = true;
-                        setConsoleText("Waiting for user to grant access...", 1, null, 0);
-                        parent.askForConsent(this, "User \"{0}\" is requesting access to all files on this computer. Click allow to grant access.", protocol, sessionLoggingUserName);
-                        parent.Event(userid, "Requesting user consent for files session");
-                    }
-                }
-                else if (protocol == 10)
-                {
-                    // File transfers are only allowed if the user has an active file session. If not, must disconnect since user consent may be required.
-                    if ((sessionUserName == null) || (parent.doesUserHaveSession(sessionUserName, 5) == false)) { disconnect(); return; }
-
-                    // Basic file transfer
-                    if ((jsonOptions.ContainsKey("file")) && (jsonOptions["file"].GetType() == typeof(string)))
-                    {
-                        FileInfo f = new FileInfo((string)jsonOptions["file"]);
-                        if (f.Exists)
-                        {
-                            try
-                            {
-                                // Send the file
-                                WebSocket.onSendOk += WebSocket_onSendOk;
-                                fileSendTransfer = File.OpenRead(f.FullName);
-                                byte[] buf = new byte[65535];
-                                int len = fileSendTransfer.Read(buf, 0, buf.Length);
-                                if (len > 0) { WebSocket.SendBinary(buf, 0, len); } else { disconnect(); }
-                                WebSocket.SendString("{\"op\":\"ok\",\"size\":" + f.Length + "}");
-                                parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":106,\"msgArgs\":[\"" + escapeJsonString(f.FullName) + "\"," + f.Length + "],\"msg\":\"Download: " + escapeJsonString(f.FullName) + ", Size: " + f.Length + "\"" + extraLogStr + "}"));
-                                parent.Event(userid, string.Format("Downloaded file {0}", f.FullName));
+                        //if (creationArgs.ContainsKey("username") && (creationArgs["username"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["username"]; }
+                        //if (creationArgs.ContainsKey("realname") && (creationArgs["realname"].GetType() == typeof(string))) { sessionUserName = (string)creationArgs["realname"]; }
+                        if (creationArgs.ContainsKey("userid") && (creationArgs["userid"].GetType() == typeof(string))) {
+                            sessionLoggingUserName = sessionUserName = (string)creationArgs["userid"];
+                            if (creationArgs.ContainsKey("guestname") && (creationArgs["guestname"].GetType() == typeof(string))) {
+                                sessionUserName += "/guest:" + Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes((string)creationArgs["guestname"]));
+                                sessionLoggingUserName += " - " + (string)creationArgs["guestname"];
                             }
-                            catch (Exception)
+                        }
+
+
+                        if (sessionUserName != null)
+                        {
+                            if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal: 1 = Admin Shell, 8 = User Shell, 9 = User PowerShell
+                            {
+                                if (parent.terminalSupport == false) { disconnect(); return; } // Terminal not supported
+                                if (parent.TerminalSessions == null) { parent.TerminalSessions = new Dictionary<string, object>(); }
+                                if (parent.TerminalSessions.ContainsKey(sessionUserName)) { parent.TerminalSessions[sessionUserName] = (int)parent.TerminalSessions[sessionUserName] + 1; } else { parent.TerminalSessions[sessionUserName] = 1; }
+                                parent.fireSessionChanged(2);
+                                parent.Event(userid, "Started terminal session");
+                            }
+                            if (protocol == 2) // Desktop
+                            {
+                                if (parent.DesktopSessions == null) { parent.DesktopSessions = new Dictionary<string, object>(); }
+                                if (parent.DesktopSessions.ContainsKey(sessionUserName)) { parent.DesktopSessions[sessionUserName] = (int)parent.DesktopSessions[sessionUserName] + 1; } else { parent.DesktopSessions[sessionUserName] = 1; }
+                                parent.fireSessionChanged(2);
+                                parent.Event(userid, "Started desktop session");
+                            }
+                            if (protocol == 5) // Files
+                            {
+                                if (parent.FilesSessions == null) { parent.FilesSessions = new Dictionary<string, object>(); }
+                                if (parent.FilesSessions.ContainsKey(sessionUserName)) { parent.FilesSessions[sessionUserName] = (int)parent.FilesSessions[sessionUserName] + 1; } else { parent.FilesSessions[sessionUserName] = 1; }
+                                parent.fireSessionChanged(5);
+                                parent.Event(userid, "Started files session");
+                            }
+                        }
+                    }
+
+                    int consent = 0;
+                    if (creationArgs.ContainsKey("consent") && (creationArgs["consent"].GetType() == typeof(int))) { consent = (int)creationArgs["consent"]; }
+                    if (creationArgs.ContainsKey("privacybartext") && (creationArgs["privacybartext"].GetType() == typeof(string))) {
+                        if (parent.privacyBarText != (string)creationArgs["privacybartext"]) { parent.privacyBarText = (string)creationArgs["privacybartext"]; parent.PrivacyTextChanged(); }
+                    }
+
+                    if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal
+                    {
+                        if (((consent & 0x10) != 0) || parent.autoConnect) // Remote Terminal Consent Prompt
+                        {
+                            consentRequested = true;
+                            setConsoleText("Waiting for user to grant access...", 1, null, 0);
+                            parent.askForConsent(this, "User \"{0}\" is requesting remote terminal control of this computer. Click allow to grant access.", protocol, sessionLoggingUserName);
+                            parent.Event(userid, "Requesting user consent for terminal session");
+                        }
+                        else
+                        {
+                            int cols = 80;
+                            int rows = 25;
+                            if (jsonOptions != null)
+                            {
+                                if (jsonOptions.ContainsKey("cols") && (jsonOptions["cols"].GetType() == typeof(int))) { cols = (int)jsonOptions["cols"]; }
+                                if (jsonOptions.ContainsKey("rows") && (jsonOptions["rows"].GetType() == typeof(int))) { rows = (int)jsonOptions["rows"]; }
+                            }
+                            Terminal = new MeshCentralTerminal(this, protocol, cols, rows);
+                        }
+                    }
+                    else if (protocol == 2) // Desktop
+                    {
+                        if (((consent & 8) != 0) || parent.autoConnect) // Remote Desktop Consent Prompt
+                        {
+                            consentRequested = true;
+                            setConsoleText("Waiting for user to grant access...", 1, null, 0);
+                            parent.askForConsent(this, "User \"{0}\" is requesting remote desktop control of this computer. Click allow to grant access.", protocol, sessionLoggingUserName);
+                            parent.Event(userid, "Requesting user consent for desktop session");
+                        }
+                        else
+                        {
+                            Desktop = MeshCentralDesktop.AddDesktopTunnel(this);
+                        }
+                    }
+                    else if (protocol == 5) // Files
+                    {
+                        if (((consent & 32) != 0) || parent.autoConnect) // Remote Files Consent Prompt
+                        {
+                            consentRequested = true;
+                            setConsoleText("Waiting for user to grant access...", 1, null, 0);
+                            parent.askForConsent(this, "User \"{0}\" is requesting access to all files on this computer. Click allow to grant access.", protocol, sessionLoggingUserName);
+                            parent.Event(userid, "Requesting user consent for files session");
+                        }
+                    }
+                    else if (protocol == 10)
+                    {
+                        // File transfers are only allowed if the user has an active file session. If not, must disconnect since user consent may be required.
+                        if ((sessionUserName == null) || (parent.doesUserHaveSession(sessionUserName, 5) == false)) { disconnect(); return; }
+
+                        // Basic file transfer
+                        if ((jsonOptions.ContainsKey("file")) && (jsonOptions["file"].GetType() == typeof(string)))
+                        {
+                            FileInfo f = new FileInfo((string)jsonOptions["file"]);
+                            if (f.Exists)
+                            {
+                                try
+                                {
+                                    // Send the file
+                                    WebSocket.onSendOk += WebSocket_onSendOk;
+                                    fileSendTransfer = File.OpenRead(f.FullName);
+                                    byte[] buf = new byte[65535];
+                                    int len = fileSendTransfer.Read(buf, 0, buf.Length);
+                                    if (len > 0) { WebSocket.SendBinary(buf, 0, len); } else { disconnect(); }
+                                    WebSocket.SendString("{\"op\":\"ok\",\"size\":" + f.Length + "}");
+                                    parent.WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"log\",\"msgid\":106,\"msgArgs\":[\"" + escapeJsonString(f.FullName) + "\"," + f.Length + "],\"msg\":\"Download: " + escapeJsonString(f.FullName) + ", Size: " + f.Length + "\"" + extraLogStr + "}"));
+                                    parent.Event(userid, string.Format("Downloaded file {0}", f.FullName));
+                                }
+                                catch (Exception)
+                                {
+                                    WebSocket.SendString("{\"op\":\"cancel\"}");
+                                }
+                            }
+                            else
                             {
                                 WebSocket.SendString("{\"op\":\"cancel\"}");
                             }
                         }
-                        else
-                        {
-                            WebSocket.SendString("{\"op\":\"cancel\"}");
-                        }
                     }
-                }
 
-                return;
+                    return;
+                }
+                else if (state == 2) // Running
+                {
+                    if (data.StartsWith("{")) { processServerJsonData(data); return; }
+                }
             }
-            else if (state == 2) // Running
+            catch (Exception ex)
             {
-                if (data.StartsWith("{")) { processServerJsonData(data); return; }
+                Log(ex.ToString());
             }
         }
 
@@ -450,40 +462,54 @@ namespace MeshAssistant
 
         private void WebSocket_onBinaryData(webSocketClient sender, byte[] data, int off, int len, int orglen)
         {
-            if (state == 1)
+            try
             {
-                // Process connection options
-                string jsonStr = UTF8Encoding.UTF8.GetString(data, off, len);
-                WebSocket_onStringData(sender, jsonStr, jsonStr.Length);
-                return;
-            }
-            if (state != 2) return;
-            if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal
-            {
-                if (Terminal != null) { Terminal.onBinaryData(data, off, len); }
-            }
-            else if (protocol == 2) // Desktop
-            {
-                if (Desktop != null) { Desktop.onBinaryData(this, data, off, len); }
-            }
-            else if (protocol == 5) // Files
-            {
-                if (data[off] == 123) { ParseFilesCommand(UTF8Encoding.UTF8.GetString(data, off, len)); }
-                else if (fileRecvTransfer != null) {
-                    bool err = false;
-                    if (data[off] == 0) {
-                        try { fileRecvTransfer.Write(data, off + 1, len - 1); } catch (Exception) { err = true; }
-                    } else {
-                        try { fileRecvTransfer.Write(data, off, len); } catch (Exception) { err = true; }
-                    }
-                    if (err) {
-                        try { fileRecvTransfer.Close(); fileRecvTransfer = null; } catch (Exception) { }
-                        fileRecvTransfer = null;
-                        WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploaderror\"}"));
-                    } else {
-                        WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploadack\",\"reqid\":" + fileRecvId + "}"));
+                if (state == 1)
+                {
+                    // Process connection options
+                    string jsonStr = UTF8Encoding.UTF8.GetString(data, off, len);
+                    WebSocket_onStringData(sender, jsonStr, jsonStr.Length);
+                    return;
+                }
+                if (state != 2) return;
+                if ((protocol == 1) || (protocol == 8) || (protocol == 9)) // Terminal
+                {
+                    if (Terminal != null) { Terminal.onBinaryData(data, off, len); }
+                }
+                else if (protocol == 2) // Desktop
+                {
+                    if (Desktop != null) { Desktop.onBinaryData(this, data, off, len); }
+                }
+                else if (protocol == 5) // Files
+                {
+                    if (data[off] == 123) { ParseFilesCommand(UTF8Encoding.UTF8.GetString(data, off, len)); }
+                    else if (fileRecvTransfer != null)
+                    {
+                        bool err = false;
+                        if (data[off] == 0)
+                        {
+                            try { fileRecvTransfer.Write(data, off + 1, len - 1); } catch (Exception) { err = true; }
+                        }
+                        else
+                        {
+                            try { fileRecvTransfer.Write(data, off, len); } catch (Exception) { err = true; }
+                        }
+                        if (err)
+                        {
+                            try { fileRecvTransfer.Close(); fileRecvTransfer = null; } catch (Exception) { }
+                            fileRecvTransfer = null;
+                            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploaderror\"}"));
+                        }
+                        else
+                        {
+                            WebSocket.SendBinary(UTF8Encoding.UTF8.GetBytes("{\"action\":\"uploadack\",\"reqid\":" + fileRecvId + "}"));
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log(ex.ToString());
             }
         }
 

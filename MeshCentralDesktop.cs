@@ -310,39 +310,41 @@ namespace MeshAssistant
 
         public void onBinaryData(MeshCentralTunnel tunnel, byte[] data, int off, int len)
         {
-            if (len < 4) return;
-            int cmd = ((data[off + 0] << 8) + data[off + 1]);
-            int cmdlen = ((data[off + 2] << 8) + data[off + 3]);
-            if (cmdlen != len) return;
-
-            switch (cmd)
+            try
             {
-                case 1: // Key
-                    {
-                        if (cmdlen < 6) break;
+                if (len < 4) return;
+                int cmd = ((data[off + 0] << 8) + data[off + 1]);
+                int cmdlen = ((data[off + 2] << 8) + data[off + 3]);
+                if (cmdlen != len) return;
 
-                        // Check user rights. If view only, ignore this command
-                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
-                        bool limitedinput = false;
-                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
-
-                        // Decode the command
-                        int action = data[off + 4];
-                        int key = data[off + 5];
-
-                        // Check limited input
-                        if (limitedinput && (action > 1)) break; // With limited input, extended keys are not allowed
-                        // TODO
-
-                        // Setup the flags
-                        uint flags = 0;
-                        if (action == 1) { flags += (uint)(KeyEventF.KeyUp); }
-                        if (action == 3) { flags += (uint)(KeyEventF.ExtendedKey | KeyEventF.KeyUp); }
-                        if (action == 4) { flags += (uint)(KeyEventF.ExtendedKey); }
-
-                        // Send the input
-                        Input[] inputs = new Input[]
+                switch (cmd)
+                {
+                    case 1: // Key
                         {
+                            if (cmdlen < 6) break;
+
+                            // Check user rights. If view only, ignore this command
+                            if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                            bool limitedinput = false;
+                            if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
+
+                            // Decode the command
+                            int action = data[off + 4];
+                            int key = data[off + 5];
+
+                            // Check limited input
+                            if (limitedinput && (action > 1)) break; // With limited input, extended keys are not allowed
+                                                                     // TODO
+
+                            // Setup the flags
+                            uint flags = 0;
+                            if (action == 1) { flags += (uint)(KeyEventF.KeyUp); }
+                            if (action == 3) { flags += (uint)(KeyEventF.ExtendedKey | KeyEventF.KeyUp); }
+                            if (action == 4) { flags += (uint)(KeyEventF.ExtendedKey); }
+
+                            // Send the input
+                            Input[] inputs = new Input[]
+                            {
                             new Input
                             {
                                 type = (int)SendInputEventType.KEYBOARD,
@@ -357,138 +359,142 @@ namespace MeshAssistant
                                     }
                                 }
                             }
-                        };
-                        SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
-                        break;
-                    }
-                case 2: // Mouse
-                    {
-                        if (cmdlen < 10) break;
-
-                        // Check user rights. If view only, ignore this command
-                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
-
-                        uint mouseFlags = (uint)((data[off + 4] << 8) + data[off + 5]);
-                        int x = (1024 * ((data[off + 6] << 8) + data[off + 7])) / encoderScaling;
-                        int y = (1024 * ((data[off + 8] << 8) + data[off + 9])) / encoderScaling;
-                        uint mouseWheel = 0;
-                        if (cmdlen >= 12) { mouseWheel = (uint)((data[off + 10] << 8) + data[off + 11]); if (mouseWheel > 32768) { mouseWheel -= 65535; } }
-                        try
+                            };
+                            SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
+                            break;
+                        }
+                    case 2: // Mouse
                         {
-                            if (currentDisplay != -1)
+                            if (cmdlen < 10) break;
+
+                            // Check user rights. If view only, ignore this command
+                            if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+
+                            uint mouseFlags = (uint)((data[off + 4] << 8) + data[off + 5]);
+                            int x = (1024 * ((data[off + 6] << 8) + data[off + 7])) / encoderScaling;
+                            int y = (1024 * ((data[off + 8] << 8) + data[off + 9])) / encoderScaling;
+                            uint mouseWheel = 0;
+                            if (cmdlen >= 12) { mouseWheel = (uint)((data[off + 10] << 8) + data[off + 11]); if (mouseWheel > 32768) { mouseWheel -= 65535; } }
+                            try
                             {
-                                Point tscreenlocation = Screen.AllScreens[currentDisplay].Bounds.Location;
-                                x += tscreenlocation.X;
-                                y += tscreenlocation.Y;
+                                if (currentDisplay != -1)
+                                {
+                                    Point tscreenlocation = Screen.AllScreens[currentDisplay].Bounds.Location;
+                                    x += tscreenlocation.X;
+                                    y += tscreenlocation.Y;
+                                }
+                                else
+                                {
+                                    Screen[] screens = Screen.AllScreens;
+                                    Rectangle allScreens = Rectangle.Empty;
+                                    foreach (Screen s in screens) { if (allScreens == Rectangle.Empty) { allScreens = s.Bounds; } else { allScreens = Rectangle.Union(allScreens, s.Bounds); } }
+                                    x += allScreens.Left;
+                                    y += allScreens.Top;
+                                }
+                            }
+                            catch (Exception) { }
+
+                            Cursor.Position = new Point(x, y);
+                            if (mouseWheel != 0) { mouseFlags |= (uint)MouseEventFlags.MOUSEEVENTF_WHEEL; }
+                            mouse_event(mouseFlags, x, y, (uint)mouseWheel, 0);
+                            break;
+                        }
+                    case 5: // Settings
+                        {
+                            if (cmdlen < 6) break;
+                            encoderType = data[off + 4];
+                            int xencoderCompression = data[off + 5];
+                            if (xencoderCompression < 0) { xencoderCompression = 0; }
+                            if (xencoderCompression > 100) { xencoderCompression = 100; }
+                            if (xencoderCompression != encoderCompression)
+                            {
+                                EncoderParameter myEncoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, encoderCompression);
+                                myEncoderParameters.Param[0] = myEncoderParameter;
+                            }
+                            if (cmdlen >= 8)
+                            {
+                                int xencoderScaling = ((data[off + 6] << 8) + data[off + 7]);
+                                if (xencoderScaling > 1024) { xencoderScaling = 1024; }
+                                if (xencoderScaling < 128) { xencoderScaling = 128; }
+                                if (xencoderScaling != encoderScaling) { newEncoderScaling = xencoderScaling; encoderScalingChanged = true; }
+                            }
+                            if (cmdlen >= 10)
+                            {
+                                int xencoderFrameRate = ((data[off + 8] << 8) + data[off + 9]);
+                                if (xencoderFrameRate < 50) { xencoderFrameRate = 50; }
+                                if (xencoderFrameRate > 30000) { xencoderFrameRate = 30000; }
+                                if (xencoderFrameRate != encoderFrameRate) { encoderFrameRate = xencoderFrameRate; }
+                            }
+                            break;
+                        }
+                    case 8:
+                        {
+                            break;
+                        }
+                    case 10: // Ctrl-Alt-Del
+                        {
+                            // Check user rights. If view only, ignore this command
+                            if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                            if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) break;
+                            // This is not supported since we are not running as a admin service
+                            break;
+                        }
+                    case 11: // Query displays
+                        {
+                            SendDisplays(tunnel);
+                            break;
+                        }
+                    case 12: // Set display
+                        {
+                            if (cmdlen < 6) break;
+                            int selectedDisplay = ((data[off + 4] << 8) + data[off + 5]);
+                            if (selectedDisplay == 65535)
+                            {
+                                currentDisplay = -1;
                             }
                             else
                             {
-                                Screen[] screens = Screen.AllScreens;
-                                Rectangle allScreens = Rectangle.Empty;
-                                foreach (Screen s in screens) { if (allScreens == Rectangle.Empty) { allScreens = s.Bounds; } else { allScreens = Rectangle.Union(allScreens, s.Bounds); } }
-                                x += allScreens.Left;
-                                y += allScreens.Top;
+                                if (selectedDisplay < 1) break;
+                                if (selectedDisplay > Screen.AllScreens.Length) break;
+                                currentDisplay = (selectedDisplay - 1);
                             }
+                            break;
                         }
-                        catch (Exception) { }
-                        
-                        Cursor.Position = new Point(x, y);
-                        if (mouseWheel != 0) { mouseFlags |= (uint)MouseEventFlags.MOUSEEVENTF_WHEEL; }
-                        mouse_event(mouseFlags, x, y, (uint)mouseWheel, 0);
-                        break;
-                    }
-                case 5: // Settings
-                    {
-                        if (cmdlen < 6) break;
-                        encoderType = data[off + 4];
-                        int xencoderCompression = data[off + 5];
-                        if (xencoderCompression < 0) { xencoderCompression = 0; }
-                        if (xencoderCompression > 100) { xencoderCompression = 100; }
-                        if (xencoderCompression != encoderCompression)
+                    case 15: // Touch
                         {
-                            EncoderParameter myEncoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, encoderCompression);
-                            myEncoderParameters.Param[0] = myEncoderParameter;
+                            // Check user rights. If view only, ignore this command
+                            if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+
+                            break;
                         }
-                        if (cmdlen >= 8)
+                    case 82: // Display location and size
                         {
-                            int xencoderScaling = ((data[off + 6] << 8) + data[off + 7]);
-                            if (xencoderScaling > 1024) { xencoderScaling = 1024; }
-                            if (xencoderScaling < 128) { xencoderScaling = 128; }
-                            if (xencoderScaling != encoderScaling) { newEncoderScaling = xencoderScaling; encoderScalingChanged = true; }
+                            SendDisplayInfo(tunnel);
+                            break;
                         }
-                        if (cmdlen >= 10) {
-                            int xencoderFrameRate = ((data[off + 8] << 8) + data[off + 9]);
-                            if (xencoderFrameRate < 50) { xencoderFrameRate = 50; }
-                            if (xencoderFrameRate > 30000) { xencoderFrameRate = 30000; }
-                            if (xencoderFrameRate != encoderFrameRate) { encoderFrameRate = xencoderFrameRate; }
-                        }
-                        break;
-                    }
-                case 8:
-                    {
-                        break;
-                    }
-                case 10: // Ctrl-Alt-Del
-                    {
-                        // Check user rights. If view only, ignore this command
-                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
-                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) break;
-                        // This is not supported since we are not running as a admin service
-                        break;
-                    }
-                case 11: // Query displays
-                    {
-                        SendDisplays(tunnel);
-                        break;
-                    }
-                case 12: // Set display
-                    {
-                        if (cmdlen < 6) break;
-                        int selectedDisplay = ((data[off + 4] << 8) + data[off + 5]);
-                        if (selectedDisplay == 65535) {
-                            currentDisplay = -1;
-                        } else {
-                            if (selectedDisplay < 1) break;
-                            if (selectedDisplay > Screen.AllScreens.Length) break;
-                            currentDisplay = (selectedDisplay - 1);
-                        }
-                        break;
-                    }
-                case 15: // Touch
-                    {
-                        // Check user rights. If view only, ignore this command
-                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
-
-                        break;
-                    }
-                case 82: // Display location and size
-                    {
-                        SendDisplayInfo(tunnel);
-                        break;
-                    }
-                case 85: // Unicode Key
-                    {
-                        if (cmdlen < 7) break;
-
-                        // Check user rights. If view only, ignore this command
-                        if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
-                        //bool limitedinput = false;
-                        //if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
-
-                        // Decode the command
-                        int action = data[off + 4];
-                        int key = (data[off + 5] << 8) + data[off + 6];
-
-                        // Check limited input
-                        // TODO
-
-                        // Setup the flags
-                        uint flags = (uint)(KeyEventF.Unicode);
-                        if (action == 1) { flags += (uint)(KeyEventF.KeyUp); }
-
-                        // Send the input
-                        Input[] inputs = new Input[]
+                    case 85: // Unicode Key
                         {
+                            if (cmdlen < 7) break;
+
+                            // Check user rights. If view only, ignore this command
+                            if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
+                            //bool limitedinput = false;
+                            //if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.DESKLIMITEDINPUT) != 0)) { limitedinput = true; }
+
+                            // Decode the command
+                            int action = data[off + 4];
+                            int key = (data[off + 5] << 8) + data[off + 6];
+
+                            // Check limited input
+                            // TODO
+
+                            // Setup the flags
+                            uint flags = (uint)(KeyEventF.Unicode);
+                            if (action == 1) { flags += (uint)(KeyEventF.KeyUp); }
+
+                            // Send the input
+                            Input[] inputs = new Input[]
+                            {
                             new Input
                             {
                                 type = (int)SendInputEventType.KEYBOARD,
@@ -503,18 +509,24 @@ namespace MeshAssistant
                                     }
                                 }
                             }
-                        };
-                        SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
-                        break;
-                    }
-                case 87:
-                    {
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
+                            };
+                            SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(Input)));
+                            break;
+                        }
+                    case 87:
+                        {
+                            break;
+                        }
+                    default:
+                        {
+                            break;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                // If requested, store this exception in the log
+                if (exceptionLogState == 0) { Log(ex.ToString()); exceptionLogState++; }
             }
         }
 
@@ -596,19 +608,19 @@ namespace MeshAssistant
                 Thread.Sleep(encoderFrameRate);
                 if (mainThread == null) return;
 
-                // Look to see that is the tunnel with the maximum number of pending bytes in the outbound buffer
-                long maxPendingOutboundBytes = 0;
-                lock (tunnels)
-                {
-                    foreach (MeshCentralTunnel tunnel in tunnels)
-                    {
-                        if (tunnel.WebSocket.PendingSendLength > maxPendingOutboundBytes) { maxPendingOutboundBytes = tunnel.WebSocket.PendingSendLength; }
-                    }
-                }
-                if (maxPendingOutboundBytes > 1024) continue; // If there is data pending in the outbound buffer, skip this round.
-
                 try
                 {
+                    // Look to see that is the tunnel with the maximum number of pending bytes in the outbound buffer
+                    long maxPendingOutboundBytes = 0;
+                    lock (tunnels)
+                    {
+                        foreach (MeshCentralTunnel tunnel in tunnels)
+                        {
+                            if (tunnel.WebSocket.PendingSendLength > maxPendingOutboundBytes) { maxPendingOutboundBytes = tunnel.WebSocket.PendingSendLength; }
+                        }
+                    }
+                    if (maxPendingOutboundBytes > 1024) continue; // If there is data pending in the outbound buffer, skip this round.
+
                     int pointerType = 0;
                     try
                     {
@@ -764,7 +776,7 @@ namespace MeshAssistant
                     exceptionLogState = 0;
                     if (UnableToCaptureShowing == true) { ClearConsoleTextAllTunnels(); UnableToCaptureShowing = false; }
                 }
-                catch (Exception ex) { if (exceptionLogState == 0) { Log(ex.ToString()); exceptionLogState++; } }
+                catch (Exception ex) { Log(ex.ToString()); }
             }
         }
 
