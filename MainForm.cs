@@ -125,8 +125,28 @@ namespace MeshAssistant
             eventsForm.addEvent(e);
         }
 
+        private bool RemoteCertificateValidationCallbackGlobal(object sender, X509Certificate certificate, X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
+        {
+            if (mcagent.state < 2)
+            {
+                // If we are not connected at all, accept the TLS cert since we are going to be doing secondary auth.
+                mcagent.WebSocket.tlsCert = new X509Certificate2(certificate);
+                return true;
+            }
+            else
+            {
+                // We are connected, all further connections need to have the same TLS cert as the main control connection.
+                if ((mcagent.ServerTlsHashStr != null) && ((mcagent.ServerTlsHashStr == certificate.GetCertHashString()) || (mcagent.ServerTlsHashStr == webSocketClient.GetMeshKeyHash(certificate)) || (mcagent.ServerTlsHashStr == webSocketClient.GetMeshCertHash(certificate)))) { return true; }
+            }
+            return false;
+        }
+
         public MainForm(string[] args)
         {
+            // Set TLS 1.2
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(RemoteCertificateValidationCallbackGlobal);
+
             // Perform self update operations if any.
             this.args = args;
             string update = null;

@@ -53,7 +53,8 @@ namespace MeshAssistant
             WebSocket.onBinaryData += WebSocket_onBinaryData;
             WebSocket.onStringData += WebSocket_onStringData;
             WebSocket.onSendOk += WebSocket_onSendOk;
-            WebSocket.Start(uri, serverHash);
+            WebSocket.TLSCertCheck = webSocketClient.TLSCertificateCheck.Fingerprint;
+            WebSocket.Start(uri, serverHash, null);
 
             // Setup extra log values
             if (creationArgs != null)

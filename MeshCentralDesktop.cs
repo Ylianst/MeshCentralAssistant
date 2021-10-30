@@ -33,7 +33,6 @@ namespace MeshAssistant
         private Size ScreenSize = Size.Empty;
         private ImageCodecInfo jgpEncoder;
         private EncoderParameters myEncoderParameters;
-        private MemoryStream memoryBuffer = new MemoryStream();
         private byte[] skipHeader = new byte[16];
         private Bitmap captureBitmap = null;
         private int encoderType = 1;
@@ -898,7 +897,7 @@ namespace MeshAssistant
 
         private void SendBitmap(int x, int y, Bitmap image)
         {
-            memoryBuffer.SetLength(0);
+            MemoryStream memoryBuffer = new MemoryStream();
             memoryBuffer.Write(skipHeader, 0, 16); // Skip the first 16 bytes
             image.Save(memoryBuffer, jgpEncoder, myEncoderParameters); // Write the JPEG image at 100% scale
             byte[] imageCmd = memoryBuffer.GetBuffer();

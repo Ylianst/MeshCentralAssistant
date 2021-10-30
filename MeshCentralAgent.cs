@@ -53,7 +53,7 @@ namespace MeshAssistant
         private string MeshIdMB64 = null;
         private string ServerId = null;
         private byte[] ServerTlsHash = null;
-        private string ServerTlsHashStr = null;
+        public string ServerTlsHashStr = null;
         private Uri ServerUrl = null;
         private byte[] Nonce = null;
         private byte[] ServerNonce = null;
@@ -454,7 +454,10 @@ namespace MeshAssistant
             WebSocket.onBinaryData += WebSocket_onBinaryData;
             WebSocket.onStringData += WebSocket_onStringData;
             ConnectionState = 1;
-            return WebSocket.Start(ServerUrl, null);
+            WebSocket.TLSCertCheck = webSocketClient.TLSCertificateCheck.Ignore;
+            if (ServerUrl.Scheme == "http") { ServerUrl = new Uri(ServerUrl.OriginalString.Replace("http://", "ws://")); }
+            if (ServerUrl.Scheme == "https") { ServerUrl = new Uri(ServerUrl.OriginalString.Replace("https://", "wss://")); }
+            return WebSocket.Start(ServerUrl, null, null);
         }
 
         private void WebSocket_onStateChanged(webSocketClient sender, webSocketClient.ConnectionStates state)
