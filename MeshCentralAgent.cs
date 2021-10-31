@@ -1024,7 +1024,7 @@ namespace MeshAssistant
                         if (jsonAction.ContainsKey("url")) { url = jsonAction["url"].ToString(); } // Server url
                         if (jsonAction.ContainsKey("serverhash")) { serverhash = jsonAction["serverhash"].ToString(); } // Server TLS certificate hash
                         if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) {
-                            if (url.StartsWith("*/")) { url = "wss://" + ServerUrl.Authority + url.Substring(1); }
+                            if (url.StartsWith("*/")) { url = "https://" + ServerUrl.Authority + url.Substring(1); }
                             url += ("&meshid=" + MeshIdMB64 + "&ac=" + autoConnectFlags);
                             onSelfUpdate(name, hash, url, serverhash);
                         }

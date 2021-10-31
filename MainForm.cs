@@ -1265,7 +1265,6 @@ namespace MeshAssistant
                 seflUpdateDownloadHash = updateHash;
                 serverTlsCertHash = updateServerHash;
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(updateUrl);
-                Uri x = webRequest.RequestUri;
                 webRequest.Method = "GET";
                 webRequest.Timeout = 10000;
                 webRequest.BeginGetResponse(new AsyncCallback(DownloadUpdateRespone), webRequest);
@@ -1290,6 +1289,92 @@ namespace MeshAssistant
             return true;
         }
 
+        private HttpWebResponse updateWebResponse = null;
+        private Stream updateHttpInputStream = null;
+        private FileStream updateFileOutputStream = null;
+
+        private void DownloadUpdateRespone(IAsyncResult asyncResult)
+        {
+            try
+            {
+                HttpWebRequest webRequest = (HttpWebRequest)asyncResult.AsyncState;
+                byte[] buffer = new byte[4096];
+                updateWebResponse = (HttpWebResponse)webRequest.EndGetResponse(asyncResult);
+                updateFileOutputStream = File.Create(Assembly.GetEntryAssembly().Location + ".update.exe");
+                updateHttpInputStream = updateWebResponse.GetResponseStream();
+                updateHttpInputStream.BeginRead(buffer, 0, buffer.Length, new AsyncCallback(DownloadUpdateTransfer), buffer);
+            }
+            catch (Exception)
+            {
+                try { updateHttpInputStream.Close(); } catch (Exception) { }
+                try { updateFileOutputStream.Close(); } catch (Exception) { }
+                try { updateWebResponse.Close(); } catch (Exception) { }
+                updateFileOutputStream = null;
+                updateHttpInputStream = null;
+                updateWebResponse = null;
+            }
+        }
+
+        private void DownloadUpdateTransfer(IAsyncResult asyncResult)
+        {
+            try
+            {
+
+                byte[] buffer = (byte[])asyncResult.AsyncState;
+                int len = updateHttpInputStream.EndRead(asyncResult);
+                if (len > 0)
+                {
+                    updateFileOutputStream.Write(buffer, 0, len);
+                    updateHttpInputStream.BeginRead(buffer, 0, buffer.Length, new AsyncCallback(DownloadUpdateTransfer), buffer);
+                }
+                else
+                {
+                    // Close the streams
+                    try { updateHttpInputStream.Close(); } catch (Exception) { }
+                    try { updateFileOutputStream.Close(); } catch (Exception) { }
+                    try { updateWebResponse.Close(); } catch (Exception) { }
+                    updateFileOutputStream = null;
+                    updateHttpInputStream = null;
+                    updateWebResponse = null;
+
+                    // Hash the resulting file, check that it's correct. This is our second security layer.
+                    byte[] downloadHash;
+                    using (var sha384 = SHA384Managed.Create()) { using (var stream = File.OpenRead(Assembly.GetEntryAssembly().Location + ".update.exe")) { downloadHash = sha384.ComputeHash(stream); } }
+                    string downloadHashHex = BitConverter.ToString(downloadHash).Replace("-", string.Empty).ToLower();
+                    bool hashMatch = (downloadHashHex == seflUpdateDownloadHash);
+                    if (hashMatch == false) { hashMatch = (ExeHandler.HashExecutable(Assembly.GetEntryAssembly().Location + ".update.exe") == seflUpdateDownloadHash); }
+                    if (hashMatch == false)
+                    {
+                        Log("DownloadUpdateRespone - Invalid hash");
+                        System.Threading.Thread.Sleep(500);
+                        File.Delete(Assembly.GetEntryAssembly().Location + ".update.exe");
+                    }
+                    else
+                    {
+                        Log("DownloadUpdateRespone - OK");
+                        doclose = true;
+                        forceExit = true;
+                        System.Threading.Thread.Sleep(500);
+                        string arguments = "-update:" + Assembly.GetEntryAssembly().Location + " " + string.Join(" ", args);
+                        if (this.Visible == true) { arguments += " -visible"; }
+                        Process.Start(Assembly.GetEntryAssembly().Location + ".update.exe", arguments);
+                        Application.Exit();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Clean up
+                try { updateHttpInputStream.Close(); } catch (Exception) { }
+                try { updateFileOutputStream.Close(); } catch (Exception) { }
+                try { updateWebResponse.Close(); } catch (Exception) { }
+                updateFileOutputStream = null;
+                updateHttpInputStream = null;
+                updateWebResponse = null;
+            }
+        }
+
+        /*
         private void DownloadUpdateRespone(IAsyncResult asyncResult)
         {
             long received = 0;
@@ -1341,8 +1426,9 @@ namespace MeshAssistant
             }
             catch (Exception) { }
         }
+        */
 
-        // Return a modified base64 SHA384 hash string of the certificate public key
+            // Return a modified base64 SHA384 hash string of the certificate public key
         public static string GetMeshKeyHash(X509Certificate cert)
         {
             return ByteArrayToHexString(new SHA384Managed().ComputeHash(cert.GetPublicKey()));
