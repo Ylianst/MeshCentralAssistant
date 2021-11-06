@@ -102,7 +102,22 @@ namespace MeshAssistant
             NoError = 0
         }
 
-        public long PendingSendLength { get { if (ws != null) { lock (pendingSends) { return pendingSends.Count; } } else { return (pendingSendBuffer == null) ? 0 : pendingSendBuffer.Length; } } }
+        public long PendingSendLength {
+            get
+            {
+                if (ws != null) {
+                    // Native websockets
+                    lock (pendingSends) {
+                        int totalBytesPending = 0;
+                        foreach (pendingSendClass p in pendingSends) { totalBytesPending += p.len; }
+                        return totalBytesPending;
+                    }
+                } else {
+                    // Built-in websockets
+                    return (pendingSendBuffer == null) ? 0 : pendingSendBuffer.Length;
+                }
+            }
+        }
 
         private void TlsDump(string direction, byte[] data, int offset, int len) { if (tlsdump) { try { File.AppendAllText("debug.log", direction + ": " + BitConverter.ToString(data, offset, len).Replace("-", string.Empty) + "\r\n"); } catch (Exception) { } } }
 

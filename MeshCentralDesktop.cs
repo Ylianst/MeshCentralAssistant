@@ -611,14 +611,8 @@ namespace MeshAssistant
                 {
                     // Look to see that is the tunnel with the maximum number of pending bytes in the outbound buffer
                     long maxPendingOutboundBytes = 0;
-                    lock (tunnels)
-                    {
-                        foreach (MeshCentralTunnel tunnel in tunnels)
-                        {
-                            if (tunnel.WebSocket.PendingSendLength > maxPendingOutboundBytes) { maxPendingOutboundBytes = tunnel.WebSocket.PendingSendLength; }
-                        }
-                    }
-                    if (maxPendingOutboundBytes > 1024) continue; // If there is data pending in the outbound buffer, skip this round.
+                    lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { if (tunnel.WebSocket.PendingSendLength > maxPendingOutboundBytes) { maxPendingOutboundBytes = tunnel.WebSocket.PendingSendLength; } } }
+                    if (maxPendingOutboundBytes > 1024) { continue; } // If there is data pending in the outbound buffer, skip this round.
 
                     int pointerType = 0;
                     try
