@@ -831,12 +831,18 @@ namespace MeshAssistant
             IntPtr bitmapPtr = bmpData.Scan0;
             int ptr = 0;
             int tileWidthReads = 24;
-            int tileWidthRemainReads = (tilesRemainingWidth * 3) / 8;
-            if (image.PixelFormat == PixelFormat.Format32bppArgb) { tileWidthReads = 32; tileWidthRemainReads = (tilesRemainingWidth * 4) / 8; }
+            int tileWidthRemainReads64 = (tilesRemainingWidth * 3) / 8;
+            int tileWidthRemainReads8 = (tilesRemainingWidth * 3) % 8;
+            if (image.PixelFormat == PixelFormat.Format32bppArgb) {
+                tileWidthReads = 32;
+                tileWidthRemainReads64 = (tilesRemainingWidth * 4) / 8;
+                tileWidthRemainReads8 = (tilesRemainingWidth * 4) % 8;
+            }
 
             // Handle all of the full tiles for the height
             for (int i = 0; i < tilesFullHigh; i++) {
                 for (int j = 0; j < 64; j++) {
+                    ptr = (((i * 64) + j) * bmpData.Stride);
                     for (int k = 0; k < tilesFullWide; k++) {
                         for (int l = 0; l < tileWidthReads; l++) {
                             newcrcs[(i * tilesWide) + k] = CRC(Marshal.ReadInt64(bitmapPtr, ptr), newcrcs[(i * tilesWide) + k]);
@@ -846,10 +852,15 @@ namespace MeshAssistant
                     if (tilesRemainingWidth > 0)
                     {
                         // Handle the reminder of the width
-                        for (int l = 0; l < tileWidthRemainReads; l++)
+                        for (int l = 0; l < tileWidthRemainReads64; l++)
                         {
                             newcrcs[(i * tilesWide) + tilesFullWide] = CRC(Marshal.ReadInt64(bitmapPtr, ptr), newcrcs[(i * tilesWide) + tilesFullWide]);
                             ptr += 8;
+                        }
+                        for (int l = 0; l < tileWidthRemainReads8; l++)
+                        {
+                            newcrcs[(i * tilesWide) + tilesFullWide] = CRC(Marshal.ReadByte(bitmapPtr, ptr), newcrcs[(i * tilesWide) + tilesFullWide]);
+                            ptr += 1;
                         }
                     }
                 }
@@ -871,10 +882,15 @@ namespace MeshAssistant
                     if (tilesRemainingWidth > 0)
                     {
                         // Handle the reminder of the width
-                        for (int l = 0; l < tileWidthRemainReads; l++)
+                        for (int l = 0; l < tileWidthRemainReads64; l++)
                         {
                             newcrcs[(tilesFullHigh * tilesWide) + tilesFullWide] = CRC(Marshal.ReadInt64(bitmapPtr, ptr), newcrcs[(tilesFullHigh * tilesWide) + tilesFullWide]);
                             ptr += 8;
+                        }
+                        for (int l = 0; l < tileWidthRemainReads8; l++)
+                        {
+                            newcrcs[(tilesFullHigh * tilesWide) + tilesFullWide] = CRC(Marshal.ReadByte(bitmapPtr, ptr), newcrcs[(tilesFullHigh * tilesWide) + tilesFullWide]);
+                            ptr += 1;
                         }
                     }
                 }
