@@ -29,6 +29,8 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32;
 
+// TODO: native WebSockets don't seem to support DEFLATE and currently don't disconnect correctly.
+
 namespace MeshAssistant
 {
     public class webSocketClient : IDisposable
@@ -202,7 +204,7 @@ namespace MeshAssistant
             if (tlsCertFingerprint != null) { this.tlsCertFingerprint = tlsCertFingerprint.ToUpper(); }
             if (tlsCertFingerprint2 != null) { this.tlsCertFingerprint2 = tlsCertFingerprint2.ToUpper(); }
 
-            if (nativeWebSocketFirst) { try { ws = new ClientWebSocket(); } catch (Exception) { } }
+            //if (nativeWebSocketFirst) { try { ws = new ClientWebSocket(); } catch (Exception) { } }
             if (ws != null)
             {
                 // Use Windows native websockets
@@ -771,8 +773,10 @@ namespace MeshAssistant
                         // No send operations being performed now, send this fragment now.
                         ArraySegment<byte> arr = new ArraySegment<byte>(data, offset, len);
                         WebSocketMessageType msgType = ((op == 129) ? WebSocketMessageType.Text : WebSocketMessageType.Binary);
-                        pendingSend = ws.SendAsync(arr, msgType, true, CTS.Token);
-                        pendingSend.ContinueWith(antecedent => SendFragmentDone());
+                        if (ws != null) {
+                            pendingSend = ws.SendAsync(arr, msgType, true, CTS.Token);
+                            pendingSend.ContinueWith(antecedent => SendFragmentDone());
+                        }
                     }
                 }
                 return len;
@@ -894,7 +898,7 @@ namespace MeshAssistant
             else
             {
                 pendingSendCall = true;
-                try { wsstream.BeginWrite(buf, off, len, new AsyncCallback(WriteWebSocketAsyncDone), null); } catch (Exception) { Dispose(); return; }
+                try { if (wsstream != null) { wsstream.BeginWrite(buf, off, len, new AsyncCallback(WriteWebSocketAsyncDone), null); } } catch (Exception) { Dispose(); return; }
             }
         }
 
@@ -972,19 +976,16 @@ namespace MeshAssistant
                     {
                         try
                         {
+                            if (ws == null) { outputStream?.Dispose(); SetState(0); return; }
                             Task<WebSocketReceiveResult> t = ws.ReceiveAsync(bufferEx, CTS.Token);
                             t.Wait();
                             receiveResult = t.Result;
-                            if (receiveResult.MessageType != WebSocketMessageType.Close) { outputStream.Write(buffer, 0, receiveResult.Count); }
+                            if (receiveResult.MessageType != WebSocketMessageType.Close) { outputStream.Write(buffer, 0, receiveResult.Count); } else { outputStream?.Dispose(); SetState(0); return; }
                         }
-                        catch (Exception) {
-                            outputStream?.Dispose();
-                            SetState(0);
-                            return;
-                        }
+                        catch (Exception) { outputStream?.Dispose(); SetState(0); return; }
                     }
-                    while (!receiveResult.EndOfMessage);
-                    if (receiveResult.MessageType == WebSocketMessageType.Close) break;
+                    while ((!receiveResult.EndOfMessage) && (ws != null));
+                    if ((ws == null) || (receiveResult.MessageType == WebSocketMessageType.Close)) { outputStream?.Dispose(); SetState(0); return; }
                     outputStream.Position = 0;
 
                     receiveLock.Wait(); // Pause reading if needed

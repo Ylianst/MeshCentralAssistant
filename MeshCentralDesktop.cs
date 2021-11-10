@@ -578,25 +578,41 @@ namespace MeshAssistant
         // Send binary data to all tunnels
         private void SendBinaryAllTunnels(byte[] buf)
         {
-            lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.WebSocket.SendBinary(buf); } }
+            lock (tunnels) {
+                foreach (MeshCentralTunnel tunnel in tunnels) {
+                    try { tunnel.WebSocket.SendBinary(buf); } catch (Exception) { }
+                }
+            }
         }
 
         // Send binary data to all tunnels
         private void SendBinaryAllTunnels(byte[] buf, int off, int len)
         {
-            lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.WebSocket.SendBinary(buf, off, len); } }
+            lock (tunnels) {
+                foreach (MeshCentralTunnel tunnel in tunnels) {
+                    try { tunnel.WebSocket.SendBinary(buf, off, len); } catch (Exception) { }
+                }
+            }
         }
 
         // Set console text for all tunnels
         private void SetConsoleTextAllTunnels(string msg, int msgid, string msgargs, int timeout)
         {
-            lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.setConsoleText(msg, msgid, msgargs, timeout); } }
+            lock (tunnels) {
+                foreach (MeshCentralTunnel tunnel in tunnels) {
+                    try { tunnel.setConsoleText(msg, msgid, msgargs, timeout); } catch (Exception) { }
+                }
+            }
         }
 
         // Clear console text for all tunnels
         private void ClearConsoleTextAllTunnels()
         {
-            lock (tunnels) { foreach (MeshCentralTunnel tunnel in tunnels) { tunnel.clearConsoleText(); } }
+            lock (tunnels) {
+                foreach (MeshCentralTunnel tunnel in tunnels) {
+                    try { tunnel.clearConsoleText(); } catch (Exception) { }
+                }
+            }
         }
 
         private void MainDesktopLoop()
