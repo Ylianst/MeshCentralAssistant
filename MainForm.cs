@@ -54,6 +54,7 @@ namespace MeshAssistant
         public UpdateForm updateForm = null;
         public EventsForm eventsForm = null;
         public BrowserForm browserForm = null;
+        public GuestSharingForm guestSharingForm = null;
         public bool isAdministrator = false;
         public bool forceExit = false;
         public bool noUpdate = false;
@@ -225,6 +226,7 @@ namespace MeshAssistant
                 mcagent.onSessionChanged += Mcagent_onSessionChanged;
                 mcagent.onUserInfoChange += Mcagent_onUserInfoChange;
                 mcagent.onRequestConsent += Mcagent_onRequestConsent;
+                mcagent.onSelfSharingStatus += Mcagent_onSelfSharingStatus;
                 mcagent.onLogEvent += Mcagent_onLogEvent;
                 currentAgentSelection = "~"; // If a built-in agent is present, always default to that on start.
                 currentAgentName = "~";
@@ -288,7 +290,6 @@ namespace MeshAssistant
             LoadEventsFromFile();
         }
 
-
         private void MainForm_Load(object sender, EventArgs e)
         {
             Log("MainForm_Load()");
@@ -335,6 +336,13 @@ namespace MeshAssistant
                 consentForm.Show(this);
                 consentForm.Focus();
             }
+        }
+
+        private void Mcagent_onSelfSharingStatus(bool allowed, string url)
+        {
+            if (forceExit) return;
+            if (this.InvokeRequired) { this.Invoke(new MeshCentralAgent.onSelfSharingStatusHandler(Mcagent_onSelfSharingStatus), allowed, url); return; }
+            if (guestSharingForm != null) { guestSharingForm.UpdateInfo(); }
         }
 
         public delegate void ShowNotificationHandler(string userid, string title, string message);
@@ -470,7 +478,11 @@ namespace MeshAssistant
         {
             if (mcagent == null) { updateSoftwareToolStripMenuItem1.Visible = updateSoftwareToolStripMenuItem.Visible = false; return; }
             helpRequested = (mcagent.HelpRequest != null);
-            if (mcagent.state != 3) { updateSoftwareToolStripMenuItem1.Visible = updateSoftwareToolStripMenuItem.Visible = false; } // If not connected, don't offer auto-update option.
+            if (mcagent.state != 3)
+            {
+                updateSoftwareToolStripMenuItem1.Visible = updateSoftwareToolStripMenuItem.Visible = false; // If not connected, don't offer auto-update option.
+                if (guestSharingForm != null) { guestSharingForm.Close(); }
+            }
 
             if (mcagent.autoConnect)
             {
@@ -1183,6 +1195,8 @@ namespace MeshAssistant
         private void dialogContextMenuStrip_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
             requestHelpToolStripMenuItem.Enabled = ((mcagent != null) && (mcagent.state != 0)) || ((agent != null) && (agent.State != 0));
+            guestSharingToolStripMenuItem.Visible = ((mcagent != null) && (mcagent.selfSharingAllowed == true));
+            guestSharingToolStripMenuItem.Enabled = (mcagent.state == 3);
         }
 
         private void intelAMTStateToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1545,5 +1559,22 @@ namespace MeshAssistant
             setUiImage(uiImage.Custom);
         }
 
+        private void guestSharingToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+        }
+
+        private void guestSharingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if ((mcagent == null) || (mcagent.state != 3) || (mcagent.selfSharingAllowed == false)) return;
+            if (guestSharingForm != null)
+            {
+                guestSharingForm.Focus();
+            }
+            else
+            {
+                guestSharingForm = new GuestSharingForm(this);
+                guestSharingForm.Show();
+            }
+        }
     }
 }

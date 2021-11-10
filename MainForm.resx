@@ -165,90 +165,6 @@
   <metadata name="mainContextMenuStrip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>152, 17</value>
   </metadata>
-  <data name="openToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="openToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Open</value>
-  </data>
-  <data name="closeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="closeToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Close</value>
-  </data>
-  <data name="closeToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="openSiteToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="openSiteToolStripMenuItem.Text" xml:space="preserve">
-    <value>O&amp;pen Site...</value>
-  </data>
-  <data name="openSiteToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="showSessionsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="showSessionsToolStripMenuItem.Text" xml:space="preserve">
-    <value>Show Sessions...</value>
-  </data>
-  <data name="showEventsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="showEventsToolStripMenuItem.Text" xml:space="preserve">
-    <value>Show &amp;Events...</value>
-  </data>
-  <data name="intelMEStateToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="intelMEStateToolStripMenuItem.Text" xml:space="preserve">
-    <value>Intel® ME State...</value>
-  </data>
-  <data name="intelMEStateToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="updateSoftwareToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="updateSoftwareToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Update Software</value>
-  </data>
-  <data name="updateSoftwareToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="agentSelectToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="agentSelectToolStripMenuItem.Text" xml:space="preserve">
-    <value>Agent Select</value>
-  </data>
-  <data name="toolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>163, 6</value>
-  </data>
-  <data name="startAgentToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="startAgentToolStripMenuItem.Text" xml:space="preserve">
-    <value>&amp;Start Agent</value>
-  </data>
-  <data name="stopAgentToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="stopAgentToolStripMenuItem.Text" xml:space="preserve">
-    <value>S&amp;top Agent</value>
-  </data>
-  <data name="toolStripMenuItem2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>163, 6</value>
-  </data>
-  <data name="exitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>166, 22</value>
-  </data>
-  <data name="exitToolStripMenuItem.Text" xml:space="preserve">
-    <value>E&amp;xit</value>
-  </data>
   <data name="mainContextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
     <value>167, 258</value>
   </data>
@@ -1955,6 +1871,90 @@
   <data name="mainNotifyIcon.Text" xml:space="preserve">
     <value>MeshCentral Assistant</value>
   </data>
+  <data name="openToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="openToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Open</value>
+  </data>
+  <data name="closeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="closeToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Close</value>
+  </data>
+  <data name="closeToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="openSiteToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="openSiteToolStripMenuItem.Text" xml:space="preserve">
+    <value>O&amp;pen Site...</value>
+  </data>
+  <data name="openSiteToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="showSessionsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="showSessionsToolStripMenuItem.Text" xml:space="preserve">
+    <value>Show Sessions...</value>
+  </data>
+  <data name="showEventsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="showEventsToolStripMenuItem.Text" xml:space="preserve">
+    <value>Show &amp;Events...</value>
+  </data>
+  <data name="intelMEStateToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="intelMEStateToolStripMenuItem.Text" xml:space="preserve">
+    <value>Intel® ME State...</value>
+  </data>
+  <data name="intelMEStateToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="updateSoftwareToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="updateSoftwareToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Update Software</value>
+  </data>
+  <data name="updateSoftwareToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="agentSelectToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="agentSelectToolStripMenuItem.Text" xml:space="preserve">
+    <value>Agent Select</value>
+  </data>
+  <data name="toolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 6</value>
+  </data>
+  <data name="startAgentToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="startAgentToolStripMenuItem.Text" xml:space="preserve">
+    <value>&amp;Start Agent</value>
+  </data>
+  <data name="stopAgentToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="stopAgentToolStripMenuItem.Text" xml:space="preserve">
+    <value>S&amp;top Agent</value>
+  </data>
+  <data name="toolStripMenuItem2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>163, 6</value>
+  </data>
+  <data name="exitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>166, 22</value>
+  </data>
+  <data name="exitToolStripMenuItem.Text" xml:space="preserve">
+    <value>E&amp;xit</value>
+  </data>
   <metadata name="connectionTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>330, 17</value>
   </metadata>
@@ -2039,6 +2039,15 @@
   <data name="cancelHelpRequestToolStripMenuItem.Text" xml:space="preserve">
     <value>Cancel Help Request</value>
   </data>
+  <data name="guestSharingToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>183, 22</value>
+  </data>
+  <data name="guestSharingToolStripMenuItem.Text" xml:space="preserve">
+    <value>Guest Sharing...</value>
+  </data>
+  <data name="guestSharingToolStripMenuItem.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
   <data name="toolStripMenuItem3.Size" type="System.Drawing.Size, System.Drawing">
     <value>180, 6</value>
   </data>
@@ -2070,7 +2079,7 @@
     <value>&amp;Update Software</value>
   </data>
   <data name="dialogContextMenuStrip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>184, 164</value>
+    <value>184, 186</value>
   </data>
   <data name="&gt;&gt;dialogContextMenuStrip.Name" xml:space="preserve">
     <value>dialogContextMenuStrip</value>
@@ -3941,6 +3950,12 @@
     <value>cancelHelpRequestToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;cancelHelpRequestToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;guestSharingToolStripMenuItem.Name" xml:space="preserve">
+    <value>guestSharingToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;guestSharingToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripMenuItem3.Name" xml:space="preserve">

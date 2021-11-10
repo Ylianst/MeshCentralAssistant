@@ -52,13 +52,14 @@
             this.dialogContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.requestHelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cancelHelpRequestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.guestSharingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.showSessionsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.showEventsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.intelAMTStateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateSoftwareToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.mainPictureBox = new System.Windows.Forms.PictureBox();
             this.pictureBoxCustom = new System.Windows.Forms.PictureBox();
-            this.updateSoftwareToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.mainContextMenuStrip.SuspendLayout();
             this.dialogContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).BeginInit();
@@ -198,6 +199,7 @@
             this.dialogContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.requestHelpToolStripMenuItem,
             this.cancelHelpRequestToolStripMenuItem,
+            this.guestSharingToolStripMenuItem,
             this.toolStripMenuItem3,
             this.showSessionsToolStripMenuItem1,
             this.showEventsToolStripMenuItem1,
@@ -218,6 +220,12 @@
             this.cancelHelpRequestToolStripMenuItem.Name = "cancelHelpRequestToolStripMenuItem";
             resources.ApplyResources(this.cancelHelpRequestToolStripMenuItem, "cancelHelpRequestToolStripMenuItem");
             this.cancelHelpRequestToolStripMenuItem.Click += new System.EventHandler(this.requestHelpButton_Click);
+            // 
+            // guestSharingToolStripMenuItem
+            // 
+            this.guestSharingToolStripMenuItem.Name = "guestSharingToolStripMenuItem";
+            resources.ApplyResources(this.guestSharingToolStripMenuItem, "guestSharingToolStripMenuItem");
+            this.guestSharingToolStripMenuItem.Click += new System.EventHandler(this.guestSharingToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -242,6 +250,12 @@
             resources.ApplyResources(this.intelAMTStateToolStripMenuItem, "intelAMTStateToolStripMenuItem");
             this.intelAMTStateToolStripMenuItem.Click += new System.EventHandler(this.intelAMTStateToolStripMenuItem_Click);
             // 
+            // updateSoftwareToolStripMenuItem1
+            // 
+            this.updateSoftwareToolStripMenuItem1.Name = "updateSoftwareToolStripMenuItem1";
+            resources.ApplyResources(this.updateSoftwareToolStripMenuItem1, "updateSoftwareToolStripMenuItem1");
+            this.updateSoftwareToolStripMenuItem1.Click += new System.EventHandler(this.updateSoftwareToolStripMenuItem_Click);
+            // 
             // mainPictureBox
             // 
             resources.ApplyResources(this.mainPictureBox, "mainPictureBox");
@@ -254,12 +268,6 @@
             resources.ApplyResources(this.pictureBoxCustom, "pictureBoxCustom");
             this.pictureBoxCustom.Name = "pictureBoxCustom";
             this.pictureBoxCustom.TabStop = false;
-            // 
-            // updateSoftwareToolStripMenuItem1
-            // 
-            this.updateSoftwareToolStripMenuItem1.Name = "updateSoftwareToolStripMenuItem1";
-            resources.ApplyResources(this.updateSoftwareToolStripMenuItem1, "updateSoftwareToolStripMenuItem1");
-            this.updateSoftwareToolStripMenuItem1.Click += new System.EventHandler(this.updateSoftwareToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -316,6 +324,7 @@
         private System.Windows.Forms.PictureBox pictureBoxCustom;
         private System.Windows.Forms.ToolStripMenuItem showEventsToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem updateSoftwareToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem guestSharingToolStripMenuItem;
     }
 }
 

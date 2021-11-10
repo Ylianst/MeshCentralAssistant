@@ -82,6 +82,10 @@ namespace MeshAssistant
         public List<string> pendingWakeOnLan = new List<string>();
         private System.Threading.Timer pendingWakeOnLanTimer = null;
         private string agentTag = null;
+        public bool selfSharingAllowed = false;
+        public string selfSharingUrl = null;
+        public bool selfSharingViewOnly = false;
+        public int selfSharingFlags = 0;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -100,6 +104,9 @@ namespace MeshAssistant
 
         public delegate void onRequestConsentHandler(MeshCentralTunnel tunnel, string msg, int protocol, string userid);
         public event onRequestConsentHandler onRequestConsent;
+
+        public delegate void onSelfSharingStatusHandler(bool allowed, string url);
+        public event onSelfSharingStatusHandler onSelfSharingStatus;
 
         public void askForConsent(MeshCentralTunnel tunnel, string msg, int protocol, string userid)
         {
@@ -623,6 +630,12 @@ namespace MeshAssistant
             }
         }
 
+        public void sendRequestGuestSharing(int flags, bool viewOnly)
+        {
+            Log(string.Format("sendRequestGuestSharing {0}, {1}", flags, viewOnly));
+            if (WebSocket != null) WebSocket.SendString("{\"action\":\"guestShare\",\"flags\":" + flags + ",\"viewOnly\":" + ((viewOnly == true)?"true":"false") + "}");
+        }
+
         private void sendSessionUpdate(string type, string value)
         {
             Log(string.Format("sendSessionUpdate {0}, {1}", type, value));
@@ -1005,6 +1018,22 @@ namespace MeshAssistant
                                     // TODO: List system services
                                     break;
                                 }
+                            case "guestShare":
+                                {
+                                    if (jsonAction.ContainsKey("url") && (jsonAction["url"] != null) && (jsonAction["url"].GetType() == typeof(string)))
+                                    {
+                                        selfSharingUrl = (string)jsonAction["url"];
+                                        if (jsonAction.ContainsKey("flags") && (jsonAction["flags"] != null) && (jsonAction["flags"].GetType() == typeof(int))) { selfSharingFlags = (int)jsonAction["flags"]; }
+                                        if (jsonAction.ContainsKey("viewOnly") && (jsonAction["viewOnly"] != null) && (jsonAction["viewOnly"].GetType() == typeof(bool))) { selfSharingViewOnly = (bool)jsonAction["viewOnly"]; }
+                                    }
+                                    else
+                                    {
+                                        selfSharingUrl = null;
+                                        selfSharingFlags = 0;
+                                    }
+                                    if (onSelfSharingStatus != null) { onSelfSharingStatus(selfSharingAllowed, selfSharingUrl); }
+                                    break;
+                                }
                             default:
                                 {
                                     Log("Unprocessed event type: " + eventType);
@@ -1086,6 +1115,32 @@ namespace MeshAssistant
                             foreach (object x in macs) { if (x.GetType() == typeof(string)) { pendingWakeOnLan.Add(((string)x).Replace(":", "")); added++; } }
                             if ((added > 0) && (pendingWakeOnLanTimer == null)) { pendingWakeOnLanTimer = new System.Threading.Timer(new System.Threading.TimerCallback(sendNextWakeOnLanPacket), null, 100, 100); }
                         }
+                        break;
+                    }
+                case "serverInfo":
+                    {
+                        if (jsonAction.ContainsKey("agentSelfGuestSharing") && (jsonAction["agentSelfGuestSharing"].GetType() == typeof(Boolean))) {
+                            if (selfSharingAllowed != (Boolean)jsonAction["agentSelfGuestSharing"])
+                            {
+                                selfSharingAllowed = (Boolean)jsonAction["agentSelfGuestSharing"];
+                                if (onSelfSharingStatus != null) { onSelfSharingStatus(selfSharingAllowed, selfSharingUrl); }
+                            }
+                        }
+                        break;
+                    }
+                case "guestShare":
+                    {
+                        if (jsonAction.ContainsKey("url") && (jsonAction["url"] != null) && (jsonAction["url"].GetType() == typeof(string)))
+                        {
+                            selfSharingUrl = (string)jsonAction["url"];
+                            if (jsonAction.ContainsKey("flags") && (jsonAction["flags"] != null) && (jsonAction["flags"].GetType() == typeof(int))) { selfSharingFlags = (int)jsonAction["flags"]; }
+                            if (jsonAction.ContainsKey("viewOnly") && (jsonAction["viewOnly"] != null) && (jsonAction["viewOnly"].GetType() == typeof(bool))) { selfSharingViewOnly = (bool)jsonAction["viewOnly"]; }
+                        }
+                        else {
+                            selfSharingUrl = null;
+                            selfSharingFlags = 0;
+                        }
+                        if (onSelfSharingStatus != null) { onSelfSharingStatus(selfSharingAllowed, selfSharingUrl); }
                         break;
                     }
                 default:

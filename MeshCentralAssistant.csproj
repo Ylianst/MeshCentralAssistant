@@ -104,6 +104,12 @@
       <DependentUpon>EventsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ExeHandler.cs" />
+    <Compile Include="GuestSharingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GuestSharingForm.Designer.cs">
+      <DependentUpon>GuestSharingForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -179,6 +185,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EventsForm.resx">
       <DependentUpon>EventsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GuestSharingForm.resx">
+      <DependentUpon>GuestSharingForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
