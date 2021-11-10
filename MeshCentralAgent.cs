@@ -579,6 +579,9 @@ namespace MeshAssistant
 
             // Send system information
             sendSysInfo(null, null);
+
+            // Remove any guest self-sharing links
+            sendRequestGuestSharing(0, false);
         }
 
         public void SendCoreInfo()

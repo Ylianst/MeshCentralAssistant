@@ -37,9 +37,9 @@ namespace MeshAssistant
             if ((parent.mcagent != null) && (parent.mcagent.selfSharingUrl != null))
             {
                 linkTextBox.Text = parent.mcagent.selfSharingUrl;
-                desktopCheckBox.Checked = ((parent.mcagent.selfSharingFlags & 1) != 0);
+                desktopCheckBox.Checked = ((parent.mcagent.selfSharingFlags & 2) != 0);
                 viewOnlyCheckBox.Checked = parent.mcagent.selfSharingViewOnly;
-                terminalCheckBox.Checked = ((parent.mcagent.selfSharingFlags & 2) != 0);
+                terminalCheckBox.Checked = ((parent.mcagent.selfSharingFlags & 1) != 0);
                 filesCheckBox.Checked = ((parent.mcagent.selfSharingFlags & 4) != 0);
             }
             else
@@ -81,8 +81,8 @@ namespace MeshAssistant
         private void createLinkButton_Click(object sender, EventArgs e)
         {
             int flags = 0;
-            if (desktopCheckBox.Checked) { flags += 1; }
-            if (terminalCheckBox.Checked) { flags += 2; }
+            if (desktopCheckBox.Checked) { flags += 2; }
+            if (terminalCheckBox.Checked) { flags += 1; }
             if (filesCheckBox.Checked) { flags += 4; }
             if (parent.mcagent != null) { parent.mcagent.sendRequestGuestSharing(flags, viewOnlyCheckBox.Checked); }
         }

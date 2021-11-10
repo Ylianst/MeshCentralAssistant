@@ -322,11 +322,15 @@ namespace MeshAssistant
             else if ((consentForm == null) && (msg != null))
             {
                 Log("Opening consent form");
-                string realname = userid.Split('/')[2];
-                if ((mcagent.usernames != null) && mcagent.usernames.ContainsKey(userid) && (mcagent.usernames[userid] != null)) { realname = mcagent.usernames[userid]; }
-                if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
+                string realname = "Guest";
                 Image userImage = null;
-                if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
+                if (userid != null)
+                {
+                    realname = userid.Split('/')[2];
+                    if ((mcagent.usernames != null) && mcagent.usernames.ContainsKey(userid) && (mcagent.usernames[userid] != null)) { realname = mcagent.usernames[userid]; }
+                    if ((mcagent.userrealname != null) && mcagent.userrealname.ContainsKey(userid) && (mcagent.userrealname[userid] != null)) { realname = mcagent.userrealname[userid]; }
+                    if ((mcagent.userimages != null) && mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
+                }
                 consentForm = new ConsentForm(this);
                 consentForm.userid = userid;
                 consentForm.tunnel = tunnel;
@@ -554,6 +558,7 @@ namespace MeshAssistant
                 string guestname = "";
                 if ((useridsplit.Length == 4) && (useridsplit[3].StartsWith("guest:"))) { guestname = " - " + UTF8Encoding.UTF8.GetString(Convert.FromBase64String(useridsplit[3].Substring(6))); }
                 stateLabel.Text = realname + guestname;
+                if (realname.StartsWith("~")) { stateLabel.Text = guestname.Substring(3); }
                 Image userImage = null;
                 if (mcagent.userimages.ContainsKey(userid) && (mcagent.userimages[userid] != null)) { userImage = mcagent.userimages[userid]; }
                 if (userImage == null) { setUiImage(uiImage.User); } else { setUiImage(userImage); }
@@ -725,6 +730,7 @@ namespace MeshAssistant
                 string u = userids[i];
                 string[] uu = u.Split('/');
                 r[i] = ((uu.Length == 3) ? uu[2] : u);
+                if ((uu.Length == 4) && (uu[3].StartsWith("guest:"))) { r[i] = UTF8Encoding.UTF8.GetString(Convert.FromBase64String(uu[3].Substring(6))); }
             }
             return r;
         }
@@ -741,6 +747,7 @@ namespace MeshAssistant
                 } else {
                     string[] uu = u.Split('/');
                     r[i] = ((uu.Length == 3) ? uu[2] : u);
+                    if ((uu.Length == 4) && (uu[3].StartsWith("guest:"))) { r[i] = UTF8Encoding.UTF8.GetString(Convert.FromBase64String(uu[3].Substring(6))); }
                 }
             }
             return r;

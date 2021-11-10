@@ -262,8 +262,9 @@ namespace MeshAssistant
                                 sessionUserName += "/guest:" + Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes((string)creationArgs["guestname"]));
                                 sessionLoggingUserName += " - " + (string)creationArgs["guestname"];
                             }
+                        } else {
+                            sessionUserName = "user//~guest/guest:" + Convert.ToBase64String(UTF8Encoding.UTF8.GetBytes("Guest"));
                         }
-
 
                         if (sessionUserName != null)
                         {
