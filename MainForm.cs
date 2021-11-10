@@ -321,6 +321,12 @@ namespace MeshAssistant
             }
             else if ((consentForm == null) && (msg != null))
             {
+                if (ConsentForm.autoConsent.ContainsKey(userid))
+                {
+                    DateTime autoAcceptTime = ConsentForm.autoConsent[userid];
+                    if (autoAcceptTime > DateTime.Now) { Log("Consent auto-accepted"); tunnel.ConsentAccepted(); return; } // Auto accept user consent
+                }
+
                 Log("Opening consent form");
                 string realname = "Guest";
                 Image userImage = null;

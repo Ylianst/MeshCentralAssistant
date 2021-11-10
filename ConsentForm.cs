@@ -14,8 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace MeshAssistant
 {
@@ -24,6 +26,7 @@ namespace MeshAssistant
         private MainForm parent;
         private string orgtitle;
         private string message = "";
+        public static Dictionary<string, DateTime> autoConsent = new Dictionary<string, DateTime>();
 
         public ConsentForm(MainForm parent)
         {
@@ -40,6 +43,8 @@ namespace MeshAssistant
         public string UserName { set { nameLabel.Text = value; updateInfo(); } }
         public string Title { set { this.Text = string.Format(Translate.T(Properties.Resources.TitleMerge), orgtitle, value); } }
         public Image UserImage { set { if (value == null) { mainPictureBox.Image = mainPictureBox.InitialImage; } else { mainPictureBox.Image = value; } } }
+
+        public bool AutoAccept { get { return autoConsentCheckBox.Checked; } }
 
         private void updateInfo()
         {
@@ -59,8 +64,14 @@ namespace MeshAssistant
 
         private void okButton_Click(object sender, System.EventArgs e)
         {
+            if ((userid != null) && (autoConsentCheckBox.Checked == true)) { autoConsent.Add(userid, DateTime.Now.AddMinutes(5)); }
             tunnel.ConsentAccepted();
             Close();
+        }
+
+        private void ConsentForm_Load(object sender, System.EventArgs e)
+        {
+            autoConsentCheckBox.Visible = (userid != null);
         }
     }
 }

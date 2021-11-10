@@ -34,6 +34,7 @@
             this.okButton = new System.Windows.Forms.Button();
             this.mainLabel = new System.Windows.Forms.Label();
             this.nameLabel = new System.Windows.Forms.Label();
+            this.autoConsentCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -73,6 +74,13 @@
             this.nameLabel.ForeColor = System.Drawing.Color.Gainsboro;
             this.nameLabel.Name = "nameLabel";
             // 
+            // autoConsentCheckBox
+            // 
+            this.autoConsentCheckBox.ForeColor = System.Drawing.Color.White;
+            resources.ApplyResources(this.autoConsentCheckBox, "autoConsentCheckBox");
+            this.autoConsentCheckBox.Name = "autoConsentCheckBox";
+            this.autoConsentCheckBox.UseVisualStyleBackColor = true;
+            // 
             // ConsentForm
             // 
             this.AcceptButton = this.cancelButton;
@@ -80,6 +88,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(79)))), ((int)(((byte)(130)))));
             this.CancelButton = this.cancelButton;
+            this.Controls.Add(this.autoConsentCheckBox);
             this.Controls.Add(this.nameLabel);
             this.Controls.Add(this.mainLabel);
             this.Controls.Add(this.okButton);
@@ -91,6 +100,7 @@
             this.Name = "ConsentForm";
             this.TopMost = true;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ConsentForm_FormClosed);
+            this.Load += new System.EventHandler(this.ConsentForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.mainPictureBox)).EndInit();
             this.ResumeLayout(false);
 
@@ -103,5 +113,6 @@
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.Label mainLabel;
         private System.Windows.Forms.Label nameLabel;
+        private System.Windows.Forms.CheckBox autoConsentCheckBox;
     }
 }
