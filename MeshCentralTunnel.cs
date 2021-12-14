@@ -103,7 +103,10 @@ namespace MeshAssistant
                 if (creationArgs.ContainsKey("guestname") && (creationArgs["guestname"].GetType() == typeof(string))) { extraLogStr += ",\"guestname\":\"" + escapeJsonString((string)creationArgs["guestname"]) + "\""; guestname = (string)creationArgs["guestname"]; }
                 if (creationArgs.ContainsKey("remoteaddr") && (creationArgs["remoteaddr"].GetType() == typeof(string))) { extraLogStr += ",\"remoteaddr\":\"" + escapeJsonString((string)creationArgs["remoteaddr"]) + "\""; }
                 if (creationArgs.ContainsKey("sessionid") && (creationArgs["sessionid"].GetType() == typeof(string))) { extraLogStr += ",\"sessionid\":\"" + escapeJsonString((string)creationArgs["sessionid"]) + "\""; }
-                if (creationArgs.ContainsKey("rights") && ((creationArgs["rights"].GetType() == typeof(System.Int32)) || (creationArgs["rights"].GetType() == typeof(System.Int64)))) { userRights = (long)creationArgs["rights"]; }
+                if (creationArgs.ContainsKey("rights")) {
+                    if (creationArgs["rights"].GetType() == typeof(System.Int32)) { userRights = (int)creationArgs["rights"]; }
+                    if (creationArgs["rights"].GetType() == typeof(System.Int64)) { userRights = (long)creationArgs["rights"]; }
+                }
             }
         }
 
