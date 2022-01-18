@@ -36,7 +36,8 @@ namespace MeshAssistant
                 {"sv","Agent är pausad"},
                 {"es","El agente está en pausa"},
                 {"hi","एजेंट रुका हुआ है"},
-                {"de","Agent ist pausiert"}
+                {"de","Agent ist pausiert"},
+                {"tr","Agent durduruldu"}
             }
         },
         {
@@ -49,7 +50,8 @@ namespace MeshAssistant
                 {"sv","S & toppagent"},
                 {"es","D&etener Agente"},
                 {"hi","शीर्ष एजेंट"},
-                {"de","Stop-Agent"}
+                {"de","Stop-Agent"},
+                {"tr","Agent'ı durdur"}
             }
         },
         {
@@ -60,7 +62,7 @@ namespace MeshAssistant
                 {"zh-cht","類型"},
                 {"zh-chs","类型"},
                 {"fi","Tyyppi"},
-                {"tr","tip"},
+                {"tr","Tip"},
                 {"cs","Typ"},
                 {"ja","タイプ"},
                 {"es","Tipo"},
@@ -84,7 +86,8 @@ namespace MeshAssistant
                 {"sv","Fjärrsessioner"},
                 {"es","Sesiones Remotas"},
                 {"hi","दूरस्थ सत्र"},
-                {"de","Remote-Sitzungen"}
+                {"de","Remote-Sitzungen"},
+                {"tr","Uzak Oturumlar"}
             }
         },
         {
@@ -97,7 +100,8 @@ namespace MeshAssistant
                 {"es","Asistente MeshCentral"},
                 {"ru","MeshCentral Ассистент"},
                 {"hi","मेषकेंद्रीय सहायक"},
-                {"de","MeshCentral-Assistent"}
+                {"de","MeshCentral-Assistent"},
+                {"tr","MeshCentral Asistanı"}
             }
         },
         {
@@ -109,7 +113,7 @@ namespace MeshAssistant
                 {"zh-cht","更新資料"},
                 {"zh-chs","更新资料"},
                 {"fi","Päivittää"},
-                {"tr","Güncelleme"},
+                {"tr","Güncelle"},
                 {"cs","Aktualizace"},
                 {"ja","更新"},
                 {"es","Actualizar"},
@@ -134,7 +138,8 @@ namespace MeshAssistant
                 {"sv","Räkna"},
                 {"es","Contar"},
                 {"hi","गिनती"},
-                {"de","Anzahl"}
+                {"de","Anzahl"},
+                {"tr","Sayı"}
             }
         },
         {
@@ -149,7 +154,8 @@ namespace MeshAssistant
                 {"sv","Intel® ME State ..."},
                 {"es","Estado Intel® ME ..."},
                 {"hi","इंटेल® एमई स्टेट..."},
-                {"de","Intel® ME-Zustand..."}
+                {"de","Intel® ME-Zustand..."},
+                {"tr","Intel® ME Durumu..."}
             }
         },
         {
@@ -163,7 +169,8 @@ namespace MeshAssistant
                 {"sv","Senare"},
                 {"es","Mas tarde"},
                 {"hi","बाद में"},
-                {"de","Später"}
+                {"de","Später"},
+                {"tr","Sonra"}
             }
         },
         {
@@ -178,7 +185,8 @@ namespace MeshAssistant
                 {"sv","Agent stoppas i väntan"},
                 {"es","El agente está detenido pendiente"},
                 {"hi","एजेंट लंबित है"},
-                {"de","Agent ist gestoppt ausstehend"}
+                {"de","Agent ist gestoppt ausstehend"},
+                {"tr","Agent beklemeyi durdurdu"}
             }
         },
         {
@@ -215,7 +223,8 @@ namespace MeshAssistant
                 {"sv","&Uppdatera mjukvara"},
                 {"es","&Actualizar el software"},
                 {"hi","&सॉफ्टवेयर अद्यतन करें"},
-                {"de","&Software aktualisieren"}
+                {"de","&Software aktualisieren"},
+                {"tr","&Yazılımı Güncelle"}
             }
         },
         {
@@ -230,7 +239,8 @@ namespace MeshAssistant
                 {"sv","Visa &Händelser ..."},
                 {"es","Espectáculos y eventos ..."},
                 {"hi","&घटनाक्रम दिखाएं..."},
-                {"de","&Ereignisse anzeigen..."}
+                {"de","&Ereignisse anzeigen..."},
+                {"tr","&Olayları Göster"}
             }
         },
         {
@@ -245,7 +255,8 @@ namespace MeshAssistant
                 {"sv","Agent saknas"},
                 {"es","Falta el agente"},
                 {"hi","एजेंट गायब है"},
-                {"de","Agent fehlt"}
+                {"de","Agent fehlt"},
+                {"tr","Agent bulunamadı"}
             }
         },
         {
@@ -259,7 +270,8 @@ namespace MeshAssistant
                 {"sv","Assistentuppdatering"},
                 {"es","Asistente de Actualización"},
                 {"hi","सहायक अद्यतन"},
-                {"de","Assistant-Update"}
+                {"de","Assistant-Update"},
+                {"tr","Asistanı Güncelle"}
             }
         },
         {
@@ -296,7 +308,8 @@ namespace MeshAssistant
                 {"sv","{0} fjärrsessioner"},
                 {"es","{0} sesiones remotas"},
                 {"hi","{0} दूरस्थ सत्र"},
-                {"de","{0} Remote-Sitzungen"}
+                {"de","{0} Remote-Sitzungen"},
+                {"tr","{0} uzak oturum"}
             }
         },
         {
@@ -332,7 +345,8 @@ namespace MeshAssistant
                 {"sv","{0} Assistent"},
                 {"es","{0} Asistente"},
                 {"hi","{0} सहायक"},
-                {"de","{0} Assistent"}
+                {"de","{0} Assistent"},
+                {"tr","{0} Asistan"}
             }
         },
         {
@@ -347,7 +361,8 @@ namespace MeshAssistant
                 {"sv","Ansluten till servern"},
                 {"es","Conectado al servidor"},
                 {"hi","सर्वर से जुड़ा"},
-                {"de","Mit Server verbunden"}
+                {"de","Mit Server verbunden"},
+                {"tr","Sunucuya bağlandı"}
             }
         },
         {
@@ -362,7 +377,8 @@ namespace MeshAssistant
                 {"sv","Ansluter"},
                 {"es","Conectando"},
                 {"hi","कनेक्ट"},
-                {"de","Anschließen"}
+                {"de","Anschließen"},
+                {"tr","Bağlanıyor"}
             }
         },
         {
@@ -376,7 +392,8 @@ namespace MeshAssistant
                 {"sv","& Starta agent"},
                 {"es","&Iniciar agente"},
                 {"hi","&प्रारंभ एजेंट"},
-                {"de","&Agent starten"}
+                {"de","&Agent starten"},
+                {"tr","Agent'ı &Başlat"}
             }
         },
         {
@@ -391,7 +408,8 @@ namespace MeshAssistant
                 {"sv","{0} fjärrsessioner är aktiva."},
                 {"es","{0} sesiones remotas están activas."},
                 {"hi","{0} दूरस्थ सत्र सक्रिय हैं।"},
-                {"de","{0} Remote-Sitzungen sind aktiv."}
+                {"de","{0} Remote-Sitzungen sind aktiv."},
+                {"tr","{0} uzak oturum aktif."}
             }
         },
         {
@@ -405,7 +423,8 @@ namespace MeshAssistant
                 {"sv","Utgång"},
                 {"es","Salida"},
                 {"hi","बाहर जाएं"},
-                {"de","Beenden"}
+                {"de","Beenden"},
+                {"tr","&Çıkış"}
             }
         },
         {
@@ -420,7 +439,8 @@ namespace MeshAssistant
                 {"sv","Agent kör"},
                 {"es","El agente se está ejecutando"},
                 {"hi","एजेंट चल रहा है"},
-                {"de","Agent läuft"}
+                {"de","Agent läuft"},
+                {"tr","Agent çalışıyor"}
             }
         },
         {
@@ -432,7 +452,7 @@ namespace MeshAssistant
                 {"zh-cht","清除"},
                 {"zh-chs","清除"},
                 {"fi","Tyhjennä"},
-                {"tr","Açık"},
+                {"tr","Temizle"},
                 {"cs","Vymazat"},
                 {"ja","クリア"},
                 {"es","Borrar"},
@@ -476,7 +496,7 @@ namespace MeshAssistant
                 {"zh-cht","事件"},
                 {"zh-chs","事件"},
                 {"fi","Tapahtumat"},
-                {"tr","Etkinlikler"},
+                {"tr","Olaylar"},
                 {"cs","Události"},
                 {"ja","イベント"},
                 {"es","Eventos"},
@@ -501,7 +521,8 @@ namespace MeshAssistant
                 {"sv","Begär hjälp"},
                 {"es","Solicitar Ayuda"},
                 {"hi","मदद का अनुरोध करें"},
-                {"de","Hilfe anfordern"}
+                {"de","Hilfe anfordern"},
+                {"tr","Yardım İste"}
             }
         },
         {
@@ -515,7 +536,8 @@ namespace MeshAssistant
                 {"sv","Versioner"},
                 {"es","Versiones"},
                 {"hi","संस्करणों"},
-                {"de","Versionen"}
+                {"de","Versionen"},
+                {"tr","Versiyonlar"}
             }
         },
         {
@@ -526,14 +548,16 @@ namespace MeshAssistant
                 {"pt-br","Desconectar do servidor e fechar?"},
                 {"sv","Koppla bort från servern och stänga?"},
                 {"es","¿Desconectar del servidor y cerrar?"},
-                {"de","Serververbindung trennen und beenden?"}
+                {"de","Serververbindung trennen und beenden?"},
+                {"tr","Bağlantı kesilip kapatılsın mı?"}
             }
         },
         {
             "Agent Select",
             new Dictionary<string, string>() {
                 {"nl","Agent selecteren"},
-                {"es","Selección del Agente"}
+                {"es","Selección del Agente"},
+                {"tr","Agent Seçimi"}
             }
         },
         {
@@ -548,7 +572,8 @@ namespace MeshAssistant
                 {"sv","Värde"},
                 {"es","Valor"},
                 {"hi","मूल्य"},
-                {"de","Wert"}
+                {"de","Wert"},
+                {"tr","Değer"}
             }
         },
         {
@@ -563,7 +588,8 @@ namespace MeshAssistant
                 {"sv","Agent är paus i väntan"},
                 {"es","El agente está en pausa pendiente"},
                 {"hi","एजेंट रुका हुआ है"},
-                {"de","Agent ist pausiert"}
+                {"de","Agent ist pausiert"},
+                {"tr","Agent beklemeye ara verdi"}
             }
         },
         {
@@ -578,7 +604,8 @@ namespace MeshAssistant
                 {"sv","Agent väntar"},
                 {"es","El agente está pendiente de inicio"},
                 {"hi","एजेंट प्रारंभ लंबित है"},
-                {"de","Agent ist Start ausstehend"}
+                {"de","Agent ist Start ausstehend"},
+                {"tr","Agent beklemeye başladı"}
             }
         },
         {
@@ -593,7 +620,8 @@ namespace MeshAssistant
                 {"sv","Intel® Management Engine-tillstånd för den här datorn."},
                 {"es","Estado del motor de administración Intel® para este equipo."},
                 {"hi","इस कंप्यूटर के लिए Intel® प्रबंधन इंजन स्थिति।"},
-                {"de","Status der Intel® Management Engine für diesen Computer."}
+                {"de","Status der Intel® Management Engine für diesen Computer."},
+                {"tr","Bu bilgisayar için Intel® Management Engine durumu."}
             }
         },
         {
@@ -651,7 +679,8 @@ namespace MeshAssistant
                 {"sv","Artikel"},
                 {"es","Artículo"},
                 {"hi","मद"},
-                {"de","Artikel"}
+                {"de","Artikel"},
+                {"tr","Eleman"}
             }
         },
         {
@@ -666,7 +695,8 @@ namespace MeshAssistant
                 {"sv","Lista över fjärrsessioner som är aktiva på den här datorn."},
                 {"es","Lista de sesiones remotas activas en esta computadora."},
                 {"hi","इस कंप्यूटर पर सक्रिय दूरस्थ सत्रों की सूची।"},
-                {"de","Liste der auf diesem Computer aktiven Remotesitzungen."}
+                {"de","Liste der auf diesem Computer aktiven Remotesitzungen."},
+                {"tr","Bu bilgisayardaki aktif uzak oturumların listesi."}
             }
         },
         {
@@ -681,7 +711,8 @@ namespace MeshAssistant
                 {"sv","Hjälp begärd"},
                 {"es","Ayuda Solicitada"},
                 {"hi","सहायता मांगी गई"},
-                {"de","Hilfe angefordert"}
+                {"de","Hilfe angefordert"},
+                {"tr","Yardım İstendi"}
             }
         },
         {
@@ -737,7 +768,7 @@ namespace MeshAssistant
                 {"zh-cht","取消"},
                 {"zh-chs","取消"},
                 {"fi","Peruuta"},
-                {"tr","İptal etmek"},
+                {"tr","İptal"},
                 {"cs","Storno"},
                 {"ja","キャンセル"},
                 {"es","Cancelar"},
@@ -784,7 +815,8 @@ namespace MeshAssistant
                 {"sv","Visa sessioner ..."},
                 {"es","Mostrar Sesiones ..."},
                 {"hi","सत्र दिखाएं..."},
-                {"de","Sitzungen anzeigen..."}
+                {"de","Sitzungen anzeigen..."},
+                {"tr","Oturumları göster..."}
             }
         },
         {
@@ -799,7 +831,8 @@ namespace MeshAssistant
                 {"sv","Inga fjärrsessioner"},
                 {"es","Sin sesiones remotas"},
                 {"hi","कोई दूरस्थ सत्र नहीं"},
-                {"de","Keine Remote-Sitzungen"}
+                {"de","Keine Remote-Sitzungen"},
+                {"tr","Uzak oturum yok"}
             }
         },
         {
@@ -807,7 +840,8 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"zh-chs","隐私栏表格"},
                 {"hi","गोपनीयताबारफॉर्म"},
-                {"de","DatenschutzBarForm"}
+                {"de","DatenschutzBarForm"},
+                {"tr","GizlilikÇubuğu"}
             }
         },
         {
@@ -822,7 +856,8 @@ namespace MeshAssistant
                 {"sv","Agent inte installerad"},
                 {"es","Agente no instalado"},
                 {"hi","एजेंट स्थापित नहीं"},
-                {"de","Agent nicht installiert"}
+                {"de","Agent nicht installiert"},
+                {"tr","Agent yüklü değil"}
             }
         },
         {
@@ -837,7 +872,8 @@ namespace MeshAssistant
                 {"sv","Ange information om hjälpförfrågan"},
                 {"es","Ingresa los detalles de la solicitud de ayuda"},
                 {"hi","सहायता अनुरोध विवरण दर्ज करें"},
-                {"de","Geben Sie die Details der Hilfeanfrage ein"}
+                {"de","Geben Sie die Details der Hilfeanfrage ein"},
+                {"tr","Yardım talebinizin detayını girin"}
             }
         },
         {
@@ -852,7 +888,8 @@ namespace MeshAssistant
                 {"sv","Inga aktiva fjärrsessioner."},
                 {"es","No hay sesiones remotas activas."},
                 {"hi","कोई सक्रिय दूरस्थ सत्र नहीं।"},
-                {"de","Keine aktiven Remote-Sitzungen."}
+                {"de","Keine aktiven Remote-Sitzungen."},
+                {"tr","Aktif uzak oturum yok."}
             }
         },
         {
@@ -867,7 +904,8 @@ namespace MeshAssistant
                 {"sv","Tillåta"},
                 {"es","Permitir"},
                 {"hi","अनुमति"},
-                {"de","Erlauben"}
+                {"de","Erlauben"},
+                {"tr","İzin ver"}
             }
         },
         {
@@ -882,7 +920,8 @@ namespace MeshAssistant
                 {"sv","Händelse"},
                 {"es","Evento"},
                 {"hi","प्रतिस्पर्धा"},
-                {"de","Ereignis"}
+                {"de","Ereignis"},
+                {"tr","Olay"}
             }
         },
         {
@@ -897,7 +936,8 @@ namespace MeshAssistant
                 {"sv","Förneka"},
                 {"es","Negar"},
                 {"hi","मना"},
-                {"de","Verweigern"}
+                {"de","Verweigern"},
+                {"tr","Reddet"}
             }
         },
         {
@@ -940,7 +980,8 @@ namespace MeshAssistant
                 {"sv","Autentiserande"},
                 {"es","Autenticando"},
                 {"hi","प्रमाणित कर रहा है"},
-                {"de","Authentifizierung"}
+                {"de","Authentifizierung"},
+                {"tr","Kimlik doğrulanıyor"}
             }
         },
         {
@@ -970,7 +1011,7 @@ namespace MeshAssistant
             new Dictionary<string, string>() {
                 {"hi","ठीक"},
                 {"fr","ОК"},
-                {"tr","tamam"},
+                {"tr","Tamam"},
                 {"pt","Ok"},
                 {"ko","확인"},
                 {"ru","ОК"}
@@ -988,7 +1029,8 @@ namespace MeshAssistant
                 {"sv","1 fjärrsession"},
                 {"es","1 sesión remota"},
                 {"hi","1 दूरस्थ सत्र"},
-                {"de","1 Remote-Sitzung"}
+                {"de","1 Remote-Sitzung"},
+                {"tr","1 uzak oturum"}
             }
         },
         {
@@ -1003,7 +1045,8 @@ namespace MeshAssistant
                 {"sv","En fjärrsession är aktiv."},
                 {"es","1 sesión remota está activa."},
                 {"hi","1 दूरस्थ सत्र सक्रिय है।"},
-                {"de","1 Remote-Sitzung ist aktiv."}
+                {"de","1 Remote-Sitzung ist aktiv."},
+                {"tr","1 uzak oturum aktif."}
             }
         },
         {
@@ -1018,7 +1061,8 @@ namespace MeshAssistant
                 {"sv","(Ingen)"},
                 {"es","(Ninguno)"},
                 {"hi","(कोई नहीं)"},
-                {"de","(Keiner)"}
+                {"de","(Keiner)"},
+                {"tr","(Yok)"}
             }
         },
         {
@@ -1029,7 +1073,7 @@ namespace MeshAssistant
                 {"zh-cht","桌面"},
                 {"zh-chs","桌面"},
                 {"fi","Työpöytä"},
-                {"tr","Masaüstü Bilgisayar"},
+                {"tr","Masaüstü"},
                 {"cs","Plocha"},
                 {"ja","デスクトップ"},
                 {"es","Escritorio"},
@@ -1075,7 +1119,8 @@ namespace MeshAssistant
                 {"sv","Agent är frånkopplad"},
                 {"es","El agente está desconectado"},
                 {"hi","एजेंट डिस्कनेक्ट हो गया है"},
-                {"de","Agent ist getrennt"}
+                {"de","Agent ist getrennt"},
+                {"tr","Agent bağlantısı kesildi"}
             }
         },
         {
@@ -1112,7 +1157,8 @@ namespace MeshAssistant
                 {"sv","UDP-relä"},
                 {"es","Relé UDP"},
                 {"hi","यूडीपी रिले"},
-                {"de","UDP-Relais"}
+                {"de","UDP-Relais"},
+                {"tr","UDP yayını"}
             }
         },
         {
@@ -1127,7 +1173,8 @@ namespace MeshAssistant
                 {"sv","En ny version av denna programvara är tillgänglig. Uppdatera nu?"},
                 {"es","Hay disponible una nueva versión de este software. ¿Actualizar ahora?"},
                 {"hi","इस सॉफ़्टवेयर का एक नया संस्करण उपलब्ध है। अभी अद्यतन करें?"},
-                {"de","Eine neue Version dieser Software ist verfügbar. Jetzt aktualisieren?"}
+                {"de","Eine neue Version dieser Software ist verfügbar. Jetzt aktualisieren?"},
+                {"tr","Yazılımın yeni versiyonu mevcut. Güncellensin mi?"}
             }
         },
         {
@@ -1141,7 +1188,8 @@ namespace MeshAssistant
                 {"sv","&Öppna"},
                 {"es","&Abierto"},
                 {"hi","&खुला हुआ"},
-                {"de","&Öffnen"}
+                {"de","&Öffnen"},
+                {"tr","&Aç"}
             }
         },
         {
@@ -1156,7 +1204,8 @@ namespace MeshAssistant
                 {"sv","Flera användare"},
                 {"es","Múltiples Usuarios"},
                 {"hi","एकाधिक उपयोगकर्ता"},
-                {"de","Mehrere Benutzer"}
+                {"de","Mehrere Benutzer"},
+                {"tr","Birden fazla kullanıcı"}
             }
         },
         {
@@ -1171,7 +1220,8 @@ namespace MeshAssistant
                 {"sv","Fjärrsessioner: {0}"},
                 {"es","Sesiones Remotas: {0}"},
                 {"hi","दूरस्थ सत्र: {0}"},
-                {"de","Remote-Sitzungen: {0}"}
+                {"de","Remote-Sitzungen: {0}"},
+                {"tr","Uzak Oturumlar: {0}"}
             }
         },
         {
@@ -1181,7 +1231,7 @@ namespace MeshAssistant
                 {"zh-cht","終端機"},
                 {"zh-chs","终端"},
                 {"fi","Pääte"},
-                {"tr","terminal"},
+                {"tr","Terminal"},
                 {"cs","Terminál"},
                 {"ja","ターミナル"},
                 {"pt-br","terminal"},
@@ -1202,7 +1252,8 @@ namespace MeshAssistant
                 {"sv","&Stäng"},
                 {"es","&Cerca"},
                 {"hi","&बंद करे"},
-                {"de","&Schließen"}
+                {"de","&Schließen"},
+                {"tr","&Kapat"}
             }
         },
         {
@@ -1261,7 +1312,8 @@ namespace MeshAssistant
                 {"sv","Avbryt hjälpförfrågan"},
                 {"es","Cancelar Solicitud de Ayuda"},
                 {"hi","सहायता अनुरोध रद्द करें"},
-                {"de","Hilfeanfrage abbrechen"}
+                {"de","Hilfeanfrage abbrechen"},
+                {"tr","Yardım İsteğini İptal Et"}
             }
         },
         {
@@ -1276,7 +1328,8 @@ namespace MeshAssistant
                 {"sv","Agent stoppas"},
                 {"es","El agente está detenido"},
                 {"hi","एजेंट रोक दिया गया है"},
-                {"de","Agent wurde gestoppt"}
+                {"de","Agent wurde gestoppt"},
+                {"tr","Agent durdu"}
             }
         },
         {
@@ -1303,7 +1356,8 @@ namespace MeshAssistant
                 {"sv","Agent ögonblicksbild"},
                 {"es","Instantánea del agente"},
                 {"hi","एजेंट स्नैपशॉट"},
-                {"de","Agenten-Snapshot"}
+                {"de","Agenten-Snapshot"},
+                {"tr","Agent Ekran Görüntüsü"}
             }
         },
         {
@@ -1318,7 +1372,8 @@ namespace MeshAssistant
                 {"sv","Begär hjälp ..."},
                 {"es","Solicitar Ayuda ..."},
                 {"hi","मदद का अनुरोध करें..."},
-                {"de","Hilfe anfordern..."}
+                {"de","Hilfe anfordern..."},
+                {"tr","Yardım İste..."}
             }
         },
         {
@@ -1333,7 +1388,8 @@ namespace MeshAssistant
                 {"sv","Direktkoppling"},
                 {"es","Conexión Directa"},
                 {"hi","प्रत्यक्ष रूप से कनेक्ट"},
-                {"de","Direkte Verbindung"}
+                {"de","Direkte Verbindung"},
+                {"tr","Direk Bağlantı"}
             }
         },
         {
@@ -1348,7 +1404,8 @@ namespace MeshAssistant
                 {"sv","O & pen-webbplats ..."},
                 {"es","Sitio de O & pen ..."},
                 {"hi","साइट खोलें..."},
-                {"de","Website öffnen..."}
+                {"de","Website öffnen..."},
+                {"tr","&Site Aç"}
             }
         },
         {
@@ -1384,7 +1441,8 @@ namespace MeshAssistant
                 {"sv","TCP-relä"},
                 {"es","Relé TCP"},
                 {"hi","टीसीपी रिले"},
-                {"de","TCP-Relais"}
+                {"de","TCP-Relais"},
+                {"tr","TCP Yayını"}
             }
         },
         {
@@ -1421,7 +1479,8 @@ namespace MeshAssistant
                 {"sv","Agent fortsätter i väntan"},
                 {"es","El agente sigue pendiente"},
                 {"hi","एजेंट जारी है लंबित"},
-                {"de","Agent ist weiterhin ausstehend"}
+                {"de","Agent ist weiterhin ausstehend"},
+                {"tr","Agent beklemeye devam ediyor"}
             }
         },
         {
@@ -1433,7 +1492,7 @@ namespace MeshAssistant
                 {"zh-cht","未啟動（輸入）"},
                 {"zh-chs","未激活（输入）"},
                 {"fi","Ei aktivoitu (sisään)"},
-                {"tr","Etkinleştirilmedi (İçinde)"},
+                {"tr","Etkinleştirilmedi (İçeride)"},
                 {"cs","Neaktivováno (v)"},
                 {"ja","アクティブ化されていない（イン）"},
                 {"es","No Activada (entrada)"},
@@ -1455,7 +1514,7 @@ namespace MeshAssistant
                 {"zh-cht","代理控制台"},
                 {"zh-chs","代理控制台"},
                 {"fi","Agentin konsoli"},
-                {"tr","Aracı Konsolu"},
+                {"tr","Agent Konsolu"},
                 {"cs","Konzole agenta"},
                 {"ja","エージェントコンソール"},
                 {"es","Consola de Agente"},
