@@ -250,7 +250,7 @@
     <None Include="images\Red.png" />
     <None Include="images\Question.png" />
     <Content Include="MeshServer.ico" />
-    <Content Include="readme.txt" />
+    <None Include="readme.md" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="CERTENROLLLib">
