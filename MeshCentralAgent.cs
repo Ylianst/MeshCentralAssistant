@@ -170,7 +170,15 @@ namespace MeshAssistant
             // Load the MSH file
             string[] lines = mshstr.Replace("\r\n", "\r").Split('\r');
             Dictionary<string, string> msh = new Dictionary<string, string>();
-            foreach (string line in lines) { int i = line.IndexOf('='); if (i > 0) { msh.Add(line.Substring(0, i), line.Substring(i + 1)); } }
+            foreach (string line in lines) {
+                int i = line.IndexOf('=');
+                if (i > 0)
+                {
+                    string key = line.Substring(0, i);
+                    string val = line.Substring(i + 1);
+                    if (msh.ContainsKey(key) == false) { msh.Add(key, val); }
+                }
+            }
 
             // Get the MeshId, ServerId, and ServerUrl
             if (msh.ContainsKey("MeshID")) { string m = msh["MeshID"]; if (m.StartsWith("0x")) { m = m.Substring(2); } MeshId = StringToByteArray(m); }
@@ -268,7 +276,16 @@ namespace MeshAssistant
             if (mshstr == null) return false;
             string[] lines = mshstr.Replace("\r\n", "\r").Split('\r');
             Dictionary<string, string> msh = new Dictionary<string, string>();
-            foreach (string line in lines) { int i = line.IndexOf('='); if (i > 0) { msh.Add(line.Substring(0, i), line.Substring(i + 1)); } }
+            foreach (string line in lines)
+            {
+                int i = line.IndexOf('=');
+                if (i > 0)
+                {
+                    string key = line.Substring(0, i);
+                    string val = line.Substring(i + 1);
+                    if (msh.ContainsKey(key) == false) { msh.Add(key, val); }
+                }
+            }
             if (!msh.ContainsKey("MeshID")) return false;
             if (!msh.ContainsKey("ServerID")) return false;
             if (!msh.ContainsKey("MeshServer")) return false;
