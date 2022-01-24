@@ -75,6 +75,7 @@ namespace MeshAssistant
         public bool SystemTrayApp = true;
         public Image CustomizationLogo = null;
         public string CustomizationTitle = null;
+        public string autoHelpRequest = null;
 
         public struct LogEventStruct
         {
@@ -159,6 +160,7 @@ namespace MeshAssistant
                 if ((arg.Length == 9) && (arg.ToLower() == "-noupdate")) { noUpdate = true; }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-delete:") { delete = arg.Substring(8); }
+                if (arg.Length > 6 && arg.Substring(0, 6).ToLower() == "-help:") { autoHelpRequest = arg.Substring(6); }
                 if (arg.Length > 11 && arg.Substring(0, 11).ToLower() == "-agentname:") { selectedAgentName = arg.Substring(11); }
                 if ((arg.Length == 8) && (arg.ToLower() == "-connect")) { autoConnect = true; }
             }
@@ -594,7 +596,8 @@ namespace MeshAssistant
                 // If auto-connect is specified, connect now
                 if (autoConnect)
                 {
-                    mcagent.HelpRequest = null;
+                    mcagent.HelpRequest = autoHelpRequest;
+                    autoHelpRequest = null;
                     mcagent.connect();
                 }
 
@@ -908,7 +911,10 @@ namespace MeshAssistant
                             requestHelpToolStripMenuItem.Enabled = true;
                             requestHelpToolStripMenuItem.Visible = true;
                             cancelHelpRequestToolStripMenuItem.Visible = false;
-                        } else {
+                            if (autoHelpRequest != null) { RequestHelp(autoHelpRequest); autoHelpRequest = null; } // Automatically request help
+                        }
+                        else
+                        {
                             setUiImage(uiImage.Yellow);
                             stateLabel.Text = Translate.T(Properties.Resources.AgentIsDisconnected);
                             requestHelpToolStripMenuItem.Enabled = false;
