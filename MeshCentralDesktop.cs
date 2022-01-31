@@ -407,6 +407,7 @@ namespace MeshAssistant
                             if (xencoderCompression > 100) { xencoderCompression = 100; }
                             if (xencoderCompression != encoderCompression)
                             {
+                                encoderCompression = xencoderCompression;
                                 EncoderParameter myEncoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, encoderCompression);
                                 myEncoderParameters.Param[0] = myEncoderParameter;
                             }
