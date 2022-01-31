@@ -44,6 +44,7 @@ DiscoveryKey                 If multicast is used to find the server on the loca
 AutoConnect                  This is a binary flag value. 1 = Don't be on the system tray, 2 = Auto-connect to the server. Use 3 to specify both flags, 0 for no flags.
 Title                        When specified, this is a branded title used for the MeshCentral Asssitant dialog box.
 Image                        A base64 encoded PNG file with a branded logo to use for the MeshCentral Asssitant dialog box.
+disableUpdate                When set to any value, this will disable MeshCentral Assistant self-update system.
 ```
 
 

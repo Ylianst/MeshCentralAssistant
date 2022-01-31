@@ -61,6 +61,7 @@ namespace MeshAssistant
         private JavaScriptSerializer JSON = new JavaScriptSerializer();
         public webSocketClient WebSocket = null;
         private int ConnectionState = 0;
+        private Dictionary<string, string> msh = null; // MSH key --> value
         private List<MeshCentralTunnel> tunnels = new List<MeshCentralTunnel>(); // List of active tunnels
         private List<MeshCentralTcpTunnel> tcptunnels = new List<MeshCentralTcpTunnel>(); // List of active TCP tunnels
         public Dictionary<string, Image> userimages = new Dictionary<string, Image>(); // UserID --> Image
@@ -169,7 +170,7 @@ namespace MeshAssistant
 
             // Load the MSH file
             string[] lines = mshstr.Replace("\r\n", "\r").Split('\r');
-            Dictionary<string, string> msh = new Dictionary<string, string>();
+            msh = new Dictionary<string, string>();
             foreach (string line in lines) {
                 int i = line.IndexOf('=');
                 if (i > 0)
@@ -1075,7 +1076,9 @@ namespace MeshAssistant
                         if ((name != null) && (hash != null) && (url != null) && (onSelfUpdate != null) && (name == softwareName)) {
                             if (url.StartsWith("*/")) { url = "https://" + ServerUrl.Authority + url.Substring(1); }
                             url += ("&meshid=" + MeshIdMB64 + "&ac=" + autoConnectFlags);
-                            onSelfUpdate(name, hash, url, serverhash);
+                            if ((msh == null) || (!msh.ContainsKey("disableUpdate") && !msh.ContainsKey("DisableUpdate"))) { // Only self-update if .msh allows it
+                                onSelfUpdate(name, hash, url, serverhash);
+                            }
                         }
                         break;
                     }
