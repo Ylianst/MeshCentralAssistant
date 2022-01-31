@@ -17,6 +17,7 @@ Command Line Switches
 -help:"Sample help request"  When specified, MeshCentral Assistant will issue a help request to to the server upon connection.
 -agentname:"Computer1"       When specified, this is the initial name that will be displayed on the server for this device.
 -connect                     If not specified in the .msh file (AutoConnect value) MeshCentral Assistant will automatically connect to the server.
+-noproxy                     When specified, HTTP proxies will not be used.
 ```
 
 MSH Format
@@ -45,6 +46,7 @@ AutoConnect                  This is a binary flag value. 1 = Don't be on the sy
 Title                        When specified, this is a branded title used for the MeshCentral Asssitant dialog box.
 Image                        A base64 encoded PNG file with a branded logo to use for the MeshCentral Asssitant dialog box.
 disableUpdate                When set to any value, this will disable MeshCentral Assistant self-update system.
+ignoreProxyFile              When set to any value, HTTP proxies will not be used.
 ```
 
 

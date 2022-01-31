@@ -88,6 +88,7 @@ namespace MeshAssistant
             this.parent = parent;
             this.creationArgs = creationArgs;
             WebSocket = new webSocketClient();
+            WebSocket.allowUseOfProxy = parent.allowUseOfProxy;
             WebSocket.pongTimeSeconds = 120; // Send a websocket pong every 2 minutes.
             WebSocket.onStateChanged += WebSocket_onStateChanged;
             WebSocket.onBinaryData += WebSocket_onBinaryData;

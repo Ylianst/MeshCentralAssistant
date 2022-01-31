@@ -87,6 +87,7 @@ namespace MeshAssistant
         public string selfSharingUrl = null;
         public bool selfSharingViewOnly = false;
         public int selfSharingFlags = 0;
+        public bool allowUseOfProxy = true;
 
         // Sessions
         public Dictionary<string, object> DesktopSessions = null;
@@ -193,6 +194,7 @@ namespace MeshAssistant
                     parent.SystemTrayApp = ((autoConnectFlags & 2) == 0); // Be a system tray tool
                 }
             }
+            if (msh.ContainsKey("ignoreProxyFile") || msh.ContainsKey("noProxy")) { allowUseOfProxy = false; }
             if (msh.ContainsKey("DiscoveryKey")) { discoveryKey = msh["DiscoveryKey"]; }
             Log("MSH MeshID: " + msh["MeshID"]);
             Log("MSH ServerID: " + ServerId);
@@ -474,6 +476,7 @@ namespace MeshAssistant
             userrealname = new Dictionary<string, string>(); // UserID --> User real name
             WebSocket = new webSocketClient();
             WebSocket.pongTimeSeconds = 120; // Send a websocket pong every 2 minutes.
+            WebSocket.allowUseOfProxy = allowUseOfProxy;
             WebSocket.debug = debug;
             WebSocket.onStateChanged += WebSocket_onStateChanged;
             WebSocket.onBinaryData += WebSocket_onBinaryData;

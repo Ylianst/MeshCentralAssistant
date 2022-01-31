@@ -76,6 +76,7 @@ namespace MeshAssistant
         public Image CustomizationLogo = null;
         public string CustomizationTitle = null;
         public string autoHelpRequest = null;
+        public bool allowUseOfProxy = true;
 
         public struct LogEventStruct
         {
@@ -163,6 +164,7 @@ namespace MeshAssistant
                 if (arg.Length > 6 && arg.Substring(0, 6).ToLower() == "-help:") { autoHelpRequest = arg.Substring(6); }
                 if (arg.Length > 11 && arg.Substring(0, 11).ToLower() == "-agentname:") { selectedAgentName = arg.Substring(11); }
                 if ((arg.Length == 8) && (arg.ToLower() == "-connect")) { autoConnect = true; }
+                if ((arg.Length == 8) && (arg.ToLower() == "-noproxy")) { allowUseOfProxy = false; }
             }
             if (debug) { try { File.AppendAllText("debug.log", "\r\n\r\n"); } catch (Exception) { } }
             Log("***** Starting MeshCentral Assistant *****");
@@ -222,6 +224,7 @@ namespace MeshAssistant
                 Log("Starting built-in agent");
                 mcagent = new MeshCentralAgent(this, msh, "MeshCentralAssistant", selfExecutableHashHex, debug);
                 mcagent.autoConnect = autoConnect;
+                if (allowUseOfProxy == false) { mcagent.allowUseOfProxy = allowUseOfProxy; }
                 mcagent.onStateChanged += Mcagent_onStateChanged;
                 mcagent.onNotify += Mcagent_onNotify;
                 mcagent.onSelfUpdate += Agent_onSelfUpdate;

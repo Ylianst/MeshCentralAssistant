@@ -39,6 +39,7 @@ namespace MeshAssistant
         private CancellationTokenSource CTS;
 
         public bool AllowCompression = true;
+        public bool allowUseOfProxy = true;
         private TcpClient wsclient = null;
         private SslStream wsstream = null;
         private NetworkStream wsrawstream = null;
@@ -218,25 +219,28 @@ namespace MeshAssistant
                 Uri proxyUri = null;
                 Log("Websocket Start, URL=" + ((url == null) ? "(NULL)" : url.ToString()));
 
-                // Check if we need to use a HTTP proxy (Auto-proxy way)
-                try
+                if (allowUseOfProxy)
                 {
-                    RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-                    Object x = registryKey.GetValue("AutoConfigURL", null);
-                    if ((x != null) && (x.GetType() == typeof(string)))
+                    // Check if we need to use a HTTP proxy (Auto-proxy way)
+                    try
                     {
-                        string proxyStr = GetProxyForUrlUsingPac("http" + ((url.Port == 80) ? "" : "s") + "://" + url.Host + ":" + url.Port, x.ToString());
-                        if (proxyStr != null) { proxyUri = new Uri("http://" + proxyStr); }
+                        RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+                        Object x = registryKey.GetValue("AutoConfigURL", null);
+                        if ((x != null) && (x.GetType() == typeof(string)))
+                        {
+                            string proxyStr = GetProxyForUrlUsingPac("http" + ((url.Port == 80) ? "" : "s") + "://" + url.Host + ":" + url.Port, x.ToString());
+                            if (proxyStr != null) { proxyUri = new Uri("http://" + proxyStr); }
+                        }
                     }
-                }
-                catch (Exception) { proxyUri = null; }
+                    catch (Exception) { proxyUri = null; }
 
-                // Check if we need to use a HTTP proxy (Normal way)
-                if (proxyUri == null)
-                {
-                    var proxy = System.Net.HttpWebRequest.GetSystemWebProxy();
-                    proxyUri = proxy.GetProxy(url);
-                    if ((url.Host.ToLower() == proxyUri.Host.ToLower()) && (url.Port == proxyUri.Port)) { proxyUri = null; }
+                    // Check if we need to use a HTTP proxy (Normal way)
+                    if (proxyUri == null)
+                    {
+                        var proxy = System.Net.HttpWebRequest.GetSystemWebProxy();
+                        proxyUri = proxy.GetProxy(url);
+                        if ((url.Host.ToLower() == proxyUri.Host.ToLower()) && (url.Port == proxyUri.Port)) { proxyUri = null; }
+                    }
                 }
 
                 if (proxyUri != null)
