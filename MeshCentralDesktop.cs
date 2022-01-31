@@ -370,6 +370,7 @@ namespace MeshAssistant
                             if ((tunnel.userRights != (long)MeshCentralTunnel.MeshRights.ADMIN) && ((tunnel.userRights & (long)MeshCentralTunnel.MeshRights.REMOTEVIEWONLY) != 0)) break;
 
                             uint mouseFlags = (uint)((data[off + 4] << 8) + data[off + 5]);
+                            if (mouseFlags == 0x88) break; // Ignore double click message
                             int x = (1024 * ((data[off + 6] << 8) + data[off + 7])) / encoderScaling;
                             int y = (1024 * ((data[off + 8] << 8) + data[off + 9])) / encoderScaling;
                             uint mouseWheel = 0;
