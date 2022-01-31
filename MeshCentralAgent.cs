@@ -202,7 +202,7 @@ namespace MeshAssistant
 
             // Load customization image
             if (msh.ContainsKey("Image")) { try { CustomizationLogo = new Bitmap(new MemoryStream(Convert.FromBase64String(msh["Image"]))); } catch (Exception) { } }
-            if ((CustomizationLogo == null) && (File.Exists("logo.png"))) { try { CustomizationLogo = new Bitmap(new MemoryStream(File.ReadAllBytes("logo.png"))); } catch (Exception) { } }
+            if ((CustomizationLogo == null) && (File.Exists("meshcentral-logo.png"))) { try { CustomizationLogo = new Bitmap(new MemoryStream(File.ReadAllBytes("meshcentral-logo.png"))); } catch (Exception) { } }
 
             // Load agent tag
             string strExeFilePath = Assembly.GetExecutingAssembly().Location;
