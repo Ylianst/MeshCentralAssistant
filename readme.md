@@ -48,7 +48,7 @@ ignoreProxyFile              When set to any value, HTTP proxies will not be use
 ## Video Tutorials
 You can watch many tutorial videos on the [MeshCentral YouTube Channel](https://www.youtube.com/channel/UCJWz607A8EVlkilzcrb-GKg/videos). MeshCentral Assistant has it's own introduction video.
 
-Introduction to MeshCentral Assistant.
+Introduction to MeshCentral Assistant.  
 [![MeshCentral - Assistant](https://img.youtube.com/vi/HytCpYLxrvk/mqdefault.jpg)](https://www.youtube.com/watch?v=HytCpYLxrvk)
 
 ## License
