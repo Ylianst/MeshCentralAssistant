@@ -1,14 +1,11 @@
-MeshCentral Assistant
-=====================
+# MeshCentral Assistant
 
 For more information, [visit MeshCentral.com](https://meshcentral.com).
 
 This is a tray icon tool for the MeshCentral. It displays the state of the agent, you can start and stop the agent and request help.
-If a meshagent.msh file is present in the same folder at the MeshCentralAssistant.exe, this tool will allow direct connection to the server.
+If a meshagent.msh file is present in the same folder as the MeshCentralAssistant.exe executable, this tool will act as an agent on it's on and allow direct connection to the server.
 
-
-Command Line Switches
----------------------
+## Command Line Switches
 
 ```
 -debug                       When set a "debug.log" file will be created and internal state of MeshCentral Assistant will be written to it. This is useful for developers to debug issues.
@@ -20,8 +17,7 @@ Command Line Switches
 -noproxy                     When specified, HTTP proxies will not be used.
 ```
 
-MSH Format
-----------
+## MSH Format
 
 The .msh file contains the policy MeshCentral Assistant built-in agent will follow. It includes what server to connect to, how to authenticate the server, what device group to initially join, etc. A sample .msh file will look like this and may be included within the MeshCentral Assistant executable when downloaded from the server.
 
@@ -49,8 +45,11 @@ disableUpdate                When set to any value, this will disable MeshCentra
 ignoreProxyFile              When set to any value, HTTP proxies will not be used.
 ```
 
+## Video Tutorials
+You can watch many tutorial videos on the [MeshCentral YouTube Channel](https://www.youtube.com/channel/UCJWz607A8EVlkilzcrb-GKg/videos). MeshCentral Assistant has it's own introduction video.
 
-License
--------
+Introduction to MeshCentral Assistant.
+[![MeshCentral - Assistant](https://img.youtube.com/vi/HytCpYLxrvk/mqdefault.jpg)](https://www.youtube.com/watch?v=HytCpYLxrvk)
 
+## License
 This software is licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).

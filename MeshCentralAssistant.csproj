@@ -60,7 +60,7 @@
     <StartupObject>MeshAssistant.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>MeshServer.ico</ApplicationIcon>
+    <ApplicationIcon>src\MeshServer.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -85,125 +85,125 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BrowserForm.cs">
+    <Compile Include="src\BrowserForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BrowserForm.Designer.cs">
+    <Compile Include="src\BrowserForm.Designer.cs">
       <DependentUpon>BrowserForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ConPTY.cs" />
-    <Compile Include="ConsoleForm.cs">
+    <Compile Include="src\ConPTY.cs" />
+    <Compile Include="src\ConsoleForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ConsoleForm.Designer.cs">
+    <Compile Include="src\ConsoleForm.Designer.cs">
       <DependentUpon>ConsoleForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="EventsForm.cs">
+    <Compile Include="src\EventsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EventsForm.Designer.cs">
+    <Compile Include="src\EventsForm.Designer.cs">
       <DependentUpon>EventsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ExeHandler.cs" />
-    <Compile Include="GuestSharingForm.cs">
+    <Compile Include="src\ExeHandler.cs" />
+    <Compile Include="src\GuestSharingForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GuestSharingForm.Designer.cs">
+    <Compile Include="src\GuestSharingForm.Designer.cs">
       <DependentUpon>GuestSharingForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainForm.cs">
+    <Compile Include="src\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="src\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MeInfoForm.cs">
+    <Compile Include="src\MeInfoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MeInfoForm.Designer.cs">
+    <Compile Include="src\MeInfoForm.Designer.cs">
       <DependentUpon>MeInfoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MeshAgent.cs" />
-    <Compile Include="MeshCentralAgent.cs" />
-    <Compile Include="MeshCentralDesktop.cs" />
-    <Compile Include="MeshCentralTcpTunnel.cs" />
-    <Compile Include="MeshCentralTerminal.cs" />
-    <Compile Include="MeshCentralTunnel.cs" />
-    <Compile Include="ConsentForm.cs">
+    <Compile Include="src\MeshAgent.cs" />
+    <Compile Include="src\MeshCentralAgent.cs" />
+    <Compile Include="src\MeshCentralDesktop.cs" />
+    <Compile Include="src\MeshCentralTcpTunnel.cs" />
+    <Compile Include="src\MeshCentralTerminal.cs" />
+    <Compile Include="src\MeshCentralTunnel.cs" />
+    <Compile Include="src\ConsentForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ConsentForm.Designer.cs">
+    <Compile Include="src\ConsentForm.Designer.cs">
       <DependentUpon>ConsentForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MeshDiscovery.cs" />
-    <Compile Include="NotifyForm.cs">
+    <Compile Include="src\MeshDiscovery.cs" />
+    <Compile Include="src\NotifyForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="NotifyForm.Designer.cs">
+    <Compile Include="src\NotifyForm.Designer.cs">
       <DependentUpon>NotifyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PrivacyBarForm.cs">
+    <Compile Include="src\PrivacyBarForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PrivacyBarForm.Designer.cs">
+    <Compile Include="src\PrivacyBarForm.Designer.cs">
       <DependentUpon>PrivacyBarForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RequestHelpForm.cs">
+    <Compile Include="src\RequestHelpForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="RequestHelpForm.Designer.cs">
+    <Compile Include="src\RequestHelpForm.Designer.cs">
       <DependentUpon>RequestHelpForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SessionsForm.cs">
+    <Compile Include="src\SessionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SessionsForm.Designer.cs">
+    <Compile Include="src\SessionsForm.Designer.cs">
       <DependentUpon>SessionsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Settings.cs" />
-    <Compile Include="WinCrypt.cs" />
-    <Compile Include="SnapShotForm.cs">
+    <Compile Include="src\Settings.cs" />
+    <Compile Include="src\WinCrypt.cs" />
+    <Compile Include="src\SnapShotForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SnapShotForm.Designer.cs">
+    <Compile Include="src\SnapShotForm.Designer.cs">
       <DependentUpon>SnapShotForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Translate.cs" />
-    <Compile Include="UpdateForm.cs">
+    <Compile Include="src\Translate.cs" />
+    <Compile Include="src\UpdateForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UpdateForm.Designer.cs">
+    <Compile Include="src\UpdateForm.Designer.cs">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="WebSocketClient.cs" />
-    <Compile Include="Win32Api.cs" />
-    <EmbeddedResource Include="BrowserForm.resx">
+    <Compile Include="src\WebSocketClient.cs" />
+    <Compile Include="src\Win32Api.cs" />
+    <EmbeddedResource Include="src\BrowserForm.resx">
       <DependentUpon>BrowserForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ConsoleForm.resx">
+    <EmbeddedResource Include="src\ConsoleForm.resx">
       <DependentUpon>ConsoleForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EventsForm.resx">
+    <EmbeddedResource Include="src\EventsForm.resx">
       <DependentUpon>EventsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GuestSharingForm.resx">
+    <EmbeddedResource Include="src\GuestSharingForm.resx">
       <DependentUpon>GuestSharingForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="src\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MeInfoForm.resx">
+    <EmbeddedResource Include="src\MeInfoForm.resx">
       <DependentUpon>MeInfoForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ConsentForm.resx">
+    <EmbeddedResource Include="src\ConsentForm.resx">
       <DependentUpon>ConsentForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="NotifyForm.resx">
+    <EmbeddedResource Include="src\NotifyForm.resx">
       <DependentUpon>NotifyForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PrivacyBarForm.resx">
+    <EmbeddedResource Include="src\PrivacyBarForm.resx">
       <DependentUpon>PrivacyBarForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -216,16 +216,16 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="RequestHelpForm.resx">
+    <EmbeddedResource Include="src\RequestHelpForm.resx">
       <DependentUpon>RequestHelpForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SessionsForm.resx">
+    <EmbeddedResource Include="src\SessionsForm.resx">
       <DependentUpon>SessionsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SnapShotForm.resx">
+    <EmbeddedResource Include="src\SnapShotForm.resx">
       <DependentUpon>SnapShotForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UpdateForm.resx">
+    <EmbeddedResource Include="src\UpdateForm.resx">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
@@ -251,7 +251,7 @@
     <None Include="images\Yellow.png" />
     <None Include="images\Red.png" />
     <None Include="images\Question.png" />
-    <Content Include="MeshServer.ico" />
+    <Content Include="src\MeshServer.ico" />
     <None Include="readme.md" />
   </ItemGroup>
   <ItemGroup>
