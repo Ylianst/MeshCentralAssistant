@@ -70,6 +70,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Security" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -162,6 +163,7 @@
       <DependentUpon>SessionsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="WinCrypt.cs" />
     <Compile Include="SnapShotForm.cs">
       <SubType>Form</SubType>
     </Compile>

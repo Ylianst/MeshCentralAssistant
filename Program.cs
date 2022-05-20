@@ -25,6 +25,18 @@ namespace MeshAssistant
     {
         [ThreadStatic]
         public static readonly bool IsMainThread = true;
+        public static Uri signedUrl = null;
+
+        public class CurrentAppContext : ApplicationContext
+        {
+            private static CurrentAppContext _currContext;
+
+            public CurrentAppContext() { if (_currContext == null) { _currContext = this; } }
+
+            public CurrentAppContext(Form AppMainForm) : this() { this.MainForm = AppMainForm; }
+
+            public CurrentAppContext CurrentContext { get { return _currContext; } }
+        }
 
         /// <summary>
         /// The main entry point for the application.
@@ -32,6 +44,9 @@ namespace MeshAssistant
         [STAThread]
         static void Main(string[] args)
         {
+            // If this application is signed, get the URL of the signature, this will be used to lock this application to a server.
+            signedUrl = WinCrypt.GetSignatureUrl(System.Reflection.Assembly.GetEntryAssembly().Location);
+
             if (Environment.OSVersion.Version.Major >= 6) SetProcessDPIAware();
 
             string update = null;
@@ -106,4 +121,5 @@ namespace MeshAssistant
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool SetProcessDPIAware();
     }
+
 }
