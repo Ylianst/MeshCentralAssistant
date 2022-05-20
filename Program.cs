@@ -15,8 +15,10 @@ limitations under the License.
 */
 
 using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Threading;
+using System.Web;
 using System.Windows.Forms;
 
 namespace MeshAssistant
@@ -25,7 +27,8 @@ namespace MeshAssistant
     {
         [ThreadStatic]
         public static readonly bool IsMainThread = true;
-        public static Uri signedUrl = null;
+        public static string LockToHostname = null;
+        public static string LockToServerId = null;
 
         public class CurrentAppContext : ApplicationContext
         {
@@ -45,16 +48,33 @@ namespace MeshAssistant
         static void Main(string[] args)
         {
             // If this application is signed, get the URL of the signature, this will be used to lock this application to a server.
-            signedUrl = WinCrypt.GetSignatureUrl(System.Reflection.Assembly.GetEntryAssembly().Location);
+            Uri signedUrl = WinCrypt.GetSignatureUrl(System.Reflection.Assembly.GetEntryAssembly().Location);
+            if (signedUrl != null)
+            {
+                NameValueCollection urlArguments = HttpUtility.ParseQueryString(signedUrl.Query);
+                if (urlArguments["serverid"] != null)
+                {
+                    LockToServerId = urlArguments["serverid"];
+                    LockToHostname = signedUrl.Host;
+                }
+            }
 
             if (Environment.OSVersion.Version.Major >= 6) SetProcessDPIAware();
 
             string update = null;
             foreach (string arg in args)
             {
-                if (arg.Length > 3 && string.Compare(arg.Substring(0, 3), "-l:", true) == 0)
+                if ((arg.Length > 3) && (string.Compare(arg.Substring(0, 3), "-l:", true) == 0))
                 {
                     try { Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(arg.Substring(3)); } catch (ArgumentException) { }
+                }
+                if ((arg.Length == 5) && (string.Compare(arg.Substring(0, 5), "-info", true) == 0))
+                {
+                    string dialogText = "Version " + System.Reflection.Assembly.GetExecutingAssembly().ImageRuntimeVersion;
+                    if (LockToHostname != null) { dialogText += "\r\n" + "Locked to host: " + LockToHostname; }
+                    if (LockToServerId != null) { dialogText += "\r\n" + "Locked to server id: " + LockToServerId; }
+                    MessageBox.Show(dialogText, "MeshCentral Assistant");
+                    return;
                 }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }
             }

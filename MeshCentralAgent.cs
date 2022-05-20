@@ -196,6 +196,11 @@ namespace MeshAssistant
             }
             if (msh.ContainsKey("ignoreProxyFile") || msh.ContainsKey("noProxy")) { allowUseOfProxy = false; }
             if (msh.ContainsKey("DiscoveryKey")) { discoveryKey = msh["DiscoveryKey"]; }
+
+            // Check if we are locked to a server
+            if (Program.LockToServerId != null) { ServerId = Program.LockToServerId; }
+            if ((Program.LockToHostname != null) && (ServerUrl.Host != Program.LockToHostname)) { ServerUrl = new Uri(ServerUrl.Scheme + "://" + Program.LockToHostname + ":" + ServerUrl.Port + ServerUrl.PathAndQuery); }
+
             Log("MSH MeshID: " + msh["MeshID"]);
             Log("MSH ServerID: " + ServerId);
             Log("MSH MeshServer: " + ServerUrl);
@@ -263,20 +268,30 @@ namespace MeshAssistant
             }
         }
 
-        public static bool checkMshFile()
+        public static int checkMshFile()
         {
             // Load the MSH file
             Dictionary<string, string> msh = LoadMshFile();
-            if (msh == null) return false;
-            if (!msh.ContainsKey("MeshID")) return false;
-            if (!msh.ContainsKey("ServerID")) return false;
-            if (!msh.ContainsKey("MeshServer")) return false;
-            return true;
+            if (msh == null) return 1;
+            if (!msh.ContainsKey("MeshID")) return 1;
+            if (!msh.ContainsKey("ServerID")) return 1;
+            if (!msh.ContainsKey("MeshServer")) return 1;
+
+            // Try to parse the URL
+            Uri u = null;
+            try { u = new Uri(msh["MeshServer"]); } catch (Exception) { }
+            if (u == null) return 1;
+
+            // Check if we are locked to a server
+            if ((Program.LockToServerId != null) && (msh["ServerID"] != Program.LockToServerId)) return 2;
+            if ((Program.LockToHostname != null) && (u.Host.ToLower() != Program.LockToHostname.ToLower())) return 2;
+
+            return 0;
         }
 
-        public static bool checkMshStr(string mshstr)
+        public static int checkMshStr(string mshstr)
         {
-            if (mshstr == null) return false;
+            if (mshstr == null) return 1;
             string[] lines = mshstr.Replace("\r\n", "\r").Split('\r');
             Dictionary<string, string> msh = new Dictionary<string, string>();
             foreach (string line in lines)
@@ -289,10 +304,23 @@ namespace MeshAssistant
                     if (msh.ContainsKey(key) == false) { msh.Add(key, val); }
                 }
             }
-            if (!msh.ContainsKey("MeshID")) return false;
-            if (!msh.ContainsKey("ServerID")) return false;
-            if (!msh.ContainsKey("MeshServer")) return false;
-            return true;
+            if (!msh.ContainsKey("MeshID")) return 1;
+            if (!msh.ContainsKey("ServerID")) return 1;
+            if (!msh.ContainsKey("MeshServer")) return 1;
+
+            // Try to parse the URL if not set to local
+            Uri u = null;
+            if (msh["MeshServer"].ToLower() != "local")
+            {
+                try { u = new Uri(msh["MeshServer"]); } catch (Exception) { }
+                if (u == null) return 1;
+            }
+
+            // Check if we are locked to a server
+            if ((Program.LockToServerId != null) && (msh["ServerID"] != Program.LockToServerId)) return 2;
+            if ((Program.LockToHostname != null) && ((u == null) || (u.Host.ToLower() != Program.LockToHostname.ToLower()))) return 2;
+
+            return 0;
         }
 
         public static bool getMshCustomization(string mshstr, out string title, out Image image)

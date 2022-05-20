@@ -219,7 +219,15 @@ namespace MeshAssistant
             List<ToolStripItem> subMenus = new List<ToolStripItem>();
             string currentAgentSelection = Settings.GetRegValue("SelectedAgent", null);
 
-            if (MeshCentralAgent.checkMshStr(msh))
+            int mshCheckErr = MeshCentralAgent.checkMshStr(msh);
+            if (mshCheckErr == 2)
+            {
+                forceExit = true;
+                MessageBox.Show(string.Format("This executable is locked to only connect to {0}.", Program.LockToHostname), "MeshCentral Assistant", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+                return;
+            }
+            else if (mshCheckErr == 0)
             {
                 Log("Starting built-in agent");
                 mcagent = new MeshCentralAgent(this, msh, "MeshCentralAssistant", selfExecutableHashHex, debug);
