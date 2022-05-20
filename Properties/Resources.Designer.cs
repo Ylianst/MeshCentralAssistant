@@ -287,6 +287,24 @@ namespace MeshAssistant.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Locked to host: {0}..
+        /// </summary>
+        internal static string LockedToHost {
+            get {
+                return ResourceManager.GetString("LockedToHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Locked to server id: {0}..
+        /// </summary>
+        internal static string LockedToServerId {
+            get {
+                return ResourceManager.GetString("LockedToServerId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap MeshCentral {
@@ -416,6 +434,15 @@ namespace MeshAssistant.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This executable is locked to only connect to {0}..
+        /// </summary>
+        internal static string SignedExecutableServerLockError {
+            get {
+                return ResourceManager.GetString("SignedExecutableServerLockError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to State.
         /// </summary>
         internal static string State {
@@ -486,6 +513,15 @@ namespace MeshAssistant.Properties {
             get {
                 object obj = ResourceManager.GetObject("Users", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version {0}.
+        /// </summary>
+        internal static string Version {
+            get {
+                return ResourceManager.GetString("Version", resourceCulture);
             }
         }
         

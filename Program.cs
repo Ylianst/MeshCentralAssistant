@@ -70,10 +70,10 @@ namespace MeshAssistant
                 }
                 if ((arg.Length == 5) && (string.Compare(arg.Substring(0, 5), "-info", true) == 0))
                 {
-                    string dialogText = "Version " + System.Reflection.Assembly.GetExecutingAssembly().ImageRuntimeVersion;
-                    if (LockToHostname != null) { dialogText += "\r\n" + "Locked to host: " + LockToHostname; }
-                    if (LockToServerId != null) { dialogText += "\r\n" + "Locked to server id: " + LockToServerId; }
-                    MessageBox.Show(dialogText, "MeshCentral Assistant");
+                    string dialogText = string.Format(Properties.Resources.Version, System.Reflection.Assembly.GetExecutingAssembly().ImageRuntimeVersion);
+                    if (LockToHostname != null) { dialogText += "\r\n" + string.Format(Properties.Resources.LockedToHost, LockToHostname); }
+                    if (LockToServerId != null) { dialogText += "\r\n" + string.Format(Properties.Resources.LockedToServerId, LockToServerId); }
+                    MessageBox.Show(dialogText, Properties.Resources.MeshCentralAssistant);
                     return;
                 }
                 if (arg.Length > 8 && arg.Substring(0, 8).ToLower() == "-update:") { update = arg.Substring(8); }

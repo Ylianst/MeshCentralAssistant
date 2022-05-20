@@ -223,7 +223,7 @@ namespace MeshAssistant
             if (mshCheckErr == 2)
             {
                 forceExit = true;
-                MessageBox.Show(string.Format("This executable is locked to only connect to {0}.", Program.LockToHostname), "MeshCentral Assistant", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(Properties.Resources.SignedExecutableServerLockError, Program.LockToHostname), Properties.Resources.MeshCentralAssistant, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
                 return;
             }
