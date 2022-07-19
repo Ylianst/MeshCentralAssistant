@@ -3,7 +3,7 @@
 For more information, [visit MeshCentral.com](https://meshcentral.com).
 
 This is a tray icon tool for the MeshCentral. It displays the state of the agent, you can start and stop the agent and request help.
-If a meshagent.msh file is present in the same folder as the MeshCentralAssistant.exe executable, this tool will act as an agent on it's on and allow direct connection to the server.
+If a meshagent.msh file is present in the same folder as the MeshCentralAssistant.exe executable, this tool will act as an agent on it and allow direct connection to the server.
 
 ## Command Line Switches
 
