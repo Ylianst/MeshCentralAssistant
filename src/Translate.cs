@@ -1990,6 +1990,17 @@ namespace MeshAssistant
         {
             string lang = Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName;
             if (lang == "en") return english;
+            switch (Thread.CurrentThread.CurrentUICulture.ThreeLetterWindowsLanguageName)
+            {
+                case "CHS":
+                    lang = "zh-chs";
+                    break;
+                case "CHT":
+                    lang = "zh-cht";
+                    break;
+                default:
+                    break;
+            }
             if (translationTable.ContainsKey(english))
             {
                 Dictionary<string, string> translations = translationTable[english];
