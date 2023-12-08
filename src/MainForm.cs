@@ -209,6 +209,7 @@ namespace MeshAssistant
             // If there is an embedded .msh file, write it out to "meshagent.msh"
             Log("Checking for embedded MSH file");
             string msh = ExeHandler.GetMshFromExecutable(Process.GetCurrentProcess().MainModule.FileName, out embeddedMshLength);
+            if (msh == null) { msh = MeshCentralAgent.LoadMshFileRes(); }
             if (msh == null) { msh = MeshCentralAgent.LoadMshFileStr(); }
             //if (msh != null) { try { File.WriteAllText(MeshCentralAgent.getSelfFilename(".msh"), msh); } catch (Exception ex) { MessageBox.Show(ex.ToString()); Application.Exit(); return; } }
             selfExecutableHashHex = ExeHandler.HashExecutable(Assembly.GetEntryAssembly().Location);
