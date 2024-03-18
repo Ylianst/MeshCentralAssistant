@@ -17,6 +17,8 @@ If a meshagent.msh file is present in the same folder as the MeshCentralAssistan
 -noproxy                     When specified, HTTP proxies will not be used.
 ```
 
+It is important to note that only one MeshCentral Assistant process can be run on a client device.  Any additional processes will be terminated immediately.  A help request specified in the command line switches will not be executed before the process is terminated.  Be sure to check for and terminate existing MeshCentral Assistant processes if an external program launches Assistant to send a help request.
+
 ## MSH Format
 
 The .msh file contains the policy MeshCentral Assistant built-in agent will follow. It includes what server to connect to, how to authenticate the server, what device group to initially join, etc. A sample .msh file will look like this and may be included within the MeshCentral Assistant executable when downloaded from the server.
