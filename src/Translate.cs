@@ -47,7 +47,8 @@ namespace MeshAssistant
                 {"da","Agenten afventer start"},
                 {"ko","에이전트가 시작 대기 중입니다."},
                 {"it","L'agente è in attesa di avvio"},
-                {"ru","Агент ожидает запуска"}
+                {"ru","Агент ожидает запуска"},
+                {"hu","Agent indításra folyamaban"}
             }
         },
         {
@@ -68,7 +69,8 @@ namespace MeshAssistant
                 {"sv","&Öppna"},
                 {"ko","&열다"},
                 {"it","&Apri"},
-                {"ru","&Открыть"}
+                {"ru","&Открыть"},
+                {"hu","Megnyitás"}
             }
         },
         {
@@ -91,7 +93,8 @@ namespace MeshAssistant
                 {"da","Intel® Management Engine-tilstand for denne computer."},
                 {"ko","이 컴퓨터의 인텔 ® 관리 엔진 상태입니다."},
                 {"it","Stato Intel® Management Engine per questo computer."},
-                {"ru","Состояние Intel® Management Engine для этого компьютера."}
+                {"ru","Состояние Intel® Management Engine для этого компьютера."},
+                {"hu","A számítógép Intel® Management Engine státusza."}
             }
         },
         {
@@ -114,7 +117,8 @@ namespace MeshAssistant
                 {"da","Godkender"},
                 {"ko","인증 중"},
                 {"it","Autenticando"},
-                {"ru","Аутентификация"}
+                {"ru","Аутентификация"},
+                {"hu","Authentikálás"}
             }
         },
         {
@@ -138,7 +142,8 @@ namespace MeshAssistant
                 {"da","Filer"},
                 {"ko","파일"},
                 {"it","File"},
-                {"ru","Файлы"}
+                {"ru","Файлы"},
+                {"hu","Fájlok"}
             }
         },
         {
@@ -161,7 +166,8 @@ namespace MeshAssistant
                 {"da","Agenten afventer fortsat"},
                 {"ko","에이전트가 계속 대기 중입니다."},
                 {"it","L'agente è ancora in attesa"},
-                {"ru","Агент ожидает продолжения"}
+                {"ru","Агент ожидает продолжения"},
+                {"hu","Az agent folytatja a várakozást"}
             }
         },
         {
@@ -184,7 +190,8 @@ namespace MeshAssistant
                 {"da","Intel® ME tilstand..."},
                 {"ko","인텔 ® ME 상태 ..."},
                 {"it","Stato Intel® ME..."},
-                {"ru","Состояние Intel® ME ..."}
+                {"ru","Состояние Intel® ME ..."},
+                {"hu","Intel® ME állapot..."}
             }
         },
         {
@@ -266,7 +273,8 @@ namespace MeshAssistant
                 {"da","Aktiveret"},
                 {"ko","활성화 됨"},
                 {"it","Abilitato"},
-                {"ru","Включено"}
+                {"ru","Включено"},
+                {"hu","Engedélyezve"}
             }
         },
         {
@@ -289,7 +297,8 @@ namespace MeshAssistant
                 {"da","1 fjernsession"},
                 {"ko","원격 세션 1 개"},
                 {"it","1 sessione remota"},
-                {"ru","1 удаленный сеанс"}
+                {"ru","1 удаленный сеанс"},
+                {"hu","1 távoli kapcsolat"}
             }
         },
         {
@@ -312,7 +321,8 @@ namespace MeshAssistant
                 {"da","Vis &Events..."},
                 {"ko","이벤트 표시 (& E) ..."},
                 {"it","Mostra eventi..."},
-                {"ru","Показать и события ..."}
+                {"ru","Показать и события ..."},
+                {"hu","Események megjelenítése..."}
             }
         },
         {
@@ -329,7 +339,8 @@ namespace MeshAssistant
                 {"pl","Asystent MeshCentral"},
                 {"ko","MeshCentral 어시스턴트"},
                 {"it","Assistente MeshCentral"},
-                {"ru","MeshCentral Ассистент"}
+                {"ru","MeshCentral Ассистент"},
+                {"hu","MeshCentral asszisztens"}
             }
         },
         {
@@ -352,7 +363,8 @@ namespace MeshAssistant
                 {"da","Flere brugere"},
                 {"ko","여러 사용자"},
                 {"it","Utenti multipli"},
-                {"ru","Несколько пользователей"}
+                {"ru","Несколько пользователей"},
+                {"hu","Több felhasználó"}
             }
         },
         {
@@ -395,7 +407,8 @@ namespace MeshAssistant
                 {"sv","Agent ögonblicksbild"},
                 {"ko","에이전트 스냅 샷"},
                 {"it","Istantanea agente"},
-                {"ru","Снимок агента"}
+                {"ru","Снимок агента"},
+                {"hu","Agent pillanatkép"}
             }
         },
         {
@@ -416,7 +429,8 @@ namespace MeshAssistant
                 {"da","Post"},
                 {"ko","안건"},
                 {"it","Elemento"},
-                {"ru","Элемент"}
+                {"ru","Элемент"},
+                {"hu","Elem"}
             }
         },
         {
@@ -436,7 +450,8 @@ namespace MeshAssistant
                 {"da","Agent valg"},
                 {"ko","에이전트 선택"},
                 {"it","Selezione agente"},
-                {"ru","Агент Выбрать"}
+                {"ru","Агент Выбрать"},
+                {"hu","Agent kiválasztása"}
             }
         },
         {
@@ -458,7 +473,8 @@ namespace MeshAssistant
                 {"sv","Skrivbord"},
                 {"da","Skrivebord"},
                 {"ko","데스크탑"},
-                {"ru","Рабочий стол"}
+                {"ru","Рабочий стол"},
+                {"hu","Asztal"}
             }
         },
         {
@@ -480,7 +496,8 @@ namespace MeshAssistant
                 {"da","Senere"},
                 {"ko","나중"},
                 {"it","Dopo"},
-                {"ru","Потом"}
+                {"ru","Потом"},
+                {"hu","Később"}
             }
         },
         {
@@ -504,7 +521,8 @@ namespace MeshAssistant
                 {"da","Brugersamtykke"},
                 {"ko","사용자 연결 옵션"},
                 {"it","Consenso dell'utente "},
-                {"ru","Согласие пользователя"}
+                {"ru","Согласие пользователя"},
+                {"hu","Felhasználói beleegyezés"}
             }
         },
         {
@@ -527,7 +545,8 @@ namespace MeshAssistant
                 {"da","Ingen aktive fjernsessioner."},
                 {"ko","활성 원격 세션이 없습니다."},
                 {"it","Nessuna sessione remota attiva."},
-                {"ru","Нет активных удаленных сеансов."}
+                {"ru","Нет активных удаленных сеансов."},
+                {"hu","Nincs aktív távoli kapcsolat."}
             }
         },
         {
@@ -550,7 +569,8 @@ namespace MeshAssistant
                 {"da","Agenten afventer stop"},
                 {"ko","에이전트가 중지되었습니다."},
                 {"it","L'agente è in attesa di essere arrestato"},
-                {"ru","Агент остановлен в ожидании"}
+                {"ru","Агент остановлен в ожидании"},
+                {"hu","Agent leállítása folyamatban"}
             }
         },
         {
@@ -572,7 +592,8 @@ namespace MeshAssistant
                 {"da","Assistent opdatering"},
                 {"ko","어시스턴트 업데이트"},
                 {"it","Aggiornamento Assistente "},
-                {"ru","Ассистент Обновление"}
+                {"ru","Ассистент Обновление"},
+                {"hu","Asszisztens frissítés"}
             }
         },
         {
@@ -595,7 +616,8 @@ namespace MeshAssistant
                 {"da","Agenten er stoppet"},
                 {"ko","에이전트가 중지되었습니다."},
                 {"it","L'agente non è in esecuzione"},
-                {"ru","Агент остановлен"}
+                {"ru","Агент остановлен"},
+                {"hu","Agent leállítva"}
             }
         },
         {
@@ -617,7 +639,8 @@ namespace MeshAssistant
                 {"sv","&Stäng"},
                 {"ko","&닫기"},
                 {"it","&Chiudi"},
-                {"ru","&Закрыть"}
+                {"ru","&Закрыть"},
+                {"hu","&Bezárás"}
             }
         },
         {
@@ -632,7 +655,8 @@ namespace MeshAssistant
                 {"ja","ターミナル"},
                 {"ko","터미널"},
                 {"it","Terminale"},
-                {"ru","Терминал"}
+                {"ru","Терминал"},
+                {"hu","Terminál"}
             }
         },
         {
@@ -655,7 +679,8 @@ namespace MeshAssistant
                 {"da","Afslå"},
                 {"ko","거부"},
                 {"it","Negare"},
-                {"ru","Отрицать"}
+                {"ru","Отрицать"},
+                {"hu","Elutasítás"}
             }
         },
         {
@@ -679,7 +704,8 @@ namespace MeshAssistant
                 {"da","Giv besked"},
                 {"ko","알림"},
                 {"it","Notifica"},
-                {"ru","Уведомить"}
+                {"ru","Уведомить"},
+                {"hu","Értesítés"}
             }
         },
         {
@@ -702,7 +728,8 @@ namespace MeshAssistant
                 {"da","Ingen fjernsessioner"},
                 {"ko","원격 세션 없음"},
                 {"it","Nessuna sessione remota"},
-                {"ru","Нет удаленных сеансов"}
+                {"ru","Нет удаленных сеансов"},
+                {"hu","Nincs aktív távkapcsolat"}
             }
         },
         {
@@ -725,7 +752,8 @@ namespace MeshAssistant
                 {"da","{0} fjernsessioner"},
                 {"ko","{0} 원격 세션"},
                 {"it","{0} sessioni remote"},
-                {"ru","{0} удаленных сеансов"}
+                {"ru","{0} удаленных сеансов"},
+                {"hu","{0} távoli kapcsolat"}
             }
         },
         {
@@ -746,7 +774,8 @@ namespace MeshAssistant
                 {"da","{0} Assistent"},
                 {"ko","{0} 어시스턴트"},
                 {"it","{0} Assistente"},
-                {"ru","{0} Ассистент"}
+                {"ru","{0} Ассистент"},
+                {"hu","{0} Asszisztens"}
             }
         },
         {
@@ -768,7 +797,8 @@ namespace MeshAssistant
                 {"sv","O & pen-webbplats ..."},
                 {"ko","O 펜 사이트 (& P) ..."},
                 {"it","O&apri Sito..."},
-                {"ru","Открытие сайта ..."}
+                {"ru","Открытие сайта ..."},
+                {"hu","Oldal megnyitása..."}
             }
         },
         {
@@ -791,7 +821,8 @@ namespace MeshAssistant
                 {"da","Anmod om hjælp..."},
                 {"ko","도움 요청 ..."},
                 {"it","Richiedi Aiuto..."},
-                {"ru","Запросить помощь ..."}
+                {"ru","Запросить помощь ..."},
+                {"hu","Segítség kérése..."}
             }
         },
         {
@@ -815,7 +846,8 @@ namespace MeshAssistant
                 {"da","Ikke aktiveret (Pre)"},
                 {"ko","활성화되지 않음 (Pre)"},
                 {"it","Non attivato (pre) "},
-                {"ru","Не активированно (Pre)"}
+                {"ru","Не активированно (Pre)"},
+                {"hu","Nem aktivált (Pre)"}
             }
         },
         {
@@ -850,7 +882,8 @@ namespace MeshAssistant
                 {"da","Forbundet"},
                 {"ko","연결됨"},
                 {"it","Collegato"},
-                {"ru","Подключено"}
+                {"ru","Подключено"},
+                {"hu","Csatlakozva"}
             }
         },
         {
@@ -874,7 +907,8 @@ namespace MeshAssistant
                 {"da","Luk"},
                 {"ko","닫기"},
                 {"it","Chiudere"},
-                {"ru","Закрыть"}
+                {"ru","Закрыть"},
+                {"hu","Bezárás"}
             }
         },
         {
@@ -897,7 +931,8 @@ namespace MeshAssistant
                 {"da","En fjernsession er aktiv."},
                 {"ko","1 개의 원격 세션이 활성화되었습니다."},
                 {"it","1 sessione remota è attiva."},
-                {"ru","Активен 1 удаленный сеанс."}
+                {"ru","Активен 1 удаленный сеанс."},
+                {"hu","1 távoli kapcsolat aktív"}
             }
         },
         {
@@ -921,7 +956,8 @@ namespace MeshAssistant
                 {"da","Ukendt"},
                 {"ko","알 수 없는"},
                 {"it","Sconosciuto"},
-                {"ru","Неизвестно"}
+                {"ru","Неизвестно"},
+                {"hu","Ismeretlen"}
             }
         },
         {
@@ -944,7 +980,8 @@ namespace MeshAssistant
                 {"da","Agenten mangler"},
                 {"ko","에이전트가 없습니다"},
                 {"it","Manca l'agente"},
-                {"ru","Агент отсутствует"}
+                {"ru","Агент отсутствует"},
+                {"hu","Az agent hiányzik"}
             }
         },
         {
@@ -966,7 +1003,8 @@ namespace MeshAssistant
                 {"da","TCP-relay"},
                 {"ko","TCP 릴레이"},
                 {"it","Rilancio TCP"},
-                {"ru","Реле TCP"}
+                {"ru","Реле TCP"},
+                {"hu","TCP átjátszó"}
             }
         },
         {
@@ -989,7 +1027,8 @@ namespace MeshAssistant
                 {"da","Tillad"},
                 {"ko","허용하다"},
                 {"it","Permettere"},
-                {"ru","Разрешать"}
+                {"ru","Разрешать"},
+                {"hu","Engedélyezés"}
             }
         },
         {
@@ -1012,7 +1051,8 @@ namespace MeshAssistant
                 {"da","Liste over fjern-sessioner, der er aktive på denne computer."},
                 {"ko","이 컴퓨터에서 활성화 된 원격 세션 목록입니다."},
                 {"it","Elenco delle sessioni remote attive su questo computer."},
-                {"ru","Список удаленных сеансов, активных на этом компьютере."}
+                {"ru","Список удаленных сеансов, активных на этом компьютере."},
+                {"hu","Aktív távoli kapcsolatok listája"}
             }
         },
         {
@@ -1035,7 +1075,8 @@ namespace MeshAssistant
                 {"da","Fjernsessioner"},
                 {"ko","원격 세션"},
                 {"it","Sessioni remote"},
-                {"ru","Удаленные сеансы"}
+                {"ru","Удаленные сеансы"},
+                {"hu","Távoli kapcsolatok"}
             }
         },
         {
@@ -1058,7 +1099,8 @@ namespace MeshAssistant
                 {"sv","Skicka"},
                 {"ko","전송"},
                 {"it","Invia"},
-                {"ru","Отправить"}
+                {"ru","Отправить"},
+                {"hu","Küldés"}
             }
         },
         {
@@ -1081,7 +1123,8 @@ namespace MeshAssistant
                 {"da","Beregn"},
                 {"ko","카운트"},
                 {"it","Contare"},
-                {"ru","Считать"}
+                {"ru","Считать"},
+                {"hu","Kapcsolatok száma"}
             }
         },
         {
@@ -1105,7 +1148,8 @@ namespace MeshAssistant
                 {"da","Bruger"},
                 {"ko","사용자"},
                 {"it","Utente"},
-                {"ru","Пользователь"}
+                {"ru","Пользователь"},
+                {"hu","Felhasználó"}
             }
         },
         {
@@ -1128,7 +1172,8 @@ namespace MeshAssistant
                 {"da","Annuller hjælpeanmodning"},
                 {"ko","도움말 요청 취소"},
                 {"it","Annulla la richiesta di aiuto"},
-                {"ru","Отменить запрос помощи"}
+                {"ru","Отменить запрос помощи"},
+                {"hu","Segítségkérés megszakítása"}
             }
         },
         {
@@ -1152,7 +1197,8 @@ namespace MeshAssistant
                 {"da","Agent konsol"},
                 {"ko","에이전트 콘솔"},
                 {"it","Console Agente"},
-                {"ru","Консоль агента"}
+                {"ru","Консоль агента"},
+                {"hu","Agent konzol"}
             }
         },
         {
@@ -1175,7 +1221,8 @@ namespace MeshAssistant
                 {"da","Agenten kører"},
                 {"ko","에이전트가 실행 중입니다."},
                 {"it","L'agente è in esecuzione"},
-                {"ru","Агент запущен"}
+                {"ru","Агент запущен"},
+                {"hu","Az agent fut"}
             }
         },
         {
@@ -1199,7 +1246,8 @@ namespace MeshAssistant
                 {"da","Hændelser"},
                 {"ko","이벤트"},
                 {"it","Eventi"},
-                {"ru","События"}
+                {"ru","События"},
+                {"hu","Események"}
             }
         },
         {
@@ -1222,7 +1270,8 @@ namespace MeshAssistant
                 {"da","Afbryd forbindelsen til serveren og lukke?"},
                 {"ko","서버에서 연결을 끊고 닫으시겠습니까?"},
                 {"it","Disconnettersi dal server e chiudere?"},
-                {"ru","Отключиться от сервера и закрыть?"}
+                {"ru","Отключиться от сервера и закрыть?"},
+                {"hu","Lecsatlakozás a szerverről és bezárás?"}
             }
         },
         {
@@ -1246,7 +1295,8 @@ namespace MeshAssistant
                 {"da","Tid"},
                 {"ko","시간"},
                 {"it","Tempo"},
-                {"ru","Время"}
+                {"ru","Время"},
+                {"hu","Idő"}
             }
         },
         {
@@ -1270,7 +1320,8 @@ namespace MeshAssistant
                 {"da","Opdatering"},
                 {"ko","개조하다"},
                 {"it","Aggiornamenti"},
-                {"ru","Обновить"}
+                {"ru","Обновить"},
+                {"hu","Frissítés"}
             }
         },
         {
@@ -1294,7 +1345,8 @@ namespace MeshAssistant
                 {"da","Annuller"},
                 {"ko","취소"},
                 {"it","Annulla"},
-                {"ru","Отмена"}
+                {"ru","Отмена"},
+                {"hu","Megszakítás"}
             }
         },
         {
@@ -1316,7 +1368,8 @@ namespace MeshAssistant
                 {"da","Versioner"},
                 {"ko","버전"},
                 {"it","Versioni"},
-                {"ru","Версии"}
+                {"ru","Версии"},
+                {"hu","Verziók"}
             }
         },
         {
@@ -1339,7 +1392,8 @@ namespace MeshAssistant
                 {"da","Vis sessioner..."},
                 {"ko","세션 표시 ..."},
                 {"it","Mostra sessioni..."},
-                {"ru","Показать сеансы ..."}
+                {"ru","Показать сеансы ..."},
+                {"hu","Kapcsolatok megjelenítése..."}
             }
         },
         {
@@ -1362,7 +1416,8 @@ namespace MeshAssistant
                 {"da","Hændelse"},
                 {"ko","행사"},
                 {"it","Evento"},
-                {"ru","Мероприятие"}
+                {"ru","Мероприятие"},
+                {"hu","Esemény"}
             }
         },
         {
@@ -1385,7 +1440,8 @@ namespace MeshAssistant
                 {"da","En ny version af denne software er tilgængelig. Opdater nu?"},
                 {"ko","이 소프트웨어의 새 버전을 사용할 수 있습니다. 지금 업데이트 하시겠습니까?"},
                 {"it","È disponibile una nuova versione di questo software. Aggiorna ora?"},
-                {"ru","Доступна новая версия этого программного обеспечения. Обновить сейчас?"}
+                {"ru","Доступна новая версия этого программного обеспечения. Обновить сейчас?"},
+                {"hu","Egy frissebb verzió érhető el a szoftverből. Szeretne frissíteni most?"}
             }
         },
         {
@@ -1408,7 +1464,8 @@ namespace MeshAssistant
                 {"da","Direkte forbindelse"},
                 {"ko","직접 연결"},
                 {"it","Collegamento diretto"},
-                {"ru","Прямое соединение"}
+                {"ru","Прямое соединение"},
+                {"hu","Közvetlen csatlakozás"}
             }
         },
         {
@@ -1431,7 +1488,8 @@ namespace MeshAssistant
                 {"da","Agenten er afbrudt"},
                 {"ko","에이전트 연결이 끊어졌습니다."},
                 {"it","L'agente è disconnesso"},
-                {"ru","Агент отключен"}
+                {"ru","Агент отключен"},
+                {"hu","Agent leválasztva"}
             }
         },
         {
@@ -1454,7 +1512,8 @@ namespace MeshAssistant
                 {"da","Der er anmodet om hjælp"},
                 {"ko","도움 요청"},
                 {"it","Aiuto richiesto"},
-                {"ru","Запрошена помощь"}
+                {"ru","Запрошена помощь"},
+                {"hu","Segítség megkérve"}
             }
         },
         {
@@ -1477,7 +1536,8 @@ namespace MeshAssistant
                 {"da","Forbundet til serveren"},
                 {"ko","서버에 연결됨"},
                 {"it","Connesso al server"},
-                {"ru","Подключено к серверу"}
+                {"ru","Подключено к серверу"},
+                {"hu","Szerverhez csatlakozva"}
             }
         },
         {
@@ -1500,7 +1560,8 @@ namespace MeshAssistant
                 {"da","Indtast oplysninger om hjælpanmodning"},
                 {"ko","도움 요청 세부 정보 입력"},
                 {"it","Inserisci i dettagli della richiesta di aiuto"},
-                {"ru","Введите детали запроса на помощь"}
+                {"ru","Введите детали запроса на помощь"},
+                {"hu","Gépelje be a segítségkérés részleteit"}
             }
         },
         {
@@ -1523,7 +1584,8 @@ namespace MeshAssistant
                 {"da","Forbinder"},
                 {"ko","연결"},
                 {"it","Collegamento"},
-                {"ru","Подключение"}
+                {"ru","Подключение"},
+                {"hu","Csatlakozás"}
             }
         },
         {
@@ -1545,7 +1607,8 @@ namespace MeshAssistant
                 {"sv","&Uppdatera mjukvara"},
                 {"ko","소프트웨어 업데이트"},
                 {"it","&Aggiorna software"},
-                {"ru","&Обновить ПО"}
+                {"ru","&Обновить ПО"},
+                {"hu","&Szoftver frissítése"}
             }
         },
         {
@@ -1568,7 +1631,8 @@ namespace MeshAssistant
                 {"da","Anmod om hjælp"},
                 {"ko","도움 요청"},
                 {"it","Richiedi aiuto"},
-                {"ru","Запросить помощь"}
+                {"ru","Запросить помощь"},
+                {"hu","Segítségkérés"}
             }
         },
         {
@@ -1592,7 +1656,8 @@ namespace MeshAssistant
                 {"da","Tilstand"},
                 {"ko","상태"},
                 {"it","Stato"},
-                {"ru","Состояние"}
+                {"ru","Состояние"},
+                {"hu","Állapot"}
             }
         },
         {
@@ -1616,7 +1681,8 @@ namespace MeshAssistant
                 {"da","Indlæser..."},
                 {"ko","불러오는 중 ..."},
                 {"it","Caricamento in corso..."},
-                {"ru","Загрузка..."}
+                {"ru","Загрузка..."},
+                {"hu","Betöltés..."}
             }
         },
         {
@@ -1640,7 +1706,8 @@ namespace MeshAssistant
                 {"da","Afbrudt"},
                 {"ko","연결 해제"},
                 {"it","Disconnesso"},
-                {"ru","Отключен"}
+                {"ru","Отключен"},
+                {"hu","Leválasztva"}
             }
         },
         {
@@ -1661,7 +1728,8 @@ namespace MeshAssistant
                 {"pt-br","Saída"},
                 {"sv","Utgång"},
                 {"ko","출구"},
-                {"ru","Выход"}
+                {"ru","Выход"},
+                {"hu","Kilépés"}
             }
         },
         {
@@ -1684,7 +1752,8 @@ namespace MeshAssistant
                 {"da","{0} fjernsessioner er aktive."},
                 {"ko","{0} 원격 세션이 활성화되었습니다."},
                 {"it","{0} sessioni remote sono attive."},
-                {"ru","Активных удаленных сеансов: {0}."}
+                {"ru","Активных удаленных сеансов: {0}."},
+                {"hu","{0} távkapcsolat aktív."}
             }
         },
         {
@@ -1704,7 +1773,8 @@ namespace MeshAssistant
                 {"pt-br","Parar agente"},
                 {"sv","S & toppagent"},
                 {"ko","Stop 에이전트"},
-                {"ru","S & главный агент"}
+                {"ru","S & главный агент"},
+                {"hu","Agent leállítása"}
             }
         },
         {
@@ -1728,7 +1798,8 @@ namespace MeshAssistant
                 {"da","Deaktiveret"},
                 {"ko","비활성화"},
                 {"it","Disabilitato"},
-                {"ru","Отключено"}
+                {"ru","Отключено"},
+                {"hu","Letiltva"}
             }
         },
         {
@@ -1751,7 +1822,8 @@ namespace MeshAssistant
                 {"da","Agent ikke installeret"},
                 {"ko","에이전트가 설치되지 않았습니다."},
                 {"it","Agente non installato"},
-                {"ru","Агент не установлен"}
+                {"ru","Агент не установлен"},
+                {"hu","Az agent nincs telepítve"}
             }
         },
         {
@@ -1775,7 +1847,8 @@ namespace MeshAssistant
                 {"da","Aktiveret"},
                 {"ko","활성화 됨"},
                 {"it","Attivato"},
-                {"ru","Активировано"}
+                {"ru","Активировано"},
+                {"hu","Aktivált"}
             }
         },
         {
@@ -1798,7 +1871,8 @@ namespace MeshAssistant
                 {"da","Fjernsessioner: {0}"},
                 {"ko","원격 세션 : {0}"},
                 {"it","Sessioni remote: {0}"},
-                {"ru","Удаленные сеансы: {0}"}
+                {"ru","Удаленные сеансы: {0}"},
+                {"hu","Távkapcsolatok: {0}"}
             }
         },
         {
@@ -1821,7 +1895,8 @@ namespace MeshAssistant
                 {"da","(Ingen)"},
                 {"ko","(없음)"},
                 {"it","(Nessuna)"},
-                {"ru","(Никто)"}
+                {"ru","(Никто)"},
+                {"hu","(Nincs)"}
             }
         },
         {
@@ -1845,7 +1920,8 @@ namespace MeshAssistant
                 {"da","Fjern"},
                 {"ko","지우기"},
                 {"it","Pulire"},
-                {"ru","Очистить"}
+                {"ru","Очистить"},
+                {"hu","Törlés"}
             }
         },
         {
@@ -1866,7 +1942,8 @@ namespace MeshAssistant
                 {"sv","Typ"},
                 {"ko","유형"},
                 {"it","Digita"},
-                {"ru","Удаленный ввод"}
+                {"ru","Удаленный ввод"},
+                {"hu","Típus"}
             }
         },
         {
@@ -1889,7 +1966,8 @@ namespace MeshAssistant
                 {"da","UDP-relay"},
                 {"ko","UDP 릴레이"},
                 {"it","Rilancio UDP"},
-                {"ru","UDP реле"}
+                {"ru","UDP реле"},
+                {"hu","UDP átjátszó"}
             }
         },
         {
@@ -1911,7 +1989,8 @@ namespace MeshAssistant
                 {"da","& Starta agent"},
                 {"ko","에이전트 시작"},
                 {"it","&Avvia agente"},
-                {"ru","&Запустить Агент"}
+                {"ru","&Запустить Агент"},
+                {"hu","&Agent elindítva"}
             }
         },
         {
@@ -1934,7 +2013,8 @@ namespace MeshAssistant
                 {"da","Agenten er sat på pause"},
                 {"ko","에이전트가 일시 중지되었습니다."},
                 {"it","L'agente è in pausa"},
-                {"ru","Агент приостановлен"}
+                {"ru","Агент приостановлен"},
+                {"hu","Agent megállítva"}
             }
         },
         {
@@ -1957,7 +2037,8 @@ namespace MeshAssistant
                 {"da","Værdi"},
                 {"ko","값"},
                 {"it","Valore"},
-                {"ru","Ценить"}
+                {"ru","Ценить"},
+                {"hu","Érték"}
             }
         },
         {
@@ -1980,7 +2061,8 @@ namespace MeshAssistant
                 {"da","Agenten afventer pause"},
                 {"ko","에이전트가 일시 중지 대기 중입니다."},
                 {"it","L'agente è in attesa di pausa"},
-                {"ru","Агент ожидает приостановки"}
+                {"ru","Агент ожидает приостановки"},
+                {"hu","Agent megállítása folyamatban"}
             }
         }
         };
