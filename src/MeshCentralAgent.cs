@@ -437,6 +437,15 @@ namespace MeshAssistant
             return str;
         }
 
+        public static string LoadMshFileRes()
+        {
+            string str = null;
+            try {
+                str = (new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream("msh"), Encoding.UTF8)).ReadToEnd();
+            } catch (Exception) { }
+            return str;
+        }
+
         public static Dictionary<string, string> LoadMshFile()
         {
             string mshfilename = getSelfFilename(".msh");
